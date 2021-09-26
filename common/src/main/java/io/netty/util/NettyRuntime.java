@@ -23,11 +23,15 @@ import java.util.Locale;
 
 /**
  * A utility class for wrapping calls to {@link Runtime}.
+ *
+ * 用于包装对运行时调用的工具类。
  */
 public final class NettyRuntime {
 
     /**
      * Holder class for available processors to enable testing.
+     *
+     * 可用处理器的拥有类，以允许测试。
      */
     static class AvailableProcessorsHolder {
 
@@ -36,12 +40,17 @@ public final class NettyRuntime {
         /**
          * Set the number of available processors.
          *
+         * 设置可用处理器的数量。
+         *
          * @param availableProcessors the number of available processors
          * @throws IllegalArgumentException if the specified number of available processors is non-positive
          * @throws IllegalStateException    if the number of available processors is already configured
          */
         synchronized void setAvailableProcessors(final int availableProcessors) {
+            // 检查入参是否为正
             ObjectUtil.checkPositive(availableProcessors, "availableProcessors");
+
+            // 如果可用处理者已不为0，则抛出违规状态异常
             if (this.availableProcessors != 0) {
                 final String message = String.format(
                         Locale.ROOT,
@@ -50,6 +59,8 @@ public final class NettyRuntime {
                         availableProcessors);
                 throw new IllegalStateException(message);
             }
+
+            // 设置可用处理器数量参数
             this.availableProcessors = availableProcessors;
         }
 
@@ -62,11 +73,14 @@ public final class NettyRuntime {
          */
         @SuppressForbidden(reason = "to obtain default number of available processors")
         synchronized int availableProcessors() {
+            // 如果可用处理器数为0
             if (this.availableProcessors == 0) {
+                // 得到可用的处理器数量
                 final int availableProcessors =
                         SystemPropertyUtil.getInt(
                                 "io.netty.availableProcessors",
                                 Runtime.getRuntime().availableProcessors());
+                // 设置可用的处理器数量
                 setAvailableProcessors(availableProcessors);
             }
             return this.availableProcessors;

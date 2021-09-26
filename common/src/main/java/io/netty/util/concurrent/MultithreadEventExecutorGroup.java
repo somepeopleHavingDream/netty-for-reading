@@ -15,8 +15,6 @@
  */
 package io.netty.util.concurrent;
 
-import static io.netty.util.internal.ObjectUtil.checkPositive;
-
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -25,6 +23,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static io.netty.util.internal.ObjectUtil.checkPositive;
 
 /**
  * Abstract base class for {@link EventExecutorGroup} implementations that handles their tasks with multiple threads at
@@ -52,6 +52,8 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
     /**
      * Create a new instance.
      *
+     * 创建一个新的实例。
+     *
      * @param nThreads          the number of threads that will be used by this instance.
      * @param executor          the Executor to use, or {@code null} if the default should be used.
      * @param args              arguments which will passed to each {@link #newChild(Executor, Object...)} call
@@ -63,6 +65,8 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
     /**
      * Create a new instance.
      *
+     * 创建一个新的实例。
+     *
      * @param nThreads          the number of threads that will be used by this instance.
      * @param executor          the Executor to use, or {@code null} if the default should be used.
      * @param chooserFactory    the {@link EventExecutorChooserFactory} to use.
@@ -70,16 +74,21 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
      */
     protected MultithreadEventExecutorGroup(int nThreads, Executor executor,
                                             EventExecutorChooserFactory chooserFactory, Object... args) {
+        // 检查线程数是否为正
         checkPositive(nThreads, "nThreads");
 
+        // 如果执行器未指定，则实例化一个任务对应一个线程的执行器
         if (executor == null) {
             executor = new ThreadPerTaskExecutor(newDefaultThreadFactory());
         }
 
+        // 声明实例化一个事件执行器数组
         children = new EventExecutor[nThreads];
 
         for (int i = 0; i < nThreads; i ++) {
+            // 处理成功的成功标志
             boolean success = false;
+
             try {
                 children[i] = newChild(executor, args);
                 success = true;
@@ -128,6 +137,11 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
         readonlyChildren = Collections.unmodifiableSet(childrenSet);
     }
 
+    /**
+     * 实例化默认的线程工厂
+     *
+     * @return 线程工厂
+     */
     protected ThreadFactory newDefaultThreadFactory() {
         return new DefaultThreadFactory(getClass());
     }
@@ -154,6 +168,9 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
      * Create a new EventExecutor which will later then accessible via the {@link #next()}  method. This method will be
      * called for each thread that will serve this {@link MultithreadEventExecutorGroup}.
      *
+     * 创建一个新的事件执行器，
+     * 随后将通过下一个方法而变为可用。
+     * 此方法将被每个服务于此多线程事件执行组的线程所调用。
      */
     protected abstract EventExecutor newChild(Executor executor, Object... args) throws Exception;
 

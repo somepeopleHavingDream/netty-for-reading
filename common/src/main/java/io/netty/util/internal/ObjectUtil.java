@@ -35,9 +35,12 @@ public final class ObjectUtil {
      * Otherwise, returns the argument.
      */
     public static <T> T checkNotNull(T arg, String text) {
+        // 如果参数为null，则抛出空指针异常，提示信息为入参文本值
         if (arg == null) {
             throw new NullPointerException(text);
         }
+
+        // 否则，返回参数
         return arg;
     }
 
@@ -94,6 +97,12 @@ public final class ObjectUtil {
     /**
      * Checks that the given argument is strictly positive. If it is not, throws {@link IllegalArgumentException}.
      * Otherwise, returns the argument.
+     *
+     * 检查给定参数是否是严格的正数。
+     * 如果不是，
+     * 则抛出违规参数异常，
+     * 否则，
+     * 返回参数。
      */
     public static int checkPositive(int i, String name) {
         if (i <= INT_ZERO) {
@@ -257,11 +266,20 @@ public final class ObjectUtil {
      * Checks that the given argument is neither null nor empty.
      * If it is, throws {@link NullPointerException} or {@link IllegalArgumentException}.
      * Otherwise, returns the argument.
+     *
+     * 检查给定参数是否既不为null也不为空。
+     * 如果是的，
+     * 则抛出空指针异常或者违规参数异常。
+     * 否则，
+     * 返回参数。
      */
     public static String checkNonEmpty(final String value, final String name) {
+        // 检查参数
         if (checkNotNull(value, name).isEmpty()) {
             throw new IllegalArgumentException("Param '" + name + "' must not be empty");
         }
+
+        // 若没有抛出违规参数异常，则返回参数值
         return value;
     }
 

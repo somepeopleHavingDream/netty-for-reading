@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Default implementation which uses simple round-robin to choose next {@link EventExecutor}.
+ *
+ * 使用简单循环以选择下一个事件执行器的默认实现。
  */
 @UnstableApi
 public final class DefaultEventExecutorChooserFactory implements EventExecutorChooserFactory {

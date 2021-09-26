@@ -15,13 +15,13 @@
  */
 package io.netty.util.internal;
 
-import static io.netty.util.internal.ObjectUtil.checkNonEmpty;
-
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+
+import static io.netty.util.internal.ObjectUtil.checkNonEmpty;
 
 /**
  * A collection of utility methods to retrieve and parse the values of the Java system properties.
@@ -58,8 +58,10 @@ public final class SystemPropertyUtil {
      *         specified property is not allowed.
      */
     public static String get(final String key, String def) {
+        // 检查键是否为null或空串，如果有，则会抛出异常
         checkNonEmpty(key, "key");
 
+        // 获得该键对应的值
         String value = null;
         try {
             if (System.getSecurityManager() == null) {
@@ -76,10 +78,12 @@ public final class SystemPropertyUtil {
             logger.warn("Unable to retrieve a system property '{}'; default values will be used.", key, e);
         }
 
+        // 如果值为null，则返回默认值
         if (value == null) {
             return def;
         }
 
+        // 返回获取到的值
         return value;
     }
 
@@ -124,11 +128,15 @@ public final class SystemPropertyUtil {
      * {@code key}, while falling back to the specified default value if
      * the property access fails.
      *
+     * 返回具有特定键的Java系统属性的值，
+     * 如果属性访问失败，将回退到给定的默认值。
+     *
      * @return the property value.
      *         {@code def} if there's no such property or if an access to the
      *         specified property is not allowed.
      */
     public static int getInt(String key, int def) {
+        // 获得给定键的系统属性值
         String value = get(key);
         if (value == null) {
             return def;

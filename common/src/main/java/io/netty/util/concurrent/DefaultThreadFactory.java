@@ -64,9 +64,17 @@ public class DefaultThreadFactory implements ThreadFactory {
         this(toPoolName(poolType), daemon, priority);
     }
 
+    /**
+     * 通过线程池的类型，获得线程池名称
+     *
+     * @param poolType 线程池类型
+     * @return 线程池名称
+     */
     public static String toPoolName(Class<?> poolType) {
+        // 检查入参
         ObjectUtil.checkNotNull(poolType, "poolType");
 
+        // 返回线程池名
         String poolName = StringUtil.simpleClassName(poolType);
         switch (poolName.length()) {
             case 0:

@@ -15,13 +15,7 @@
  */
 package io.netty.channel.nio;
 
-import io.netty.channel.Channel;
-import io.netty.channel.DefaultSelectStrategyFactory;
-import io.netty.channel.EventLoop;
-import io.netty.channel.EventLoopTaskQueueFactory;
-import io.netty.channel.MultithreadEventLoopGroup;
-import io.netty.channel.SelectStrategyFactory;
-import io.netty.channel.SingleThreadEventLoop;
+import io.netty.channel.*;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.EventExecutorChooserFactory;
 import io.netty.util.concurrent.RejectedExecutionHandler;
@@ -48,6 +42,9 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
     /**
      * Create a new instance using the specified number of threads, {@link ThreadFactory} and the
      * {@link SelectorProvider} which is returned by {@link SelectorProvider#provider()}.
+     *
+     * 使用指定的线程数创建一个新的实例，
+     * 线程工厂和选择器提供者通过选择器提供者的提供者方法返回。
      */
     public NioEventLoopGroup(int nThreads) {
         this(nThreads, (Executor) null);
@@ -70,6 +67,15 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
     }
 
     public NioEventLoopGroup(int nThreads, Executor executor) {
+        /*
+            SelectorProvider根据不同操作系统的内核不同而不同。
+
+            Selector有两种创建方式：
+            Selector.open()：会调用操作系统底层的Selector实现来创建Selector；
+            SelectorProvider.openSelector()：这种方式直接调用SelectorProvider类来获取操作系统底层的Selector来创建Selector。
+
+            两种创建方式在本质上没有区别！
+        */
         this(nThreads, executor, SelectorProvider.provider());
     }
 
@@ -166,12 +172,16 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
 
     @Override
     protected EventLoop newChild(Executor executor, Object... args) throws Exception {
+        // 第一位参数是选择器提供者
         SelectorProvider selectorProvider = (SelectorProvider) args[0];
+        // 第二位参数是选择策略工厂
         SelectStrategyFactory selectStrategyFactory = (SelectStrategyFactory) args[1];
+        // 第三位参数是拒绝执行处理者
         RejectedExecutionHandler rejectedExecutionHandler = (RejectedExecutionHandler) args[2];
         EventLoopTaskQueueFactory taskQueueFactory = null;
         EventLoopTaskQueueFactory tailTaskQueueFactory = null;
 
+        // 如果有第四位参数和第五位参数，则设置第四位第五位参数
         int argsLength = args.length;
         if (argsLength > 3) {
             taskQueueFactory = (EventLoopTaskQueueFactory) args[3];
@@ -179,6 +189,8 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
         if (argsLength > 4) {
             tailTaskQueueFactory = (EventLoopTaskQueueFactory) args[4];
         }
+
+        // 实例化一个Nio事件循环
         return new NioEventLoop(this, executor, selectorProvider,
                 selectStrategyFactory.newSelectStrategy(),
                 rejectedExecutionHandler, taskQueueFactory, tailTaskQueueFactory);

@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import static io.netty.util.internal.ObjectUtil.*;
+import static io.netty.util.internal.ObjectUtil.checkNotNull;
 
 /**
  * String utility class.
@@ -301,9 +301,16 @@ public final class StringUtil {
     /**
      * Generates a simplified name from a {@link Class}.  Similar to {@link Class#getSimpleName()}, but it works fine
      * with anonymous classes.
+     *
+     * 从类对象生成一个简化名字。
+     * 与Class#getSimpleName()方法相似，
+     * 但它更适用与匿名类
      */
     public static String simpleClassName(Class<?> clazz) {
+        // 检查入参，接着获得类名
         String className = checkNotNull(clazz, "clazz").getName();
+
+        // 返回简化类名
         final int lastDotIdx = className.lastIndexOf(PACKAGE_SEPARATOR_CHAR);
         if (lastDotIdx > -1) {
             return className.substring(lastDotIdx + 1);

@@ -20,8 +20,15 @@ import java.util.Queue;
 /**
  * Factory used to create {@link Queue} instances that will be used to store tasks for an {@link EventLoop}.
  *
+ * 被用来创建队列实例的工厂，
+ * 通常被用来为每个事件循环存储任务。
+ *
  * Generally speaking the returned {@link Queue} MUST be thread-safe and depending on the {@link EventLoop}
  * implementation must be of type {@link java.util.concurrent.BlockingQueue}.
+ *
+ * 通常来说，
+ * 返回的队列必须是线程安全的，
+ * 并且依赖的事件循环实现必须是阻塞队列的类型。
  */
 public interface EventLoopTaskQueueFactory {
 
