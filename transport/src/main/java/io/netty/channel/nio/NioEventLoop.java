@@ -128,6 +128,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 rejectedExecutionHandler);
         this.provider = ObjectUtil.checkNotNull(selectorProvider, "selectorProvider");
         this.selectStrategy = ObjectUtil.checkNotNull(strategy, "selectStrategy");
+        // 打开选择器，获得选择器元祖
         final SelectorTuple selectorTuple = openSelector();
         this.selector = selectorTuple.selector;
         this.unwrappedSelector = selectorTuple.unwrappedSelector;
@@ -150,7 +151,15 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     }
 
     private static final class SelectorTuple {
+
+        /**
+         * 未包装的选择器
+         */
         final Selector unwrappedSelector;
+
+        /**
+         * 包装的选择器
+         */
         final Selector selector;
 
         SelectorTuple(Selector unwrappedSelector) {
@@ -164,6 +173,11 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
+    /**
+     * 打开选择器（不细究）
+     *
+     * @return 选择器元祖
+     */
     private SelectorTuple openSelector() {
         final Selector unwrappedSelector;
         try {
@@ -271,8 +285,15 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         return newTaskQueue0(maxPendingTasks);
     }
 
+    /**
+     * 实例化任务队列
+     *
+     * @param maxPendingTasks 最大待办任务数
+     * @return 任务队列
+     */
     private static Queue<Runnable> newTaskQueue0(int maxPendingTasks) {
         // This event loop never calls takeTask()
+        // 此事件循环从不调用取出任务方法
         return maxPendingTasks == Integer.MAX_VALUE ? PlatformDependent.<Runnable>newMpscQueue()
                 : PlatformDependent.<Runnable>newMpscQueue(maxPendingTasks);
     }

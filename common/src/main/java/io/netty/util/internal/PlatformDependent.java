@@ -29,11 +29,7 @@ import org.jctools.queues.atomic.SpscLinkedAtomicQueue;
 import org.jctools.util.Pow2;
 import org.jctools.util.UnsafeAccess;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
@@ -41,17 +37,7 @@ import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentMap;
@@ -60,11 +46,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static io.netty.util.internal.PlatformDependent0.HASH_CODE_ASCII_SEED;
-import static io.netty.util.internal.PlatformDependent0.HASH_CODE_C1;
-import static io.netty.util.internal.PlatformDependent0.HASH_CODE_C2;
-import static io.netty.util.internal.PlatformDependent0.hashCodeAsciiSanitize;
-import static io.netty.util.internal.PlatformDependent0.unalignedAccess;
+import static io.netty.util.internal.PlatformDependent0.*;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -940,6 +922,12 @@ public final class PlatformDependent {
     }
 
     private static final class Mpsc {
+
+        /**
+         * 是否使用多生产者单消费者分块数组队列，
+         * 一般通过静态块初始化后，
+         * 此值是true。
+         */
         private static final boolean USE_MPSC_CHUNKED_ARRAY_QUEUE;
 
         private Mpsc() {
@@ -973,12 +961,14 @@ public final class PlatformDependent {
             // Calculate the max capacity which can not be bigger than MAX_ALLOWED_MPSC_CAPACITY.
             // This is forced by the MpscChunkedArrayQueue implementation as will try to round it
             // up to the next power of two and so will overflow otherwise.
+            // 计算容量
             final int capacity = max(min(maxCapacity, MAX_ALLOWED_MPSC_CAPACITY), MIN_MAX_MPSC_CAPACITY);
             return USE_MPSC_CHUNKED_ARRAY_QUEUE ? new MpscChunkedArrayQueue<T>(MPSC_CHUNK_SIZE, capacity)
                                                 : new MpscChunkedAtomicArrayQueue<T>(MPSC_CHUNK_SIZE, capacity);
         }
 
         static <T> Queue<T> newMpscQueue() {
+            // 根据是否使用多生产者单消费者分块数组队列，实例化不同的队列（一般是MpscUnboundedArrayQueue）
             return USE_MPSC_CHUNKED_ARRAY_QUEUE ? new MpscUnboundedArrayQueue<T>(MPSC_CHUNK_SIZE)
                                                 : new MpscUnboundedAtomicArrayQueue<T>(MPSC_CHUNK_SIZE);
         }
@@ -987,6 +977,9 @@ public final class PlatformDependent {
     /**
      * Create a new {@link Queue} which is safe to use for multiple producers (different threads) and a single
      * consumer (one thread!).
+     *
+     * 创建一个对多个生产者（不同线程）和单个消费者（一个线程）安全的队列。
+     *
      * @return A MPSC queue which may be unbounded.
      */
     public static <T> Queue<T> newMpscQueue() {
@@ -996,6 +989,9 @@ public final class PlatformDependent {
     /**
      * Create a new {@link Queue} which is safe to use for multiple producers (different threads) and a single
      * consumer (one thread!).
+     *
+     * 创建一个新的队列，
+     * 该队列对于多生产者（不同线程）和单消费者（一个线程）是使用安全的。
      */
     public static <T> Queue<T> newMpscQueue(final int maxCapacity) {
         return Mpsc.newMpscQueue(maxCapacity);

@@ -29,13 +29,28 @@ import static io.netty.util.internal.ObjectUtil.checkPositive;
 /**
  * Abstract base class for {@link EventExecutorGroup} implementations that handles their tasks with multiple threads at
  * the same time.
+ *
+ * 用于事件执行器组实现的抽象基类，
+ * 该基类在同一时间用多线程处理它们的任务
  */
 public abstract class MultithreadEventExecutorGroup extends AbstractEventExecutorGroup {
 
+    /**
+     * 子事件执行器
+     */
     private final EventExecutor[] children;
     private final Set<EventExecutor> readonlyChildren;
+
+    /**
+     * 终止的子事件执行器个数
+     */
     private final AtomicInteger terminatedChildren = new AtomicInteger();
+
+    /**
+     * 终止承诺
+     */
     private final Promise<?> terminationFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);
+
     private final EventExecutorChooserFactory.EventExecutorChooser chooser;
 
     /**
@@ -82,7 +97,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
             executor = new ThreadPerTaskExecutor(newDefaultThreadFactory());
         }
 
-        // 声明实例化一个事件执行器数组
+        // 声明实例化一个子事件执行器数组
         children = new EventExecutor[nThreads];
 
         for (int i = 0; i < nThreads; i ++) {
@@ -90,13 +105,17 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
             boolean success = false;
 
             try {
+                // 如果实例化一个事件执行器成功，则至标记为成功
                 children[i] = newChild(executor, args);
                 success = true;
             } catch (Exception e) {
                 // TODO: Think about if this is a good exception type
                 throw new IllegalStateException("failed to create a child event loop", e);
             } finally {
+                // 以下不细究
+                // 如果不成功
                 if (!success) {
+                    // 不成功，则关闭所有子事件执行器
                     for (int j = 0; j < i; j ++) {
                         children[j].shutdownGracefully();
                     }
@@ -117,8 +136,10 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
             }
         }
 
+        // 实例化一个新的选择器
         chooser = chooserFactory.newChooser(children);
 
+        // 创建终止监听者
         final FutureListener<Object> terminationListener = new FutureListener<Object>() {
             @Override
             public void operationComplete(Future<Object> future) throws Exception {
@@ -128,6 +149,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
             }
         };
 
+        // 为每个事件执行者添加监听者
         for (EventExecutor e: children) {
             e.terminationFuture().addListener(terminationListener);
         }
