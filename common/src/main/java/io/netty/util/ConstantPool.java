@@ -27,12 +27,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * A pool of {@link Constant}s.
  *
+ * 常量池。
+ *
  * @param <T> the type of the constant
+ *
+ *           常量的类型
  */
 public abstract class ConstantPool<T extends Constant<T>> {
 
     private final ConcurrentMap<String, T> constants = PlatformDependent.newConcurrentHashMap();
 
+    /**
+     * 用于创建下一个常量的Id序列
+     */
     private final AtomicInteger nextId = new AtomicInteger(1);
 
     /**
@@ -87,17 +94,25 @@ public abstract class ConstantPool<T extends Constant<T>> {
      * {@link IllegalArgumentException} if a {@link Constant} for the given {@code name} exists.
      */
     public T newInstance(String name) {
+        // 先检查入参名称是否为空，若不为空，则创建或抛出
         return createOrThrow(checkNonEmpty(name, "name"));
     }
 
     /**
      * Creates constant by name or throws exception. Threadsafe
      *
+     * 通过名称创建常量或抛出异常。
+     * 线程安全。
+     *
      * @param name the name of the {@link Constant}
      */
     private T createOrThrow(String name) {
+        // 获得对应的常量对象
         T constant = constants.get(name);
+
+        // 如果该名称对应的常量对象之前不存在，则做相关操作
         if (constant == null) {
+            // 实例化一个常量，放置，并返回
             final T tempConstant = newConstant(nextId(), name);
             constant = constants.putIfAbsent(name, tempConstant);
             if (constant == null) {
@@ -105,6 +120,7 @@ public abstract class ConstantPool<T extends Constant<T>> {
             }
         }
 
+        // 否则，抛出违规参数异常
         throw new IllegalArgumentException(String.format("'%s' is already in use", name));
     }
 

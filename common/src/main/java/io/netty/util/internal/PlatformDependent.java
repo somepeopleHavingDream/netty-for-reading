@@ -413,6 +413,8 @@ public final class PlatformDependent {
 
     /**
      * Creates a new fastest {@link ConcurrentMap} implementation for the current platform.
+     *
+     * 创建一个比当前平台更快的并发映射实现。
      */
     public static <K, V> ConcurrentMap<K, V> newConcurrentHashMap() {
         return new ConcurrentHashMap<K, V>();

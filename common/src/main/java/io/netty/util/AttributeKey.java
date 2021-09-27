@@ -24,6 +24,9 @@ package io.netty.util;
 @SuppressWarnings("UnusedDeclaration") // 'T' is used only at compile time
 public final class AttributeKey<T> extends AbstractConstant<AttributeKey<T>> {
 
+    /**
+     * 常量池的匿名内部类实现
+     */
     private static final ConstantPool<AttributeKey<Object>> pool = new ConstantPool<AttributeKey<Object>>() {
         @Override
         protected AttributeKey<Object> newConstant(int id, String name) {
@@ -49,6 +52,10 @@ public final class AttributeKey<T> extends AbstractConstant<AttributeKey<T>> {
     /**
      * Creates a new {@link AttributeKey} for the given {@code name} or fail with an
      * {@link IllegalArgumentException} if a {@link AttributeKey} for the given {@code name} exists.
+     *
+     * 为给定名称创建一个新的属性键，
+     * 或者因违规参数异常而失败，
+     * 如果对于给定名称的属性键已存在。
      */
     @SuppressWarnings("unchecked")
     public static <T> AttributeKey<T> newInstance(String name) {
