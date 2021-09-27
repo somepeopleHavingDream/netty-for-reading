@@ -85,18 +85,26 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     /**
      * The {@link EventLoopGroup} which is used to handle all the events for the to-be-created
      * {@link Channel}
+     *
+     * 被用来处理所有用于将被创建的通道的事件循环组。
      */
     public B group(EventLoopGroup group) {
+        // 检查事件循环组，事件循环组不能为null
         ObjectUtil.checkNotNull(group, "group");
+
+        // 如果当前引导类实例的事件循环组不为null，则抛出违规参数异常
         if (this.group != null) {
             throw new IllegalStateException("group set already");
         }
+
+        // 设置事件循环组
         this.group = group;
         return self();
     }
 
     @SuppressWarnings("unchecked")
     private B self() {
+        // 返回自身引用，B是子类类型
         return (B) this;
     }
 

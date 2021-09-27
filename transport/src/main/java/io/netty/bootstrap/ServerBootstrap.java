@@ -53,7 +53,12 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
     private final Map<ChannelOption<?>, Object> childOptions = new LinkedHashMap<ChannelOption<?>, Object>();
     private final Map<AttributeKey<?>, Object> childAttrs = new ConcurrentHashMap<AttributeKey<?>, Object>();
     private final ServerBootstrapConfig config = new ServerBootstrapConfig(this);
+
+    /**
+     * 子事件循环组
+     */
     private volatile EventLoopGroup childGroup;
+
     private volatile ChannelHandler childHandler;
 
     public ServerBootstrap() { }
@@ -80,12 +85,20 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
      * Set the {@link EventLoopGroup} for the parent (acceptor) and the child (client). These
      * {@link EventLoopGroup}'s are used to handle all the events and IO for {@link ServerChannel} and
      * {@link Channel}'s.
+     *
+     * 为父（接收器）和子（客户端）设置事件循环组。
+     * 这些事件循环组被用来处理所有的事件和用于服务端通道、客户端通道的输入输出。
      */
     public ServerBootstrap group(EventLoopGroup parentGroup, EventLoopGroup childGroup) {
+        // 设置父事件循环组
         super.group(parentGroup);
+
+        // 如果当前服务端引导类实例的子事件循环组不为null，则抛出违规状态异常
         if (this.childGroup != null) {
             throw new IllegalStateException("childGroup set already");
         }
+
+        // 设置子事件循环组，并返回自身
         this.childGroup = ObjectUtil.checkNotNull(childGroup, "childGroup");
         return this;
     }
