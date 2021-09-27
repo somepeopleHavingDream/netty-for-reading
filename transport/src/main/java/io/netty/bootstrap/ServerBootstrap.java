@@ -50,6 +50,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
     // The order in which child ChannelOptions are applied is important they may depend on each other for validation
     // purposes.
+    // 应用子通道选项的顺序是很重要的。它们也许彼此依赖以达到校验目的。
     private final Map<ChannelOption<?>, Object> childOptions = new LinkedHashMap<ChannelOption<?>, Object>();
     private final Map<AttributeKey<?>, Object> childAttrs = new ConcurrentHashMap<AttributeKey<?>, Object>();
     private final ServerBootstrapConfig config = new ServerBootstrapConfig(this);
@@ -107,16 +108,27 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
      * Allow to specify a {@link ChannelOption} which is used for the {@link Channel} instances once they get created
      * (after the acceptor accepted the {@link Channel}). Use a value of {@code null} to remove a previous set
      * {@link ChannelOption}.
+     *
+     * 允许指定用于通道实例的通道选项，
+     * 一旦它们获得创建（在接收器接收了通道之后）。
+     * 使用null值以移除先前设置的通道选项。
      */
     public <T> ServerBootstrap childOption(ChannelOption<T> childOption, T value) {
+        // 检查入参子选项不能为null
         ObjectUtil.checkNotNull(childOption, "childOption");
+
+        // 锁住子选项映射
         synchronized (childOptions) {
+            // 如果入参值为null，则移除原先设置的子选项
             if (value == null) {
                 childOptions.remove(childOption);
             } else {
+                // 为子选项设置新值
                 childOptions.put(childOption, value);
             }
         }
+
+        // 返回引导类实例本身
         return this;
     }
 
