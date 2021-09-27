@@ -52,7 +52,12 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
     // purposes.
     // 应用子通道选项的顺序是很重要的。它们也许彼此依赖以达到校验目的。
     private final Map<ChannelOption<?>, Object> childOptions = new LinkedHashMap<ChannelOption<?>, Object>();
+
+    /**
+     * 为每个子通道设置的属性映射
+     */
     private final Map<AttributeKey<?>, Object> childAttrs = new ConcurrentHashMap<AttributeKey<?>, Object>();
+
     private final ServerBootstrapConfig config = new ServerBootstrapConfig(this);
 
     /**
@@ -135,14 +140,25 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
     /**
      * Set the specific {@link AttributeKey} with the given value on every child {@link Channel}. If the value is
      * {@code null} the {@link AttributeKey} is removed
+     *
+     * 在每个子通道上，
+     * 用给定值设置指定的属性键。
+     * 如果值为null，
+     * 则属性键将被移除。
      */
     public <T> ServerBootstrap childAttr(AttributeKey<T> childKey, T value) {
+        // 检查子属性键不能为null
         ObjectUtil.checkNotNull(childKey, "childKey");
+
+        // 如果入参值为null，则移除该属性键
         if (value == null) {
             childAttrs.remove(childKey);
         } else {
+            // 否则，为该属性键设置该属性值
             childAttrs.put(childKey, value);
         }
+
+        // 返回引导类实例本身
         return this;
     }
 
