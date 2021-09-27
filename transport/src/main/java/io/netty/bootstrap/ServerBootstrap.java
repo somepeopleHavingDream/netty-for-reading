@@ -164,9 +164,14 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
     /**
      * Set the {@link ChannelHandler} which is used to serve the request for the {@link Channel}'s.
+     *
+     * 设置通道处理者，
+     * 该通道处理者被用于服务通道请求。
      */
     public ServerBootstrap childHandler(ChannelHandler childHandler) {
+        // 检查子通道处理者不能为null
         this.childHandler = ObjectUtil.checkNotNull(childHandler, "childHandler");
+        // 返回引导类实例本身
         return this;
     }
 
