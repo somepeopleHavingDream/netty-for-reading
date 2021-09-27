@@ -23,14 +23,20 @@ import java.lang.reflect.Constructor;
 
 /**
  * A {@link ChannelFactory} that instantiates a new {@link Channel} by invoking its default constructor reflectively.
+
+ * 通过反射地调用它默认的构造器，
+ * 来实例新通道的通道工厂。
  */
 public class ReflectiveChannelFactory<T extends Channel> implements ChannelFactory<T> {
 
     private final Constructor<? extends T> constructor;
 
     public ReflectiveChannelFactory(Class<? extends T> clazz) {
+        // 检查类对象不能为null
         ObjectUtil.checkNotNull(clazz, "clazz");
+
         try {
+            // 从类对象中获得并设置构造器
             this.constructor = clazz.getConstructor();
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Class " + StringUtil.simpleClassName(clazz) +

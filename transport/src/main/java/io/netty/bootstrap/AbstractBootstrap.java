@@ -112,6 +112,11 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
      * The {@link Class} which is used to create {@link Channel} instances from.
      * You either use this or {@link #channelFactory(io.netty.channel.ChannelFactory)} if your
      * {@link Channel} implementation has no no-args constructor.
+     *
+     * 将被用来从中创建通道实例的类对象。
+     * 你要么使用本身，
+     * 要么使用通道工厂方法，
+     * 如果你的通道实现没有无参构造器。
      */
     public B channel(Class<? extends C> channelClass) {
         return channelFactory(new ReflectiveChannelFactory<C>(
@@ -124,12 +129,18 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
      */
     @Deprecated
     public B channelFactory(ChannelFactory<? extends C> channelFactory) {
+        // 检查通道工厂不能为null
         ObjectUtil.checkNotNull(channelFactory, "channelFactory");
+
+        // 如果当前引导类实例的通道工厂不为null，则抛出违规状态异常
         if (this.channelFactory != null) {
             throw new IllegalStateException("channelFactory set already");
         }
 
+        // 设置通道工厂
         this.channelFactory = channelFactory;
+
+        // 返回自身实例
         return self();
     }
 
