@@ -19,6 +19,9 @@ import java.util.Arrays;
 
 final class DefaultFutureListeners {
 
+    /**
+     * 通用未来监听者数组
+     */
     private GenericFutureListener<? extends Future<?>>[] listeners;
     private int size;
     private int progressiveSize; // the number of progressive listeners
@@ -26,6 +29,7 @@ final class DefaultFutureListeners {
     @SuppressWarnings("unchecked")
     DefaultFutureListeners(
             GenericFutureListener<? extends Future<?>> first, GenericFutureListener<? extends Future<?>> second) {
+        // 实例化通用未来监听者数组，并依次赋值
         listeners = new GenericFutureListener[2];
         listeners[0] = first;
         listeners[1] = second;

@@ -49,9 +49,17 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
 
     private volatile Object result;
     private final EventExecutor executor;
+
     /**
      * One or more listeners. Can be a {@link GenericFutureListener} or a {@link DefaultFutureListeners}.
      * If {@code null}, it means either 1) no listeners were added yet or 2) all listeners were notified.
+     *
+     * 一个或多个监听者。
+     * 可以是通用未来监听者或者默认未来监听者。
+     * 如果为null，
+     * 则意味着，
+     * 要么至今为止没有监听者被添加，
+     * 要么所有的监听者都被通知。
      *
      * Threading - synchronized(this). We must support adding listeners when there is no EventExecutor.
      */
@@ -174,9 +182,12 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
 
     @Override
     public Promise<V> addListener(GenericFutureListener<? extends Future<? super V>> listener) {
+        // 检查监听器是否为null
         checkNotNull(listener, "listener");
 
+        // 锁住当前对象
         synchronized (this) {
+            // 添加监听者
             addListener0(listener);
         }
 

@@ -39,6 +39,10 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
      * 子事件执行器
      */
     private final EventExecutor[] children;
+
+    /**
+     * 只读子事件执行器集合
+     */
     private final Set<EventExecutor> readonlyChildren;
 
     /**
@@ -105,7 +109,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
             boolean success = false;
 
             try {
-                // 如果实例化一个事件执行器成功，则至标记为成功
+                // 如果实例化一个事件执行器成功，则置标记为成功
                 children[i] = newChild(executor, args);
                 success = true;
             } catch (Exception e) {
