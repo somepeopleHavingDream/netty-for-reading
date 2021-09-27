@@ -41,6 +41,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * {@link Bootstrap} sub-class which allows easy bootstrap of {@link ServerChannel}
  *
+ * 引导类的子类，
+ * 允许服务端通道的更简单引导。
  */
 public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerChannel> {
 
