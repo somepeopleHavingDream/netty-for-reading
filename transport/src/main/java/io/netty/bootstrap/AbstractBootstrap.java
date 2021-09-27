@@ -382,9 +382,13 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
 
     /**
      * the {@link ChannelHandler} to use for serving the requests.
+     *
+     * 用于服务请求的通道处理者。
      */
     public B handler(ChannelHandler handler) {
+        // 检查入参客户端处理者不能为null
         this.handler = ObjectUtil.checkNotNull(handler, "handler");
+        // 返回引导实例本身
         return self();
     }
 
