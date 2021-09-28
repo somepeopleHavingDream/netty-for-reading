@@ -40,8 +40,16 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     private static final InternalLogger logger =
             InternalLoggerFactory.getInstance(AbstractNioChannel.class);
 
+    /**
+     * 当前可选通道
+     */
     private final SelectableChannel ch;
+
+    /**
+     * 读感兴趣操作
+     */
     protected final int readInterestOp;
+
     volatile SelectionKey selectionKey;
     boolean readPending;
     private final Runnable clearReadPendingRunnable = new Runnable() {
@@ -70,9 +78,11 @@ public abstract class AbstractNioChannel extends AbstractChannel {
      */
     protected AbstractNioChannel(Channel parent, SelectableChannel ch, int readInterestOp) {
         super(parent);
+        // 设置通道和读感兴趣操作
         this.ch = ch;
         this.readInterestOp = readInterestOp;
         try {
+            // 设置通道为非阻塞模式
             ch.configureBlocking(false);
         } catch (IOException e) {
             try {

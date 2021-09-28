@@ -34,9 +34,18 @@ import static java.lang.Math.min;
  */
 public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufAllocator {
 
+    /**
+     * 默认最小
+     */
     static final int DEFAULT_MINIMUM = 64;
+
     // Use an initial value that is bigger than the common MTU of 1500
+    // 使用大于1500的常见最大传输单元的初始值
     static final int DEFAULT_INITIAL = 2048;
+
+    /**
+     * 默认最大
+     */
     static final int DEFAULT_MAXIMUM = 65536;
 
     private static final int INDEX_INCREMENT = 4;
@@ -153,6 +162,9 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
      * Creates a new predictor with the default parameters.  With the default
      * parameters, the expected buffer size starts from {@code 1024}, does not
      * go down below {@code 64}, and does not go up above {@code 65536}.
+     *
+     * 用默认参数创建一个新的预测器。
+     * 用默认参数，期盼的缓冲区大小从1024开始，不会低于64，也不会高于65536。
      */
     public AdaptiveRecvByteBufAllocator() {
         this(DEFAULT_MINIMUM, DEFAULT_INITIAL, DEFAULT_MAXIMUM);

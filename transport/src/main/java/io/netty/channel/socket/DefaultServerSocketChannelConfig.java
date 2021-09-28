@@ -45,9 +45,12 @@ public class DefaultServerSocketChannelConfig extends DefaultChannelConfig
 
     /**
      * Creates a new instance.
+     *
+     * 创建一个新的实例。
      */
     public DefaultServerSocketChannelConfig(ServerSocketChannel channel, ServerSocket javaSocket) {
         super(channel);
+        // 设置服务端套接字
         this.javaSocket = ObjectUtil.checkNotNull(javaSocket, "javaSocket");
     }
 

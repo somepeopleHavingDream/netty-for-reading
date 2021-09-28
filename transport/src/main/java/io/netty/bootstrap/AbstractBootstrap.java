@@ -312,7 +312,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
      * 绑定本地套接字地址
      *
      * @param localAddress 本地套接字地址
-     * @return
+     * @return 通道未来
      */
     private ChannelFuture doBind(final SocketAddress localAddress) {
         final ChannelFuture regFuture = initAndRegister();

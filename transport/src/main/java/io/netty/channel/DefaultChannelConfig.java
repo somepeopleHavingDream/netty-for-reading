@@ -58,7 +58,12 @@ public class DefaultChannelConfig implements ChannelConfig {
     protected final Channel channel;
 
     private volatile ByteBufAllocator allocator = ByteBufAllocator.DEFAULT;
+
+    /**
+     * 接收字节缓冲分配器
+     */
     private volatile RecvByteBufAllocator rcvBufAllocator;
+
     private volatile MessageSizeEstimator msgSizeEstimator = DEFAULT_MSG_SIZE_ESTIMATOR;
 
     private volatile int connectTimeoutMillis = DEFAULT_CONNECT_TIMEOUT;
@@ -76,6 +81,7 @@ public class DefaultChannelConfig implements ChannelConfig {
     }
 
     protected DefaultChannelConfig(Channel channel, RecvByteBufAllocator allocator) {
+        // 设置接收字节缓冲分配器
         setRecvByteBufAllocator(allocator, channel.metadata());
         this.channel = channel;
     }
@@ -316,16 +322,24 @@ public class DefaultChannelConfig implements ChannelConfig {
 
     /**
      * Set the {@link RecvByteBufAllocator} which is used for the channel to allocate receive buffers.
+     *
+     * 设置被用于通道以分配接收缓冲的接收字节缓冲分配器。
+     *
      * @param allocator the allocator to set.
      * @param metadata Used to set the {@link ChannelMetadata#defaultMaxMessagesPerRead()} if {@code allocator}
      * is of type {@link MaxMessagesRecvByteBufAllocator}.
      */
     private void setRecvByteBufAllocator(RecvByteBufAllocator allocator, ChannelMetadata metadata) {
+        // 入参校验
         checkNotNull(allocator, "allocator");
         checkNotNull(metadata, "metadata");
+
+        // 如果分配器属于最大消息接收字节缓冲分配器，则设置每次读的最大消息数
         if (allocator instanceof MaxMessagesRecvByteBufAllocator) {
             ((MaxMessagesRecvByteBufAllocator) allocator).maxMessagesPerRead(metadata.defaultMaxMessagesPerRead());
         }
+
+        // 设置接收字节缓冲分配器
         setRecvByteBufAllocator(allocator);
     }
 
