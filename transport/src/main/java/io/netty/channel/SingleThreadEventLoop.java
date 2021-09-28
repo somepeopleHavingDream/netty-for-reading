@@ -83,6 +83,7 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
 
     @Override
     public ChannelFuture register(Channel channel) {
+        // 注册一个默认通道承诺
         return register(new DefaultChannelPromise(channel, this));
     }
 

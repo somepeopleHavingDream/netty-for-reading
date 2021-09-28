@@ -28,20 +28,17 @@ import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.net.SocketAddress;
-import java.util.ArrayList;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 /**
  * The default {@link ChannelPipeline} implementation.  It is usually created
  * by a {@link Channel} implementation when the {@link Channel} is created.
+ *
+ * 默认通道流水线实现。
+ * 它通常在创建通道时，
+ * 由通道实现来创建。
  */
 public class DefaultChannelPipeline implements ChannelPipeline {
 
@@ -90,9 +87,14 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     private boolean registered;
 
     protected DefaultChannelPipeline(Channel channel) {
+        // 设置当前通道、成功未来、void承诺
         this.channel = ObjectUtil.checkNotNull(channel, "channel");
         succeededFuture = new SucceededChannelFuture(channel, null);
         voidPromise =  new VoidChannelPromise(channel, true);
+
+        /*
+            一个链表（不细究）
+         */
 
         tail = new TailContext(this);
         head = new HeadContext(this);
@@ -1242,6 +1244,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     // A special catch-all handler that handles both bytes and messages.
+    // 既处理字节又处理消息的特别的捕捉所有的处理者。
     final class TailContext extends AbstractChannelHandlerContext implements ChannelInboundHandler {
 
         TailContext(DefaultChannelPipeline pipeline) {

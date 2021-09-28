@@ -16,16 +16,7 @@
 
 package io.netty.bootstrap;
 
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPromise;
-import io.netty.channel.DefaultChannelPromise;
-import io.netty.channel.EventLoop;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.ReflectiveChannelFactory;
+import io.netty.channel.*;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -51,8 +42,16 @@ import java.util.concurrent.ConcurrentHashMap;
  * transports such as datagram (UDP).</p>
  */
 public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C extends Channel> implements Cloneable {
+
+    /**
+     * 空的通道选项数组
+     */
     @SuppressWarnings("unchecked")
     private static final Map.Entry<ChannelOption<?>, Object>[] EMPTY_OPTION_ARRAY = new Map.Entry[0];
+
+    /**
+     * 空的属性数组
+     */
     @SuppressWarnings("unchecked")
     private static final Map.Entry<AttributeKey<?>, Object>[] EMPTY_ATTRIBUTE_ARRAY = new Map.Entry[0];
 
@@ -63,8 +62,14 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
 
     // The order in which ChannelOptions are applied is important they may depend on each other for validation
     // purposes.
+    // 应用子通道选项的顺序是很重要的。它们也许彼此依赖以达到校验目的。
     private final Map<ChannelOption<?>, Object> options = new LinkedHashMap<ChannelOption<?>, Object>();
+
+    /**
+     * 属性映射关系
+     */
     private final Map<AttributeKey<?>, Object> attrs = new ConcurrentHashMap<AttributeKey<?>, Object>();
+
     private volatile ChannelHandler handler;
 
     AbstractBootstrap() {
@@ -218,14 +223,23 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     /**
      * Validate all the parameters. Sub-classes may override this, but should
      * call the super method in that case.
+     *
+     * 校验所有参数。
+     * 子类可能覆盖它，
+     * 但是在那种情况下，
+     * 应该调用父类方法。
      */
     public B validate() {
+        // 如果事件循环组为null，则抛出违规参数异常
         if (group == null) {
             throw new IllegalStateException("group not set");
         }
+        // 如果通道工厂为null，则抛出违规参数异常
         if (channelFactory == null) {
             throw new IllegalStateException("channel or channelFactory not set");
         }
+
+        // 返回引导类实例本身
         return self();
     }
 
@@ -284,12 +298,22 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
 
     /**
      * Create a new {@link Channel} and bind it.
+     *
+     * 创建一个新的通道并且绑定它。
      */
     public ChannelFuture bind(SocketAddress localAddress) {
         validate();
+
+        // 若本地地址不为null，则做绑定操作
         return doBind(ObjectUtil.checkNotNull(localAddress, "localAddress"));
     }
 
+    /**
+     * 绑定本地套接字地址
+     *
+     * @param localAddress 本地套接字地址
+     * @return
+     */
     private ChannelFuture doBind(final SocketAddress localAddress) {
         final ChannelFuture regFuture = initAndRegister();
         final Channel channel = regFuture.channel();
@@ -326,12 +350,23 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         }
     }
 
+    /**
+     * 初始化并且注册
+     *
+     * @return 通道未来
+     */
     final ChannelFuture initAndRegister() {
         Channel channel = null;
         try {
+            // 从通道工厂中实例化一个通道
             channel = channelFactory.newChannel();
+            // 初始化通道
             init(channel);
         } catch (Throwable t) {
+            /*
+                异常处理（不细究）
+             */
+
             if (channel != null) {
                 // channel can be null if newChannel crashed (eg SocketException("too many open files"))
                 channel.unsafe().closeForcibly();
@@ -342,6 +377,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             return new DefaultChannelPromise(new FailedChannel(), GlobalEventExecutor.INSTANCE).setFailure(t);
         }
 
+        // 事件循环者注册通道
         ChannelFuture regFuture = config().group().register(channel);
         if (regFuture.cause() != null) {
             if (channel.isRegistered()) {
@@ -363,6 +399,12 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         return regFuture;
     }
 
+    /**
+     * 由子类实现初始化
+     *
+     * @param channel 通道
+     * @throws Exception 异常
+     */
     abstract void init(Channel channel) throws Exception;
 
     private static void doBind0(
@@ -411,20 +453,44 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
      */
     public abstract AbstractBootstrapConfig<B, C> config();
 
+    /**
+     * 实例化一个选项数组
+     *
+     * @return 选项数组
+     */
     final Map.Entry<ChannelOption<?>, Object>[] newOptionsArray() {
+        // 实例一个选项数组
         return newOptionsArray(options);
     }
 
+    /**
+     * 实例一个通道选项数组
+     *
+     * @param options 当前通道选项数组
+     * @return 通道选项数组
+     */
     static Map.Entry<ChannelOption<?>, Object>[] newOptionsArray(Map<ChannelOption<?>, Object> options) {
         synchronized (options) {
             return new LinkedHashMap<ChannelOption<?>, Object>(options).entrySet().toArray(EMPTY_OPTION_ARRAY);
         }
     }
 
+    /**
+     * 实例化属性数组
+     *
+     * @return 属性数组
+     */
     final Map.Entry<AttributeKey<?>, Object>[] newAttributesArray() {
+        // 实例属性数组
         return newAttributesArray(attrs0());
     }
 
+    /**
+     * 实例化属性数组
+     *
+     * @param attributes 属性映射
+     * @return 属性数组
+     */
     static Map.Entry<AttributeKey<?>, Object>[] newAttributesArray(Map<AttributeKey<?>, Object> attributes) {
         return attributes.entrySet().toArray(EMPTY_ATTRIBUTE_ARRAY);
     }
@@ -475,13 +541,29 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         }
     }
 
+    /**
+     * 设置通道选项
+     *
+     * @param channel 通道
+     * @param options 通道选项数组
+     * @param logger 日志器
+     */
     static void setChannelOptions(
             Channel channel, Map.Entry<ChannelOption<?>, Object>[] options, InternalLogger logger) {
         for (Map.Entry<ChannelOption<?>, Object> e: options) {
+            // 为每个通道选项进行设置
             setChannelOption(channel, e.getKey(), e.getValue(), logger);
         }
     }
 
+    /**
+     * 设置通道选项
+     *
+     * @param channel 通道
+     * @param option 通道选项
+     * @param value 通道选项值
+     * @param logger 日志器
+     */
     @SuppressWarnings("unchecked")
     private static void setChannelOption(
             Channel channel, ChannelOption<?> option, Object value, InternalLogger logger) {

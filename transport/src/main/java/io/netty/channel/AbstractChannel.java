@@ -27,11 +27,7 @@ import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.io.IOException;
-import java.net.ConnectException;
-import java.net.InetSocketAddress;
-import java.net.NoRouteToHostException;
-import java.net.SocketAddress;
-import java.net.SocketException;
+import java.net.*;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.NotYetConnectedException;
 import java.util.concurrent.Executor;
@@ -39,15 +35,26 @@ import java.util.concurrent.RejectedExecutionException;
 
 /**
  * A skeletal {@link Channel} implementation.
+ *
+ * 骨骼通道实现。
  */
 public abstract class AbstractChannel extends DefaultAttributeMap implements Channel {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractChannel.class);
 
+    /**
+     * 父通道
+     */
     private final Channel parent;
+
     private final ChannelId id;
     private final Unsafe unsafe;
+
+    /**
+     * 默认通道流水线
+     */
     private final DefaultChannelPipeline pipeline;
+
     private final VoidChannelPromise unsafeVoidPromise = new VoidChannelPromise(this, false);
     private final CloseFuture closeFuture = new CloseFuture(this);
 
@@ -65,10 +72,13 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     /**
      * Creates a new instance.
      *
+     * 创建一个新实例。
+     *
      * @param parent
      *        the parent of this channel. {@code null} if there's no parent.
      */
     protected AbstractChannel(Channel parent) {
+        // 设置父通道、id、unsafe、流水线
         this.parent = parent;
         id = newId();
         unsafe = newUnsafe();
@@ -108,13 +118,19 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     /**
      * Returns a new {@link DefaultChannelId} instance. Subclasses may override this method to assign custom
      * {@link ChannelId}s to {@link Channel}s that use the {@link AbstractChannel#AbstractChannel(Channel)} constructor.
+     *
+     * 返回一个新的默认通道Id实例。
+     * 此类也许会覆写此方法以将自定义的通道Id赋值给通道。
      */
     protected ChannelId newId() {
+        // （不细究）
         return DefaultChannelId.newInstance();
     }
 
     /**
      * Returns a new {@link DefaultChannelPipeline} instance.
+     *
+     * 返回一个新的默认通道流水线实例。
      */
     protected DefaultChannelPipeline newChannelPipeline() {
         return new DefaultChannelPipeline(this);
@@ -343,6 +359,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     /**
      * Create a new {@link AbstractUnsafe} instance which will be used for the life-time of the {@link Channel}
+     *
+     * 创建一个新的抽象不安全实例，该实例将被用于通道的生命周期。
      */
     protected abstract AbstractUnsafe newUnsafe();
 
@@ -464,6 +482,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         @Override
         public final void register(EventLoop eventLoop, final ChannelPromise promise) {
             ObjectUtil.checkNotNull(eventLoop, "eventLoop");
+
+            // 如果已注册，则失败
             if (isRegistered()) {
                 promise.setFailure(new IllegalStateException("registered to an event loop already"));
                 return;

@@ -50,6 +50,8 @@ public final class DefaultChannelId implements ChannelId {
 
     /**
      * Returns a new {@link DefaultChannelId} instance.
+     *
+     * 返回一个新的默认通道Id实例。
      */
     public static DefaultChannelId newInstance() {
         return new DefaultChannelId();

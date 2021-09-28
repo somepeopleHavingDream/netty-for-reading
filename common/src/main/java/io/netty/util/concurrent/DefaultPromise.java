@@ -15,11 +15,7 @@
  */
 package io.netty.util.concurrent;
 
-import io.netty.util.internal.InternalThreadLocalMap;
-import io.netty.util.internal.PlatformDependent;
-import io.netty.util.internal.StringUtil;
-import io.netty.util.internal.SystemPropertyUtil;
-import io.netty.util.internal.ThrowableUtil;
+import io.netty.util.internal.*;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
@@ -38,9 +34,11 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
             InternalLoggerFactory.getInstance(DefaultPromise.class.getName() + ".rejectedExecution");
     private static final int MAX_LISTENER_STACK_DEPTH = Math.min(8,
             SystemPropertyUtil.getInt("io.netty.defaultPromise.maxListenerStackDepth", 8));
+
     @SuppressWarnings("rawtypes")
     private static final AtomicReferenceFieldUpdater<DefaultPromise, Object> RESULT_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(DefaultPromise.class, Object.class, "result");
+
     private static final Object SUCCESS = new Object();
     private static final Object UNCANCELLABLE = new Object();
     private static final CauseHolder CANCELLATION_CAUSE_HOLDER = new CauseHolder(
@@ -56,16 +54,17 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
      *
      * 一个或多个监听者。
      * 可以是通用未来监听者或者默认未来监听者。
-     * 如果为null，
-     * 则意味着，
-     * 要么至今为止没有监听者被添加，
-     * 要么所有的监听者都被通知。
+     * 如果为null，则意味着，要么至今为止没有监听者被添加，要么所有的监听者都被通知。
      *
      * Threading - synchronized(this). We must support adding listeners when there is no EventExecutor.
      */
     private Object listeners;
+
     /**
      * Threading - synchronized(this). We are required to hold the monitor to use Java's underlying wait()/notifyAll().
+     *
+     * 线程的 - 同步此实例。
+     * 我们需要拥有一个监视器以使用java底层的等待/通知所有方法。
      */
     private short waiters;
 
@@ -88,6 +87,7 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
      *
      */
     public DefaultPromise(EventExecutor executor) {
+        // 设置执行器
         this.executor = checkNotNull(executor, "executor");
     }
 
@@ -617,12 +617,20 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
     }
 
     private boolean setFailure0(Throwable cause) {
+        // 实例化并设置原因持有器
         return setValue0(new CauseHolder(checkNotNull(cause, "cause")));
     }
 
+    /**
+     * 设置值
+     *
+     * @param objResult 对象结果
+     * @return 是否设置成功
+     */
     private boolean setValue0(Object objResult) {
         if (RESULT_UPDATER.compareAndSet(this, null, objResult) ||
             RESULT_UPDATER.compareAndSet(this, UNCANCELLABLE, objResult)) {
+            // 检查通知等待者
             if (checkNotifyWaiters()) {
                 notifyListeners();
             }
@@ -634,8 +642,12 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
     /**
      * Check if there are any waiters and if so notify these.
      * @return {@code true} if there are any listeners attached to the promise, {@code false} otherwise.
+     *
+     * 检查是否有等待者，如果有的话则通知。
+     * 如果有附加在承诺之上的监听器，则返回真，否则返回假。
      */
     private synchronized boolean checkNotifyWaiters() {
+        // 如果存在等待者，则通知所有
         if (waiters > 0) {
             notifyAll();
         }

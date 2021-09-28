@@ -55,6 +55,9 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
      */
     private final Promise<?> terminationFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);
 
+    /**
+     * 事件执行器选择器
+     */
     private final EventExecutorChooserFactory.EventExecutorChooser chooser;
 
     /**
@@ -140,7 +143,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
             }
         }
 
-        // 实例化一个新的选择器
+        // 实例化一个新的事件选择器
         chooser = chooserFactory.newChooser(children);
 
         // 创建终止监听者
@@ -174,6 +177,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
 
     @Override
     public EventExecutor next() {
+        // 从事件执行器选择器中选择一个
         return chooser.next();
     }
 

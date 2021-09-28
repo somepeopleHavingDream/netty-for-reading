@@ -15,18 +15,7 @@
  */
 package io.netty.bootstrap;
 
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelConfig;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.ServerChannel;
+import io.netty.channel.*;
 import io.netty.util.AttributeKey;
 import io.netty.util.internal.ObjectUtil;
 import io.netty.util.internal.logging.InternalLogger;
@@ -65,6 +54,9 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
      */
     private volatile EventLoopGroup childGroup;
 
+    /**
+     * 子处理者
+     */
     private volatile ChannelHandler childHandler;
 
     public ServerBootstrap() { }
@@ -177,22 +169,33 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
     @Override
     void init(Channel channel) {
+        // 设置通道选项（一般是空的）
         setChannelOptions(channel, newOptionsArray(), logger);
+        // 设置属性（一般是空的）
         setAttributes(channel, newAttributesArray());
 
+        // 获得通道流水线
         ChannelPipeline p = channel.pipeline();
 
+        // 当前子事件循环组
         final EventLoopGroup currentChildGroup = childGroup;
+        // 当前子处理者（一般是匿名类实现）
         final ChannelHandler currentChildHandler = childHandler;
+        // 当前的子选项数组
         final Entry<ChannelOption<?>, Object>[] currentChildOptions = newOptionsArray(childOptions);
+        // 当前子属性数组
         final Entry<AttributeKey<?>, Object>[] currentChildAttrs = newAttributesArray(childAttrs);
 
         p.addLast(new ChannelInitializer<Channel>() {
             @Override
             public void initChannel(final Channel ch) {
+                // 获得通道流水线
                 final ChannelPipeline pipeline = ch.pipeline();
+
+                // 通道处理者
                 ChannelHandler handler = config.handler();
                 if (handler != null) {
+                    // 如果通道处理者不为null，则添加至流水线的最后
                     pipeline.addLast(handler);
                 }
 
