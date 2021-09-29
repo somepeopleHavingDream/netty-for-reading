@@ -40,7 +40,12 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     private static final int ST_NOT_STARTED = 1;
     private static final int ST_STARTED = 2;
     private static final int ST_SHUTTING_DOWN = 3;
+
+    /**
+     * 单线程事件执行器-关闭
+     */
     private static final int ST_SHUTDOWN = 4;
+
     private static final int ST_TERMINATED = 5;
 
     private static final Runnable NOOP_TASK = new Runnable() {
@@ -50,8 +55,12 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         }
     };
 
+    /**
+     * 当前单线程事件执行器的状态更新器
+     */
     private static final AtomicIntegerFieldUpdater<SingleThreadEventExecutor> STATE_UPDATER =
             AtomicIntegerFieldUpdater.newUpdater(SingleThreadEventExecutor.class, "state");
+
     private static final AtomicReferenceFieldUpdater<SingleThreadEventExecutor, ThreadProperties> PROPERTIES_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(
                     SingleThreadEventExecutor.class, ThreadProperties.class, "threadProperties");
@@ -76,6 +85,9 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
 
     private long lastExecutionTime;
 
+    /**
+     * 当前单线程事件执行器的状态，初始值为未开始
+     */
     @SuppressWarnings({ "FieldMayBeFinal", "unused" })
     private volatile int state = ST_NOT_STARTED;
 
@@ -323,18 +335,34 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     /**
      * Add a task to the task queue, or throws a {@link RejectedExecutionException} if this instance was shutdown
      * before.
+     *
+     * 添加任务到任务队列，或者抛出拒绝执行异常，如果此实例之前已关闭。
      */
     protected void addTask(Runnable task) {
+        // 检查任务
         ObjectUtil.checkNotNull(task, "task");
+
+        // 如果提供任务失败，则拒绝此任务
         if (!offerTask(task)) {
+            // 拒绝任务（不细究）
             reject(task);
         }
     }
 
+    /**
+     * 提供任务
+     *
+     * @param task 任务
+     * @return 是否提供任务成功
+     */
     final boolean offerTask(Runnable task) {
+        // 如果单线程事件执行器已关闭，则拒绝任务
         if (isShutdown()) {
+            // 拒绝
             reject();
         }
+
+        // 往任务队列里提供任务
         return taskQueue.offer(task);
     }
 
@@ -797,7 +825,9 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
 
     @Override
     public void execute(Runnable task) {
+        // 检查入参可运行任务不为null
         ObjectUtil.checkNotNull(task, "task");
+        // 执行任务
         execute(task, !(task instanceof LazyRunnable) && wakesUpForTask(task));
     }
 
@@ -807,9 +837,14 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     }
 
     private void execute(Runnable task, boolean immediate) {
+        // 记录是否处于事件循环内
         boolean inEventLoop = inEventLoop();
+        // 添加任务
         addTask(task);
+
+        // 如果当前线程未处于事件循环中
         if (!inEventLoop) {
+            // 开启线程
             startThread();
             if (isShutdown()) {
                 boolean reject = false;
@@ -900,17 +935,24 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     /**
      * Can be overridden to control which tasks require waking the {@link EventExecutor} thread
      * if it is waiting so that they can be run immediately.
+     *
+     * 能够被覆写以控制哪个任务需要唤醒事件执行器线程，如果该线程一直处于等待，以让它们能够被马上运行。
      */
     protected boolean wakesUpForTask(Runnable task) {
         return true;
     }
 
+    /**
+     * 抛出拒绝执行异常
+     */
     protected static void reject() {
         throw new RejectedExecutionException("event executor terminated");
     }
 
     /**
      * Offers the task to the associated {@link RejectedExecutionHandler}.
+     *
+     * 将任务提供到与之关联的拒绝执行处理者。
      *
      * @param task to reject.
      */
@@ -922,11 +964,17 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
 
     private static final long SCHEDULE_PURGE_INTERVAL = TimeUnit.SECONDS.toNanos(1);
 
+    /**
+     * 开启线程
+     */
     private void startThread() {
+        // 如果当前单线程事件执行器还未开启
         if (state == ST_NOT_STARTED) {
+            // 设置当前单线程事件执行器的状态
             if (STATE_UPDATER.compareAndSet(this, ST_NOT_STARTED, ST_STARTED)) {
                 boolean success = false;
                 try {
+                    // 处理开启线程
                     doStartThread();
                     success = true;
                 } finally {
@@ -956,8 +1004,14 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         return false;
     }
 
+    /**
+     * 处理开启线程
+     */
     private void doStartThread() {
+        // 断言线程不为null
         assert thread == null;
+
+        // 执行器执行可运行任务
         executor.execute(new Runnable() {
             @Override
             public void run() {

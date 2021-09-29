@@ -179,6 +179,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         if (eventLoop == null) {
             throw new IllegalStateException("channel not registered to an event loop");
         }
+
+        // 返回当前的事件循环
         return eventLoop;
     }
 
@@ -449,7 +451,12 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         private volatile ChannelOutboundBuffer outboundBuffer = new ChannelOutboundBuffer(AbstractChannel.this);
         private RecvByteBufAllocator.Handle recvHandle;
         private boolean inFlush0;
-        /** true if the channel has never been registered, false otherwise */
+
+        /**
+         * true if the channel has never been registered, false otherwise
+         *
+         * 如果通道还未被注册，则为真，否则为假
+         */
         private boolean neverRegistered = true;
 
         private void assertEventLoop() {
@@ -535,11 +542,14 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             try {
                 // check if the channel is still open as it could be closed in the mean time when the register
                 // call was outside of the eventLoop
-                // 检查通道是否仍然是打开的，因为在注册调用在事件循环外面时可能会关闭该通道
+                // 检查通道是否仍然是打开的，因为注册调用在事件循环外面时可能会关闭该通道
                 if (!promise.setUncancellable() || !ensureOpen(promise)) {
                     return;
                 }
+
+                // 记录首次注册标记
                 boolean firstRegistration = neverRegistered;
+                // 做注册操作
                 doRegister();
                 neverRegistered = false;
                 registered = true;
@@ -1027,10 +1037,20 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             return unsafeVoidPromise;
         }
 
+        /**
+         * 确认通道是否打开
+         *
+         * @param promise 通道承诺
+         * @return 通道是否打开
+         */
         protected final boolean ensureOpen(ChannelPromise promise) {
             if (isOpen()) {
                 return true;
             }
+
+            /*
+                以下不细究
+             */
 
             safeSetFailure(promise, newClosedChannelException(initialCloseCause, "ensureOpen(ChannelPromise)"));
             return false;
@@ -1125,6 +1145,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     /**
      * Is called after the {@link Channel} is registered with its {@link EventLoop} as part of the register process.
+     *
+     * 在通道被注册后调用，该通道的事件循环作为注册过程中的一部分。
      *
      * Sub-classes may override this method
      */

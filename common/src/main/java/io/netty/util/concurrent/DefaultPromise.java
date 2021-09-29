@@ -40,7 +40,12 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
             AtomicReferenceFieldUpdater.newUpdater(DefaultPromise.class, Object.class, "result");
 
     private static final Object SUCCESS = new Object();
+
+    /**
+     * 不可取消
+     */
     private static final Object UNCANCELLABLE = new Object();
+
     private static final CauseHolder CANCELLATION_CAUSE_HOLDER = new CauseHolder(
             StacklessCancellationException.newInstance(DefaultPromise.class, "cancel(...)"));
     private static final StackTraceElement[] CANCELLATION_STACK = CANCELLATION_CAUSE_HOLDER.cause.getStackTrace();
@@ -130,6 +135,11 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
         if (RESULT_UPDATER.compareAndSet(this, null, UNCANCELLABLE)) {
             return true;
         }
+
+        /*
+            以下不细究
+         */
+
         Object result = this.result;
         return !isDone0(result) || !isCancelled0(result);
     }

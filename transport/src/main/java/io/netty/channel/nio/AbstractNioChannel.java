@@ -98,6 +98,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
 
     @Override
     public boolean isOpen() {
+        // 调用底层jdk的通道是否打开方法
         return ch.isOpen();
     }
 
@@ -106,6 +107,11 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         return (NioUnsafe) super.unsafe();
     }
 
+    /**
+     * 返回底层的jdk的可选通道
+     *
+     * @return 底层jdk的可选通道
+     */
     protected SelectableChannel javaChannel() {
         return ch;
     }
@@ -376,6 +382,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
 
     @Override
     protected void doRegister() throws Exception {
+        // 置已被选择标记为假
         boolean selected = false;
         for (;;) {
             try {

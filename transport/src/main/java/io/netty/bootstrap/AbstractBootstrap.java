@@ -315,6 +315,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
      * @return 通道未来
      */
     private ChannelFuture doBind(final SocketAddress localAddress) {
+        // 初始化和注册
         final ChannelFuture regFuture = initAndRegister();
         final Channel channel = regFuture.channel();
         if (regFuture.cause() != null) {
