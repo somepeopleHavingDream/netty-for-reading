@@ -483,23 +483,28 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         public final void register(EventLoop eventLoop, final ChannelPromise promise) {
             ObjectUtil.checkNotNull(eventLoop, "eventLoop");
 
-            // 如果已注册，则失败
+            // 如果已注册，则失败（不细究）
             if (isRegistered()) {
                 promise.setFailure(new IllegalStateException("registered to an event loop already"));
                 return;
             }
+            // 如果不兼容，则失败（不细究）
             if (!isCompatible(eventLoop)) {
                 promise.setFailure(
                         new IllegalStateException("incompatible event loop type: " + eventLoop.getClass().getName()));
                 return;
             }
 
+            // 获得当前事件循环
             AbstractChannel.this.eventLoop = eventLoop;
 
+            // 如果当前线程处在此事件循环中（不细究）
             if (eventLoop.inEventLoop()) {
                 register0(promise);
             } else {
+                // 当前线程不处于此事件循环中
                 try {
+                    // 向当前事件循环提交任务
                     eventLoop.execute(new Runnable() {
                         @Override
                         public void run() {
@@ -507,6 +512,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                         }
                     });
                 } catch (Throwable t) {
+                    /*
+                        以下不细究
+                     */
+
                     logger.warn(
                             "Force-closing a channel whose registration task was not accepted by an event loop: {}",
                             AbstractChannel.this, t);
@@ -517,10 +526,16 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             }
         }
 
+        /**
+         * 注册
+         *
+         * @param promise 承诺
+         */
         private void register0(ChannelPromise promise) {
             try {
                 // check if the channel is still open as it could be closed in the mean time when the register
                 // call was outside of the eventLoop
+                // 检查通道是否仍然是打开的，因为在注册调用在事件循环外面时可能会关闭该通道
                 if (!promise.setUncancellable() || !ensureOpen(promise)) {
                     return;
                 }

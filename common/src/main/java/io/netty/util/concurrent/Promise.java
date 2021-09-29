@@ -59,6 +59,8 @@ public interface Promise<V> extends Future<V> {
     /**
      * Make this future impossible to cancel.
      *
+     * 让此未来无法取消。
+     *
      * @return {@code true} if and only if successfully marked this future as uncancellable or it is already done
      *         without being cancelled.  {@code false} if this future has been cancelled already.
      */
