@@ -23,9 +23,14 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * Allow to retrieve the {@link EventExecutor} for the calling {@link Thread}.
+ *
+ * 允许为调用线程取出一个事件执行器。
  */
 public final class ThreadExecutorMap {
 
+    /**
+     * 快速线程本地，存储了当前线程使用的事件执行器
+     */
     private static final FastThreadLocal<EventExecutor> mappings = new FastThreadLocal<EventExecutor>();
 
     private ThreadExecutorMap() { }
@@ -39,6 +44,8 @@ public final class ThreadExecutorMap {
 
     /**
      * Set the current {@link EventExecutor} that is used by the {@link Thread}.
+     *
+     * 设置当前被线程使用的事件执行器。
      */
     private static void setCurrentEventExecutor(EventExecutor executor) {
         mappings.set(executor);
@@ -47,10 +54,15 @@ public final class ThreadExecutorMap {
     /**
      * Decorate the given {@link Executor} and ensure {@link #currentExecutor()} will return {@code eventExecutor}
      * when called from within the {@link Runnable} during execution.
+     *
+     * 装饰给定执行器，并且确保当从执行时的可运行中调用时，当前执行器将返回事件执行器。
      */
     public static Executor apply(final Executor executor, final EventExecutor eventExecutor) {
+        // 检查入参执行器和事件执行器，executor一般是ThreadPerTaskExecutor实例，eventExecutor一般是NioEventLoop实例
         ObjectUtil.checkNotNull(executor, "executor");
         ObjectUtil.checkNotNull(eventExecutor, "eventExecutor");
+
+        // 实例化并且返回执行器
         return new Executor() {
             @Override
             public void execute(final Runnable command) {
@@ -62,13 +74,18 @@ public final class ThreadExecutorMap {
     /**
      * Decorate the given {@link Runnable} and ensure {@link #currentExecutor()} will return {@code eventExecutor}
      * when called from within the {@link Runnable} during execution.
+     *
+     * 装饰给定的可运行实例，并且确保当前执行器在执行期从可运行实例中调用时，将返回事件执行器。
      */
     public static Runnable apply(final Runnable command, final EventExecutor eventExecutor) {
+        // 检查可运行实例和时间执行器
         ObjectUtil.checkNotNull(command, "command");
         ObjectUtil.checkNotNull(eventExecutor, "eventExecutor");
+
         return new Runnable() {
             @Override
             public void run() {
+                // 设置当前事件执行器
                 setCurrentEventExecutor(eventExecutor);
                 try {
                     command.run();

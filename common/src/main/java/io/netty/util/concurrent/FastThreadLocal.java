@@ -122,9 +122,13 @@ public class FastThreadLocal<V> {
         variablesToRemove.remove(variable);
     }
 
+    /**
+     * 此快速线程本地在内部线程本地映射的索引表中的下标（该下标值绝对在索引表的范围内）
+     */
     private final int index;
 
     public FastThreadLocal() {
+        // 获得内部线程本地映射所分配的索引
         index = InternalThreadLocalMap.nextVariableIndex();
     }
 
@@ -186,9 +190,13 @@ public class FastThreadLocal<V> {
 
     /**
      * Set the value for the current thread.
+     *
+     * 为当前线程设置值
      */
     public final void set(V value) {
+        // 如果可以设置值
         if (value != InternalThreadLocalMap.UNSET) {
+            // 获得内部线程本地映射
             InternalThreadLocalMap threadLocalMap = InternalThreadLocalMap.get();
             setKnownNotUnset(threadLocalMap, value);
         } else {
@@ -211,7 +219,9 @@ public class FastThreadLocal<V> {
      * @see InternalThreadLocalMap#setIndexedVariable(int, Object).
      */
     private void setKnownNotUnset(InternalThreadLocalMap threadLocalMap, V value) {
+        // 如果内部线程本地映射设置索引变量成功
         if (threadLocalMap.setIndexedVariable(index, value)) {
+            // 添加到将要移除的变量
             addToVariablesToRemove(threadLocalMap, this);
         }
     }

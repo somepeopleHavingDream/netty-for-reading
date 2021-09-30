@@ -24,6 +24,7 @@ public final class ThreadPerTaskExecutor implements Executor {
     private final ThreadFactory threadFactory;
 
     public ThreadPerTaskExecutor(ThreadFactory threadFactory) {
+        // 检查并设置线程工厂
         this.threadFactory = ObjectUtil.checkNotNull(threadFactory, "threadFactory");
     }
 

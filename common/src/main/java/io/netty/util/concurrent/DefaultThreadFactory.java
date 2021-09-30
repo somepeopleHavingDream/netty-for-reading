@@ -25,15 +25,25 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A {@link ThreadFactory} implementation with a simple naming rule.
+ *
+ * 具有简单命名规则的线程工厂实现
  */
 public class DefaultThreadFactory implements ThreadFactory {
 
     private static final AtomicInteger poolId = new AtomicInteger();
 
+    /**
+     * 用于分配下一个线程的Id
+     */
     private final AtomicInteger nextId = new AtomicInteger();
+
     private final String prefix;
     private final boolean daemon;
     private final int priority;
+
+    /**
+     * 用于此线程工厂的线程组
+     */
     protected final ThreadGroup threadGroup;
 
     public DefaultThreadFactory(Class<?> poolType) {
@@ -91,13 +101,16 @@ public class DefaultThreadFactory implements ThreadFactory {
     }
 
     public DefaultThreadFactory(String poolName, boolean daemon, int priority, ThreadGroup threadGroup) {
+        // 检查线程池名
         ObjectUtil.checkNotNull(poolName, "poolName");
 
+        // 检查入参优先级
         if (priority < Thread.MIN_PRIORITY || priority > Thread.MAX_PRIORITY) {
             throw new IllegalArgumentException(
                     "priority: " + priority + " (expected: Thread.MIN_PRIORITY <= priority <= Thread.MAX_PRIORITY)");
         }
 
+        // 设置前缀、是否守护线程、优先级、线程组
         prefix = poolName + '-' + poolId.incrementAndGet() + '-';
         this.daemon = daemon;
         this.priority = priority;
@@ -110,21 +123,34 @@ public class DefaultThreadFactory implements ThreadFactory {
 
     @Override
     public Thread newThread(Runnable r) {
+        // 实例化一个线程
         Thread t = newThread(FastThreadLocalRunnable.wrap(r), prefix + nextId.incrementAndGet());
         try {
+            // 设置线程是否是守护线程
             if (t.isDaemon() != daemon) {
                 t.setDaemon(daemon);
             }
 
+            // 设置线程优先级
             if (t.getPriority() != priority) {
                 t.setPriority(priority);
             }
         } catch (Exception ignored) {
             // Doesn't matter even if failed to set.
+            // 即使设置失败也没关系。
         }
+
+        // 返回实例出来的线程
         return t;
     }
 
+    /**
+     * 实例化一个快速线程本地线程
+     *
+     * @param r 可运行实例
+     * @param name 线程名
+     * @return 线程
+     */
     protected Thread newThread(Runnable r, String name) {
         return new FastThreadLocalThread(threadGroup, r, name);
     }

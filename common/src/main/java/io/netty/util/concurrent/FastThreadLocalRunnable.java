@@ -33,6 +33,12 @@ final class FastThreadLocalRunnable implements Runnable {
         }
     }
 
+    /**
+     * 将可运行实例包装成快速线程本地可运行实例
+     *
+     * @param runnable 可运行实例
+     * @return 快速线程本地可运行实例
+     */
     static Runnable wrap(Runnable runnable) {
         return runnable instanceof FastThreadLocalRunnable ? runnable : new FastThreadLocalRunnable(runnable);
     }

@@ -101,6 +101,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
 
         // 如果执行器未指定，则实例化一个任务对应一个线程的执行器
         if (executor == null) {
+            // 实例化一个线程对应一个任务的执行器
             executor = new ThreadPerTaskExecutor(newDefaultThreadFactory());
         }
 
