@@ -362,6 +362,12 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         this.localChannelReaderStackDepth = localChannelReaderStackDepth;
     }
 
+    /**
+     * 该索引对应的索引变量
+     *
+     * @param index 索引
+     * @return 该索引对应的索引变量
+     */
     public Object indexedVariable(int index) {
         Object[] lookup = indexedVariables;
         return index < lookup.length? lookup[index] : UNSET;
@@ -370,7 +376,7 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
     /**
      * @return {@code true} if and only if a new thread-local variable has been created
      *
-     * 当且仅当已创建新的线程本地变量返回真
+     * 当且仅当已创建新的线程本地变量时返回真
      */
     public boolean setIndexedVariable(int index, Object value) {
         // 获得当前内部线程本地映射的索引变量表

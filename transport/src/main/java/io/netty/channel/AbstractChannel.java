@@ -515,6 +515,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                     eventLoop.execute(new Runnable() {
                         @Override
                         public void run() {
+                            // 注册
                             register0(promise);
                         }
                     });

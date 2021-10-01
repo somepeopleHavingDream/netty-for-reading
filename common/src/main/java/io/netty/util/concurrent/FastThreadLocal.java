@@ -43,6 +43,9 @@ import java.util.Set;
  */
 public class FastThreadLocal<V> {
 
+    /**
+     * 将被移除的变量索引
+     */
     private static final int variablesToRemoveIndex = InternalThreadLocalMap.nextVariableIndex();
 
     /**
@@ -96,15 +99,23 @@ public class FastThreadLocal<V> {
 
     @SuppressWarnings("unchecked")
     private static void addToVariablesToRemove(InternalThreadLocalMap threadLocalMap, FastThreadLocal<?> variable) {
+        // 获得将要移除位置的索引变量
         Object v = threadLocalMap.indexedVariable(variablesToRemoveIndex);
+
+        // 将被移除的快速线程本地集合
         Set<FastThreadLocal<?>> variablesToRemove;
+        // 如果该值为初始对象或者为null
         if (v == InternalThreadLocalMap.UNSET || v == null) {
+            // 实例化一个将被移除的变量集合
             variablesToRemove = Collections.newSetFromMap(new IdentityHashMap<FastThreadLocal<?>, Boolean>());
+            // 设置索引变量
             threadLocalMap.setIndexedVariable(variablesToRemoveIndex, variablesToRemove);
         } else {
+            // 强转为快速线程本地集合，并赋值为将被移除的快速线程本地集合
             variablesToRemove = (Set<FastThreadLocal<?>>) v;
         }
 
+        // 将被移除的快速线程本地集合添加入参快速线程本地实例
         variablesToRemove.add(variable);
     }
 
@@ -191,15 +202,20 @@ public class FastThreadLocal<V> {
     /**
      * Set the value for the current thread.
      *
-     * 为当前线程设置值
+     * 为当前线程设置值。
      */
     public final void set(V value) {
-        // 如果可以设置值
+        // 如果入参值是有效的
         if (value != InternalThreadLocalMap.UNSET) {
             // 获得内部线程本地映射
             InternalThreadLocalMap threadLocalMap = InternalThreadLocalMap.get();
+            // 设置已知的有效值
             setKnownNotUnset(threadLocalMap, value);
         } else {
+            /*
+                以下不细究
+             */
+
             remove();
         }
     }

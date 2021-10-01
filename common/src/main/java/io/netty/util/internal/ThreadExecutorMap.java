@@ -29,7 +29,7 @@ import java.util.concurrent.ThreadFactory;
 public final class ThreadExecutorMap {
 
     /**
-     * 快速线程本地，存储了当前线程使用的事件执行器
+     * 快速线程本地，存储了当前线程使用的事件执行器（该事件执行器一般为NioEventLoop）
      */
     private static final FastThreadLocal<EventExecutor> mappings = new FastThreadLocal<EventExecutor>();
 
@@ -66,6 +66,7 @@ public final class ThreadExecutorMap {
         return new Executor() {
             @Override
             public void execute(final Runnable command) {
+                // 申请并执行任务
                 executor.execute(apply(command, eventExecutor));
             }
         };
@@ -82,6 +83,7 @@ public final class ThreadExecutorMap {
         ObjectUtil.checkNotNull(command, "command");
         ObjectUtil.checkNotNull(eventExecutor, "eventExecutor");
 
+        // 实例化并返回一个可运行实例
         return new Runnable() {
             @Override
             public void run() {
