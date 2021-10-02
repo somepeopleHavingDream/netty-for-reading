@@ -880,6 +880,11 @@ final class PlatformDependent0 {
         }
     }
 
+    /**
+     * 获得系统类加载器
+     *
+     * @return 类加载器
+     */
     static ClassLoader getSystemClassLoader() {
         if (System.getSecurityManager() == null) {
             return ClassLoader.getSystemClassLoader();

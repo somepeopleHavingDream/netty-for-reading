@@ -26,6 +26,8 @@ import java.util.Map;
 
 /**
  * Exposes the configuration of a {@link ServerBootstrapConfig}.
+ *
+ * 暴露服务引导配置的配置。
  */
 public final class ServerBootstrapConfig extends AbstractBootstrapConfig<ServerBootstrap, ServerChannel> {
 

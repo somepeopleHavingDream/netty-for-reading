@@ -1031,6 +1031,8 @@ public final class PlatformDependent {
 
     /**
      * Return the system {@link ClassLoader}.
+     *
+     * 返回系统类加载器。
      */
     public static ClassLoader getSystemClassLoader() {
         return PlatformDependent0.getSystemClassLoader();

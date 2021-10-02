@@ -60,7 +60,12 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     private volatile SocketAddress localAddress;
     private volatile SocketAddress remoteAddress;
+
+    /**
+     * 用于当前通道的事件循环
+     */
     private volatile EventLoop eventLoop;
+
     private volatile boolean registered;
     private boolean closeInitiated;
     private Throwable initialCloseCause;
@@ -82,6 +87,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         this.parent = parent;
         id = newId();
         unsafe = newUnsafe();
+        // 实例化一个通道流水线
         pipeline = newChannelPipeline();
     }
 
@@ -175,6 +181,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     @Override
     public EventLoop eventLoop() {
+        // 拿到当前事件循环
         EventLoop eventLoop = this.eventLoop;
         if (eventLoop == null) {
             throw new IllegalStateException("channel not registered to an event loop");
@@ -502,7 +509,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 return;
             }
 
-            // 获得当前事件循环
+            // 设置该通道的当前事件循环
             AbstractChannel.this.eventLoop = eventLoop;
 
             // 如果当前线程处在此事件循环中（不细究）
@@ -552,11 +559,17 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 boolean firstRegistration = neverRegistered;
                 // 做注册操作
                 doRegister();
+
+                // 修改状态标记
                 neverRegistered = false;
                 registered = true;
 
                 // Ensure we call handlerAdded(...) before we actually notify the promise. This is needed as the
                 // user may already fire events through the pipeline in the ChannelFutureListener.
+                /*
+                    在我们实际地通知承诺之前，确保我们调用被添加的处理者方法。
+                    这是被需要的，因为用户可能已经在通道未来监听者里通过流水线触发事件。
+                 */
                 pipeline.invokeHandlerAddedIfNeeded();
 
                 safeSetSuccess(promise);

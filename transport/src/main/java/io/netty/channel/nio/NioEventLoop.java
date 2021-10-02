@@ -49,6 +49,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
     private static final int CLEANUP_INTERVAL = 256; // XXX Hard-coded value, but won't need customization.
 
+    /**
+     * 禁用键集优化，默认为false
+     */
     private static final boolean DISABLE_KEY_SET_OPTIMIZATION =
             SystemPropertyUtil.getBoolean("io.netty.noKeySetOptimization", false);
 
@@ -101,7 +104,15 @@ public final class NioEventLoop extends SingleThreadEventLoop {
      * The NIO {@link Selector}.
      */
     private Selector selector;
+
+    /**
+     * 展开的选择器
+     */
     private Selector unwrappedSelector;
+
+    /**
+     * 选定的选择键集
+     */
     private SelectedSelectionKeySet selectedKeys;
 
     private final SelectorProvider provider;
@@ -174,7 +185,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     }
 
     /**
-     * 打开选择器（不细究）
+     * 打开选择器
      *
      * @return 选择器元祖
      */
@@ -187,9 +198,11 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
 
         if (DISABLE_KEY_SET_OPTIMIZATION) {
+            // 不细究
             return new SelectorTuple(unwrappedSelector);
         }
 
+        // 获得可能的选择器实现类实例（一般是系统类加载器）
         Object maybeSelectorImplClass = AccessController.doPrivileged(new PrivilegedAction<Object>() {
             @Override
             public Object run() {
@@ -204,6 +217,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             }
         });
 
+        // 该条件体不细究
         if (!(maybeSelectorImplClass instanceof Class) ||
             // ensure the current selector implementation is what we can instrument.
             !((Class<?>) maybeSelectorImplClass).isAssignableFrom(unwrappedSelector.getClass())) {
@@ -217,13 +231,16 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         final Class<?> selectorImplClass = (Class<?>) maybeSelectorImplClass;
         final SelectedSelectionKeySet selectedKeySet = new SelectedSelectionKeySet();
 
+        // 获得可能的异常
         Object maybeException = AccessController.doPrivileged(new PrivilegedAction<Object>() {
             @Override
             public Object run() {
                 try {
+                    // 分别拿到两个字段：selectedKeys、publicSelectedKeys
                     Field selectedKeysField = selectorImplClass.getDeclaredField("selectedKeys");
                     Field publicSelectedKeysField = selectorImplClass.getDeclaredField("publicSelectedKeys");
 
+                    // 此条件体不细究
                     if (PlatformDependent.javaVersion() >= 9 && PlatformDependent.hasUnsafe()) {
                         // Let us try to use sun.misc.Unsafe to replace the SelectionKeySet.
                         // This allows us to also do this in Java9+ without any extra flags.
@@ -241,6 +258,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                         // We could not retrieve the offset, lets try reflection as last-resort.
                     }
 
+                    // 分别设置两个字段为可访问权限
                     Throwable cause = ReflectionUtil.trySetAccessible(selectedKeysField, true);
                     if (cause != null) {
                         return cause;
@@ -250,6 +268,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                         return cause;
                     }
 
+                    // 给展开选择器的两个字段设值
                     selectedKeysField.set(unwrappedSelector, selectedKeySet);
                     publicSelectedKeysField.set(unwrappedSelector, selectedKeySet);
                     return null;
@@ -261,14 +280,19 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             }
         });
 
+        // 此条件体不细究
         if (maybeException instanceof Exception) {
             selectedKeys = null;
             Exception e = (Exception) maybeException;
             logger.trace("failed to instrument a special java.util.Set into: {}", unwrappedSelector, e);
             return new SelectorTuple(unwrappedSelector);
         }
+
+        // 设置已选键集
         selectedKeys = selectedKeySet;
         logger.trace("instrumented a special java.util.Set into: {}", unwrappedSelector);
+
+        // 返回选择器元祖
         return new SelectorTuple(unwrappedSelector,
                                  new SelectedSelectionKeySetSelector(unwrappedSelector, selectedKeySet));
     }
@@ -815,6 +839,11 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         return deadlineNanos < nextWakeupNanos.get();
     }
 
+    /**
+     * 返回原装选择器
+     *
+     * @return 原装选择器
+     */
     Selector unwrappedSelector() {
         return unwrappedSelector;
     }

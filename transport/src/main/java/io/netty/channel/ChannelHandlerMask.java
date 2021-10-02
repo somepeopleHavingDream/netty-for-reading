@@ -62,6 +62,9 @@ final class ChannelHandlerMask {
             MASK_CLOSE | MASK_DEREGISTER | MASK_READ | MASK_WRITE | MASK_FLUSH;
     private static final int MASK_ALL_OUTBOUND = MASK_EXCEPTION_CAUGHT | MASK_ONLY_OUTBOUND;
 
+    /**
+     * 快速线程本地，用于存储通道处理者的掩码
+     */
     private static final FastThreadLocal<Map<Class<? extends ChannelHandler>, Integer>> MASKS =
             new FastThreadLocal<Map<Class<? extends ChannelHandler>, Integer>>() {
                 @Override
@@ -72,21 +75,33 @@ final class ChannelHandlerMask {
 
     /**
      * Return the {@code executionMask}.
+     *
+     * 返回执行掩码。
      */
     static int mask(Class<? extends ChannelHandler> clazz) {
         // Try to obtain the mask from the cache first. If this fails calculate it and put it in the cache for fast
         // lookup in the future.
+        // 首先尝试从缓存中获取掩码。如果失败，则计算它并且将它放置到缓存里以用以未来快速查找。
+
+        // 首先从快速线程本地存储的通道处理者映射中拿到缓存的掩码值
         Map<Class<? extends ChannelHandler>, Integer> cache = MASKS.get();
         Integer mask = cache.get(clazz);
+
+        // 如果缓存中没有该掩码值则生成一个掩码值，放置到缓存中
         if (mask == null) {
+            // 生成一个掩码值（不细究），放置到缓存中
             mask = mask0(clazz);
             cache.put(clazz, mask);
         }
+
+        // 返回掩码值
         return mask;
     }
 
     /**
      * Calculate the {@code executionMask}.
+     *
+     * 计算执行掩码。
      */
     private static int mask0(Class<? extends ChannelHandler> handlerType) {
         int mask = MASK_EXCEPTION_CAUGHT;

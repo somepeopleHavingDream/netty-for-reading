@@ -78,6 +78,8 @@ public abstract class AbstractBootstrapConfig<B extends AbstractBootstrap<B, C>,
 
     /**
      * Returns the configured {@link EventLoopGroup} or {@code null} if non is configured yet.
+     *
+     * 返回配置的事件循环组或者null，如果还未配置的话。
      */
     @SuppressWarnings("deprecation")
     public final EventLoopGroup group() {

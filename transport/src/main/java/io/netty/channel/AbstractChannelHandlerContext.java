@@ -64,6 +64,9 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
     volatile AbstractChannelHandlerContext next;
     volatile AbstractChannelHandlerContext prev;
 
+    /**
+     * 处理者状态更新器
+     */
     private static final AtomicIntegerFieldUpdater<AbstractChannelHandlerContext> HANDLER_STATE_UPDATER =
             AtomicIntegerFieldUpdater.newUpdater(AbstractChannelHandlerContext.class, "handlerState");
 
@@ -75,8 +78,11 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
      * {@link ChannelHandler#handlerAdded(ChannelHandlerContext)} was called.
      */
     private static final int ADD_COMPLETE = 2;
+
     /**
      * {@link ChannelHandler#handlerRemoved(ChannelHandlerContext)} was called.
+     *
+     * 处理者移除方法被调用。
      */
     private static final int REMOVE_COMPLETE = 3;
     /**
@@ -99,15 +105,21 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
     // There is no need to make this volatile as at worse it will just create a few more instances then needed.
     private Tasks invokeTasks;
 
+    /**
+     * 处理者状态，初始值为INIT
+     */
     private volatile int handlerState = INIT;
 
     AbstractChannelHandlerContext(DefaultChannelPipeline pipeline, EventExecutor executor,
                                   String name, Class<? extends ChannelHandler> handlerClass) {
+        // 设置通道处理者上下文的名称、流水线、执行器、执行掩码
         this.name = ObjectUtil.checkNotNull(name, "name");
         this.pipeline = pipeline;
         this.executor = executor;
         this.executionMask = mask(handlerClass);
+
         // Its ordered if its driven by the EventLoop or the given Executor is an instanceof OrderedEventExecutor.
+        // 如果事件循环或者给定执行器是顺序事件执行器的实例来驱动它，则是顺序的。
         ordered = executor == null || executor instanceof OrderedEventExecutor;
     }
 
@@ -911,16 +923,29 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         handlerState = REMOVE_COMPLETE;
     }
 
+    /**
+     * 设置添加完成
+     *
+     * @return 是否设置添加完成成功
+     */
     final boolean setAddComplete() {
         for (;;) {
+            // 获得现在的处理者状态
             int oldState = handlerState;
+            // 如果处理者已被移除，则返回假
             if (oldState == REMOVE_COMPLETE) {
                 return false;
             }
+
             // Ensure we never update when the handlerState is REMOVE_COMPLETE already.
             // oldState is usually ADD_PENDING but can also be REMOVE_COMPLETE when an EventExecutor is used that is not
             // exposing ordering guarantees.
+            /*
+                当处理者状态已经是移除完成，确保我们不更新。
+                旧的状态通常是添加待办中，但是也可以是移除完成，当使用的事件执行器不保证公开有序时。
+             */
             if (HANDLER_STATE_UPDATER.compareAndSet(this, oldState, ADD_COMPLETE)) {
+                // 如果更改状态为添加完成成功，则返回真
                 return true;
             }
         }

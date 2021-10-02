@@ -44,7 +44,14 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultChannelPipeline.class);
 
+    /**
+     * 头名
+     */
     private static final String HEAD_NAME = generateName0(HeadContext.class);
+
+    /**
+     * 尾名
+     */
     private static final String TAIL_NAME = generateName0(TailContext.class);
 
     private static final FastThreadLocal<Map<Class<?>, String>> nameCaches =
@@ -92,13 +99,12 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         succeededFuture = new SucceededChannelFuture(channel, null);
         voidPromise =  new VoidChannelPromise(channel, true);
 
-        /*
-            一个链表（不细究）
-         */
-
+        // 实例化一个尾上下文，并让流水线的尾指针指向它
         tail = new TailContext(this);
+        // 实例化一个头上下文，并让流水线的头指针指向它
         head = new HeadContext(this);
 
+        // 通道处理者上下文构成一个循环链表
         head.next = tail;
         tail.prev = head;
     }
@@ -410,6 +416,12 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         return name;
     }
 
+    /**
+     * 生成一个名称
+     *
+     * @param handlerType 处理者类型
+     * @return 名称
+     */
     private static String generateName0(Class<?> handlerType) {
         return StringUtil.simpleClassName(handlerType) + "#0";
     }
@@ -1249,6 +1261,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         TailContext(DefaultChannelPipeline pipeline) {
             super(pipeline, null, TAIL_NAME, TailContext.class);
+            // 设置添加完成
             setAddComplete();
         }
 
@@ -1312,7 +1325,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         HeadContext(DefaultChannelPipeline pipeline) {
             super(pipeline, null, HEAD_NAME, HeadContext.class);
+            // 设置unsafe对象
             unsafe = pipeline.channel().unsafe();
+            // 设置添加完成
             setAddComplete();
         }
 
