@@ -19,11 +19,15 @@ import io.netty.util.concurrent.EventExecutor;
 
 final class DefaultChannelHandlerContext extends AbstractChannelHandlerContext {
 
+    /**
+     * 用于该默认通道处理者上下文的通道处理者
+     */
     private final ChannelHandler handler;
 
     DefaultChannelHandlerContext(
             DefaultChannelPipeline pipeline, EventExecutor executor, String name, ChannelHandler handler) {
         super(pipeline, executor, name, handler.getClass());
+        // 设置通道处理者
         this.handler = handler;
     }
 

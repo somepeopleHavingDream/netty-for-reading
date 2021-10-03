@@ -570,6 +570,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                     在我们实际地通知承诺之前，确保我们调用被添加的处理者方法。
                     这是被需要的，因为用户可能已经在通道未来监听者里通过流水线触发事件。
                  */
+                // 调用添加处理者，如果有必要的话
                 pipeline.invokeHandlerAddedIfNeeded();
 
                 safeSetSuccess(promise);

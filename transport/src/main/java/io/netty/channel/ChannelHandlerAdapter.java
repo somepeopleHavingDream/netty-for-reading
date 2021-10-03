@@ -27,6 +27,7 @@ import java.util.Map;
 public abstract class ChannelHandlerAdapter implements ChannelHandler {
 
     // Not using volatile because it's used only for a sanity check.
+    // 不使用易变关键字，因为它只被用作健全检查。
     boolean added;
 
     /**
@@ -41,6 +42,8 @@ public abstract class ChannelHandlerAdapter implements ChannelHandler {
     /**
      * Return {@code true} if the implementation is {@link Sharable} and so can be added
      * to different {@link ChannelPipeline}s.
+     *
+     * 如果实现是共享的，则返回真，以便能添加到不同的通道流水线里。
      */
     public boolean isSharable() {
         /**
@@ -51,13 +54,19 @@ public abstract class ChannelHandlerAdapter implements ChannelHandler {
          *
          * See <a href="https://github.com/netty/netty/issues/2289">#2289</a>.
          */
+
+        // 获得通道处理者适配者的类对象
         Class<?> clazz = getClass();
+        // 获得共享处理者缓存
         Map<Class<?>, Boolean> cache = InternalThreadLocalMap.get().handlerSharableCache();
+        // 获悉该处理者是否是可共享的
         Boolean sharable = cache.get(clazz);
         if (sharable == null) {
+            // 如果缓存没有记录，则看该类是否有被可共享注解标注，如果有则放置进缓存中
             sharable = clazz.isAnnotationPresent(Sharable.class);
             cache.put(clazz, sharable);
         }
+        // 返回该处理者是否可共享
         return sharable;
     }
 

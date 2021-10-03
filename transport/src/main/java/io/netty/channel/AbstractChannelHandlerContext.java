@@ -98,6 +98,10 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
 
     // Will be set to null if no child executor should be used, otherwise it will be set to the
     // child executor.
+
+    /**
+     * 如果没有子执行器应该被使用，将被设置为null，否则它将被设置为子执行器。
+     */
     final EventExecutor executor;
     private ChannelFuture succeededFuture;
 
@@ -140,6 +144,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
 
     @Override
     public EventExecutor executor() {
+        // 如果当前通道处理者上下文的执行器不存在，则返回该通道的事件循环，否则就直接返回
         if (executor == null) {
             return channel().eventLoop();
         } else {
@@ -951,15 +956,27 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         }
     }
 
+    /**
+     * 设置添加待办状态
+     */
     final void setAddPending() {
+        // 将通道处理者上下文的状态从初始化改为添加待办
         boolean updated = HANDLER_STATE_UPDATER.compareAndSet(this, INIT, ADD_PENDING);
+
+        // 断言：这应该总是真，因为它必须在设置添加完成或者设置移除之前被调用。
         assert updated; // This should always be true as it MUST be called before setAddComplete() or setRemoved().
     }
 
     final void callHandlerAdded() throws Exception {
         // We must call setAddComplete before calling handlerAdded. Otherwise if the handlerAdded method generates
         // any pipeline events ctx.handler() will miss them because the state will not allow it.
+        /*
+            我们必须在调用添加处理者之前调用设置添加完成。
+            否则，如果添加通道方法生成任务流水线事件，通道处理者上下文将丢失它们，因为状态不允许。
+         */
+        // 设置添加完成
         if (setAddComplete()) {
+            // 如果设置添加完成，则获得该通道处理者，执行添加处理者方法
             handler().handlerAdded(this);
         }
     }

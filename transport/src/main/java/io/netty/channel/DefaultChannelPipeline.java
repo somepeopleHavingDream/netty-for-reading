@@ -54,6 +54,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
      */
     private static final String TAIL_NAME = generateName0(TailContext.class);
 
+    /**
+     * 名称缓存
+     */
     private static final FastThreadLocal<Map<Class<?>, String>> nameCaches =
             new FastThreadLocal<Map<Class<?>, String>>() {
         @Override
@@ -75,21 +78,35 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     private Map<EventExecutorGroup, EventExecutor> childExecutors;
     private volatile MessageSizeEstimator.Handle estimatorHandle;
+
+    /**
+     * 是否是首次注册
+     */
     private boolean firstRegistration = true;
 
     /**
      * This is the head of a linked list that is processed by {@link #callHandlerAddedForAllHandlers()} and so process
      * all the pending {@link #callHandlerAdded0(AbstractChannelHandlerContext)}.
      *
+     * 这是一个链表的头部。
+     * 该链表由对于所有处理者调用添加处理者方法所处理。
+     * 并且以处理所有待办。
+     *
      * We only keep the head because it is expected that the list is used infrequently and its size is small.
      * Thus full iterations to do insertions is assumed to be a good compromised to saving memory and tail management
      * complexity.
+     *
+     * 我们仅保持头部，因为预期链表会被很少地使用，并且它的大小也是小的。
+     * 因为对插入的全迭代被认为是对保存内存和尾部管理复杂性的好的妥协。
      */
     private PendingHandlerCallback pendingHandlerCallbackHead;
 
     /**
      * Set to {@code true} once the {@link AbstractChannel} is registered.Once set to {@code true} the value will never
      * change.
+     *
+     * 一旦抽象通道被注册，就设置成真。
+     * 一旦设置成真，此值将不再会改变。
      */
     private boolean registered;
 
@@ -124,14 +141,34 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         return touch ? ReferenceCountUtil.touch(msg, next) : msg;
     }
 
+    /**
+     * 实例化一个通道处理者上下文
+     *
+     * @param group 事件执行器组
+     * @param name 通道处理者名称
+     * @param handler 通道处理者
+     * @return 通道处理者上下文
+     */
     private AbstractChannelHandlerContext newContext(EventExecutorGroup group, String name, ChannelHandler handler) {
+        // 实例化并返回默认通道处理者上下文
         return new DefaultChannelHandlerContext(this, childExecutor(group), name, handler);
     }
 
+    /**
+     * 子执行器
+     *
+     * @param group 事件执行器组
+     * @return 事件执行器
+     */
     private EventExecutor childExecutor(EventExecutorGroup group) {
         if (group == null) {
             return null;
         }
+
+        /*
+            以下不细究
+         */
+
         Boolean pinEventExecutor = channel.config().getOption(ChannelOption.SINGLE_EVENTEXECUTOR_PER_GROUP);
         if (pinEventExecutor != null && !pinEventExecutor) {
             return group.next();
@@ -205,34 +242,62 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelPipeline addLast(EventExecutorGroup group, String name, ChannelHandler handler) {
+        // 新的通道处理者上下文
         final AbstractChannelHandlerContext newCtx;
+
+        // 锁住当前实例
         synchronized (this) {
+            // 检查多样性
             checkMultiplicity(handler);
 
+            // 实例一个上下文
             newCtx = newContext(group, filterName(name, handler), handler);
 
+            // 实际地添加到流水线末尾的操作
             addLast0(newCtx);
 
             // If the registered is false it means that the channel was not registered on an eventLoop yet.
             // In this case we add the context to the pipeline and add a task that will call
             // ChannelHandler.handlerAdded(...) once the channel is registered.
+
+            /*
+                如果注册标记是假，说明通道至今还未在事件循环上被注册。
+                在这种情况下，我们将上下文添加到流水线，并且添加一个任务，该任务将调用通道处理者的添加处理者方法，一旦通道被注册。
+             */
+            // 如果还没有通道被注册到该流水线
             if (!registered) {
+                // 通道处理者上下文状态设置为添加待办
                 newCtx.setAddPending();
+                // 调用处理者之后回调方法
                 callHandlerCallbackLater(newCtx, true);
+                // 返回当前默认通道流水线
                 return this;
             }
 
+            // 如果至少有个通道已被注册到流水线上，则拿到该通道处理者上下文的事件执行器
             EventExecutor executor = newCtx.executor();
+            // 如果该执行器不处于事件循环之中，则需要做一些处理
             if (!executor.inEventLoop()) {
+                /*
+                    以下不细究
+                 */
                 callHandlerAddedInEventLoop(newCtx, executor);
                 return this;
             }
         }
+
+        // 调用添加处理者方法
         callHandlerAdded0(newCtx);
         return this;
     }
 
+    /**
+     * 将通道处理者上下文添加到流水线末尾
+     *
+     * @param newCtx 通道处理者上下文
+     */
     private void addLast0(AbstractChannelHandlerContext newCtx) {
+        // 获得最后一个通道处理者上下文，将新的通道处理者上下文链接到最后
         AbstractChannelHandlerContext prev = tail.prev;
         newCtx.prev = prev;
         newCtx.next = tail;
@@ -285,10 +350,20 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         ctx.prev = newCtx;
     }
 
+    /**
+     * 过滤者名称
+     *
+     * @param name 入参名称
+     * @param handler 通道处理者
+     * @return 过滤者名称
+     */
     private String filterName(String name, ChannelHandler handler) {
+        // 如果入参名为空，则生成名称
         if (name == null) {
             return generateName(handler);
         }
+
+        // 检查是否有重复的处理者名称，如果没有则返回处理者名称
         checkDuplicateName(name);
         return name;
     }
@@ -375,6 +450,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelPipeline addLast(ChannelHandler... handlers) {
+        // 将入参通道处理者添加到通道流水线的尾部
         return addLast(null, handlers);
     }
 
@@ -382,20 +458,33 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     public final ChannelPipeline addLast(EventExecutorGroup executor, ChannelHandler... handlers) {
         ObjectUtil.checkNotNull(handlers, "handlers");
 
+        // 依次添加到尾部
         for (ChannelHandler h: handlers) {
             if (h == null) {
                 break;
             }
+            // 添加到流水线尾部
             addLast(executor, null, h);
         }
 
         return this;
     }
 
+    /**
+     * 生成名称
+     *
+     * @param handler 通道处理者
+     * @return 通道处理者名称
+     */
     private String generateName(ChannelHandler handler) {
+        // 拿到名称映射
         Map<Class<?>, String> cache = nameCaches.get();
+        // 通道处理者的类对象
         Class<?> handlerType = handler.getClass();
+        // 通过通道处理者的类对象拿到通道处理者名称
         String name = cache.get(handlerType);
+
+        // 如果缓存中的通道处理者名称为null，则生成一个新的通道处理者名称，并放置进缓存
         if (name == null) {
             name = generateName0(handlerType);
             cache.put(handlerType, name);
@@ -403,7 +492,16 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         // It's not very likely for a user to put more than one handler of the same type, but make sure to avoid
         // any name conflicts.  Note that we don't cache the names generated here.
+
+        /*
+            对于用户，不是太有可能放置一种类型的多个处理者，但是为了确保避免命名冲突。
+            注意，在这我们不缓存生成的命名。
+         */
+        // 如果通道处理者上下文不为null
         if (context0(name) != null) {
+            /*
+                以下不细究
+             */
             String baseName = name.substring(0, name.length() - 1); // Strip the trailing '0'.
             for (int i = 1;; i ++) {
                 String newName = baseName + i;
@@ -413,6 +511,8 @@ public class DefaultChannelPipeline implements ChannelPipeline {
                 }
             }
         }
+
+        // 返回生成的处理者名称
         return name;
     }
 
@@ -606,20 +706,37 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         oldCtx.next = newCtx;
     }
 
+    /**
+     * 检查多样性
+     *
+     * @param handler 通道处理者
+     */
     private static void checkMultiplicity(ChannelHandler handler) {
+        // 如果入参通道处理者是通道处理者适配者实例
         if (handler instanceof ChannelHandlerAdapter) {
+            // 将入参通道处理者强转为通道处理者适配者
             ChannelHandlerAdapter h = (ChannelHandlerAdapter) handler;
+
+            // 如果该通道处理适配者既不是可共享的，也已经被添加过了，则抛出通道流水线异常
             if (!h.isSharable() && h.added) {
                 throw new ChannelPipelineException(
                         h.getClass().getName() +
                         " is not a @Sharable handler, so can't be added or removed multiple times.");
             }
+
+            // 修改该通道处理者为已添加
             h.added = true;
         }
     }
 
+    /**
+     * 调用添加处理者
+     *
+     * @param ctx 通道处理者上下文
+     */
     private void callHandlerAdded0(final AbstractChannelHandlerContext ctx) {
         try {
+            // 通道处理者上下文调用添加处理者
             ctx.callHandlerAdded();
         } catch (Throwable t) {
             boolean removed = false;
@@ -655,12 +772,25 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
     }
 
+    /**
+     * 调用添加处理者方法，如果有必要的话
+     */
     final void invokeHandlerAddedIfNeeded() {
+        // 断言该通道的事件循环处于事件循环中（看当前线程是否是事件循环的线程）
         assert channel.eventLoop().inEventLoop();
+
+        // 如果是首次注册
         if (firstRegistration) {
+            // 修改首次注册标记
             firstRegistration = false;
+
             // We are now registered to the EventLoop. It's time to call the callbacks for the ChannelHandlers,
             // that were added before the registration was done.
+            /*
+                我们现在被注册到事件循环里。
+                是时候去调用通道处理者的回调，这些回调是在注册完成之前被添加的。
+             */
+            // 对于所有处理者，调用添加处理者方法
             callHandlerAddedForAllHandlers();
         }
     }
@@ -1064,13 +1194,25 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         return voidPromise;
     }
 
+    /**
+     * 检查是否有重复的处理者名称
+     *
+     * @param name 处理者名称
+     */
     private void checkDuplicateName(String name) {
         if (context0(name) != null) {
             throw new IllegalArgumentException("Duplicate handler name: " + name);
         }
     }
 
+    /**
+     * 通过名称，返回通道处理者上下文
+     *
+     * @param name 通道处理者名称
+     * @return 通道处理者上下文
+     */
     private AbstractChannelHandlerContext context0(String name) {
+        // 依次遍历通道处理者上下文，如果有同名的通道处理者上下文，则返回该通道处理者上下文
         AbstractChannelHandlerContext context = head.next;
         while (context != tail) {
             if (context.name().equals(name)) {
@@ -1108,12 +1250,20 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
     }
 
+    /**
+     * 对于所有处理者，调用添加处理者方法
+     */
     private void callHandlerAddedForAllHandlers() {
+        // 待办处理者回调头部
         final PendingHandlerCallback pendingHandlerCallbackHead;
+
+        // 锁住当前实例
         synchronized (this) {
+            // 断言
             assert !registered;
 
             // This Channel itself was registered.
+            // 注册此通道本身
             registered = true;
 
             pendingHandlerCallbackHead = this.pendingHandlerCallbackHead;
@@ -1131,15 +1281,27 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
     }
 
+    /**
+     * 调用处理者之后回调方法
+     *
+     * @param ctx 通道处理者上下文
+     * @param added 是否有通道被添加
+     */
     private void callHandlerCallbackLater(AbstractChannelHandlerContext ctx, boolean added) {
+        // 断言：流水线上还未有通道被注册上去
         assert !registered;
 
+        // 生成待办处理者任务（添加的任务或删除的任务）
         PendingHandlerCallback task = added ? new PendingHandlerAddedTask(ctx) : new PendingHandlerRemovedTask(ctx);
+        // 首个待办处理者回调
         PendingHandlerCallback pending = pendingHandlerCallbackHead;
+
+        // 如果首个待办处理者回调为null，则设置首个待办处理者回调为当前任务，否则插入到待办处理者回调链的尾部
         if (pending == null) {
             pendingHandlerCallbackHead = task;
         } else {
             // Find the tail of the linked-list.
+            // 找到链表的尾部
             while (pending.next != null) {
                 pending = pending.next;
             }

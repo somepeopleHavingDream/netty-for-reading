@@ -50,6 +50,10 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
     private static final int DEFAULT_ARRAY_LIST_INITIAL_CAPACITY = 8;
     private static final int STRING_BUILDER_INITIAL_SIZE;
     private static final int STRING_BUILDER_MAX_SIZE;
+
+    /**
+     * 共享处理者缓存的初始容量
+     */
     private static final int HANDLER_SHARABLE_CACHE_INITIAL_CAPACITY = 4;
 
     /**
@@ -345,12 +349,21 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         this.counterHashCode = counterHashCode;
     }
 
+    /**
+     * 共享处理者缓存
+     *
+     * @return 共享处理者缓存
+     */
     public Map<Class<?>, Boolean> handlerSharableCache() {
+        // 获得共享处理者缓存
         Map<Class<?>, Boolean> cache = handlerSharableCache;
         if (cache == null) {
             // Start with small capacity to keep memory overhead as low as possible.
+            // 如果缓存为null，以小容量开始，以保证尽可能低的内存开销。
             handlerSharableCache = cache = new WeakHashMap<Class<?>, Boolean>(HANDLER_SHARABLE_CACHE_INITIAL_CAPACITY);
         }
+
+        // 返回共享处理者缓存
         return cache;
     }
 
