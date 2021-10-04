@@ -75,7 +75,13 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
     private Object[] indexedVariables;
 
     // Core thread-locals
+    // 核心线程本地
+
+    /**
+     * 未来监听者栈深度
+     */
     private int futureListenerStackDepth;
+
     private int localChannelReaderStackDepth;
     private Map<Class<?>, Boolean> handlerSharableCache;
     private IntegerHolder counterHashCode;
@@ -307,6 +313,11 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         return list;
     }
 
+    /**
+     * 未来监听者栈深度
+     *
+     * @return 未来监听者栈深度
+     */
     public int futureListenerStackDepth() {
         return futureListenerStackDepth;
     }

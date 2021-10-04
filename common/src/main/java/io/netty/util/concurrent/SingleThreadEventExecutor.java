@@ -74,7 +74,15 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
 
     @SuppressWarnings("unused")
     private volatile ThreadProperties threadProperties;
+
+    /**
+     * 当前单线程事件执行器
+     */
     private final Executor executor;
+
+    /**
+     * 当前单线程事件处理器是否被中断
+     */
     private volatile boolean interrupted;
 
     private final CountDownLatch threadLock = new CountDownLatch(1);
@@ -83,6 +91,9 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     private final int maxPendingTasks;
     private final RejectedExecutionHandler rejectedExecutionHandler;
 
+    /**
+     * 最后执行时间
+     */
     private long lastExecutionTime;
 
     /**
@@ -546,11 +557,14 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
      * checks.
      */
     protected void updateLastExecutionTime() {
+        // 更新最后的执行时间
         lastExecutionTime = ScheduledFutureTask.nanoTime();
     }
 
     /**
      * Run the tasks in the {@link #taskQueue}
+     *
+     * 在任务队列里运行任务
      */
     protected abstract void run();
 
@@ -848,6 +862,9 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         if (!inEventLoop) {
             // 开启线程
             startThread();
+            /*
+                以下不细究
+             */
             if (isShutdown()) {
                 boolean reject = false;
                 try {
@@ -1017,14 +1034,19 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         executor.execute(new Runnable() {
             @Override
             public void run() {
+                // 获得当前线程
                 thread = Thread.currentThread();
+                // 如果当前单线程事件处理器被中断，则中断该线程
                 if (interrupted) {
                     thread.interrupt();
                 }
 
                 boolean success = false;
+                // 更新最后执行时间
                 updateLastExecutionTime();
+
                 try {
+                    // 当前单线程事件执行器运行
                     SingleThreadEventExecutor.this.run();
                     success = true;
                 } catch (Throwable t) {

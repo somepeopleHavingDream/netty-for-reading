@@ -29,7 +29,7 @@ import java.util.concurrent.ThreadFactory;
 public final class ThreadExecutorMap {
 
     /**
-     * 快速线程本地，存储了当前线程使用的事件执行器（该事件执行器一般为NioEventLoop）
+     * 快速线程本地，存储了当前使用的事件执行器（该事件执行器一般为NioEventLoop）
      */
     private static final FastThreadLocal<EventExecutor> mappings = new FastThreadLocal<EventExecutor>();
 
@@ -45,7 +45,7 @@ public final class ThreadExecutorMap {
     /**
      * Set the current {@link EventExecutor} that is used by the {@link Thread}.
      *
-     * 设置当前被线程使用的事件执行器。
+     * 设置被当前线程使用的事件执行器。
      */
     private static void setCurrentEventExecutor(EventExecutor executor) {
         mappings.set(executor);

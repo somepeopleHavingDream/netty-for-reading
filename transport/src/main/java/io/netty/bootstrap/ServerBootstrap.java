@@ -47,6 +47,9 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
      */
     private final Map<AttributeKey<?>, Object> childAttrs = new ConcurrentHashMap<AttributeKey<?>, Object>();
 
+    /**
+     * 服务引导配置
+     */
     private final ServerBootstrapConfig config = new ServerBootstrapConfig(this);
 
     /**

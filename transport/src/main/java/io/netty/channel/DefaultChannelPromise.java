@@ -35,10 +35,13 @@ public class DefaultChannelPromise extends DefaultPromise<Void> implements Chann
     /**
      * Creates a new instance.
      *
+     * 创建一个新实例。
+     *
      * @param channel
      *        the {@link Channel} associated with this future
      */
     public DefaultChannelPromise(Channel channel) {
+        // 检查并设置通道
         this.channel = checkNotNull(channel, "channel");
     }
 

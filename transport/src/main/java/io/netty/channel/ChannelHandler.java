@@ -179,6 +179,8 @@ public interface ChannelHandler {
 
     /**
      * Gets called after the {@link ChannelHandler} was added to the actual context and it's ready to handle events.
+     *
+     * 在通道处理者被添加到实际的上下文之后，获得调用，并且准备去处理事件。
      */
     void handlerAdded(ChannelHandlerContext ctx) throws Exception;
 

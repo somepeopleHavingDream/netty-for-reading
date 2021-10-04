@@ -739,6 +739,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             // 通道处理者上下文调用添加处理者
             ctx.callHandlerAdded();
         } catch (Throwable t) {
+            /*
+                以下不细究
+             */
             boolean removed = false;
             try {
                 atomicRemoveFromHandlerList(ctx);
@@ -1257,7 +1260,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         // 待办处理者回调头部
         final PendingHandlerCallback pendingHandlerCallbackHead;
 
-        // 锁住当前实例
+        // 锁住当前实例，拿到待办处理者回调头部
         synchronized (this) {
             // 断言
             assert !registered;
@@ -1266,14 +1269,21 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             // 注册此通道本身
             registered = true;
 
+            // 获得待办处理者回调头部
             pendingHandlerCallbackHead = this.pendingHandlerCallbackHead;
             // Null out so it can be GC'ed.
+            // 清空以便可以gc结束。
             this.pendingHandlerCallbackHead = null;
         }
 
         // This must happen outside of the synchronized(...) block as otherwise handlerAdded(...) may be called while
         // holding the lock and so produce a deadlock if handlerAdded(...) will try to add another handler from outside
         // the EventLoop.
+        /*
+            这必须发生在同步块外面，因为当拥有锁的时候可能会调用添加处理者，因此如果添加处理者将尝试从事件循环外面添加另一个处理者，
+            将产生死锁。
+         */
+        // 执行待办处理者回调链
         PendingHandlerCallback task = pendingHandlerCallbackHead;
         while (task != null) {
             task.execute();
@@ -1622,6 +1632,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             this.ctx = ctx;
         }
 
+        /**
+         * 执行待办处理者回调
+         */
         abstract void execute();
     }
 
@@ -1638,10 +1651,16 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         void execute() {
+            // 获得当前待办处理者添加任务所在的默认通道流水线的执行器
             EventExecutor executor = ctx.executor();
+            // 如果该事件执行器处于事件循环之中
             if (executor.inEventLoop()) {
+                // 调用添加处理者
                 callHandlerAdded0(ctx);
             } else {
+                /*
+                    以下不细究
+                 */
                 try {
                     executor.execute(this);
                 } catch (RejectedExecutionException e) {

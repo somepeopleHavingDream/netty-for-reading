@@ -144,7 +144,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
 
     @Override
     public EventExecutor executor() {
-        // 如果当前通道处理者上下文的执行器不存在，则返回该通道的事件循环，否则就直接返回
+        // 如果当前通道处理者上下文的执行器不存在，则返回该通道的事件循环，否则就直接返回事件执行器
         if (executor == null) {
             return channel().eventLoop();
         } else {
@@ -976,7 +976,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
          */
         // 设置添加完成
         if (setAddComplete()) {
-            // 如果设置添加完成，则获得该通道处理者，执行添加处理者方法
+            // 如果设置添加完成成功，则获得该通道处理者，执行添加处理者方法
             handler().handlerAdded(this);
         }
     }

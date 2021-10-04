@@ -39,6 +39,9 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
     private static final AtomicReferenceFieldUpdater<DefaultPromise, Object> RESULT_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(DefaultPromise.class, Object.class, "result");
 
+    /**
+     * 代表计算成功的对象实例
+     */
     private static final Object SUCCESS = new Object();
 
     /**
@@ -50,7 +53,14 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
             StacklessCancellationException.newInstance(DefaultPromise.class, "cancel(...)"));
     private static final StackTraceElement[] CANCELLATION_STACK = CANCELLATION_CAUSE_HOLDER.cause.getStackTrace();
 
+    /**
+     * 当前承诺的结果
+     */
     private volatile Object result;
+
+    /**
+     * 当前承诺的事件执行器
+     */
     private final EventExecutor executor;
 
     /**
@@ -62,6 +72,9 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
      * 如果为null，则意味着，要么至今为止没有监听者被添加，要么所有的监听者都被通知。
      *
      * Threading - synchronized(this). We must support adding listeners when there is no EventExecutor.
+     *
+     * 线程的 - 同步块。
+     * 当没有事件执行器时，我们必须支持添加监听者。
      */
     private Object listeners;
 
@@ -76,6 +89,9 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
     /**
      * Threading - synchronized(this). We must prevent concurrent notification and FIFO listener notification if the
      * executor changes.
+     *
+     * 线程的 - 同步（当前对象）。
+     * 如果执行器改变，我们必须阻止并发通知并且先进先出的通知监听者。
      */
     private boolean notifyingListeners;
 
@@ -177,9 +193,13 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
     }
 
     private Throwable cause0(Object result) {
+        // 如果结果不是原因持有者，则返回null
         if (!(result instanceof CauseHolder)) {
             return null;
         }
+        /*
+            以下不细究
+         */
         if (result == CANCELLATION_CAUSE_HOLDER) {
             CancellationException ce = new LeanCancellationException();
             if (RESULT_UPDATER.compareAndSet(this, CANCELLATION_CAUSE_HOLDER, new CauseHolder(ce))) {
@@ -201,6 +221,7 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
             addListener0(listener);
         }
 
+        // 如果该承诺已经完成，则通知所有监听者
         if (isDone()) {
             notifyListeners();
         }
@@ -501,25 +522,40 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
                 checkNotNull(listener, "listener"));
     }
 
+    /**
+     * 通知监听者
+     */
     private void notifyListeners() {
+        // 获得当前承诺的事件执行器
         EventExecutor executor = executor();
+
+        // 如果该事件执行器处于事件循环中
         if (executor.inEventLoop()) {
+            // 获得内部线程本地映射
             final InternalThreadLocalMap threadLocals = InternalThreadLocalMap.get();
+            // 通过内部线程本地映射获得栈深度
             final int stackDepth = threadLocals.futureListenerStackDepth();
+
+            // 如果栈深度小于最大监听者栈深度
             if (stackDepth < MAX_LISTENER_STACK_DEPTH) {
+                // 内部线程本地映射设置未来监听者栈深度
                 threadLocals.setFutureListenerStackDepth(stackDepth + 1);
                 try {
+                    // 马上通知监听者
                     notifyListenersNow();
                 } finally {
+                    // 内部线程本地映射设置为原来的未来监听者栈深度
                     threadLocals.setFutureListenerStackDepth(stackDepth);
                 }
                 return;
             }
         }
 
+        // 安全执行
         safeExecute(executor, new Runnable() {
             @Override
             public void run() {
+                // 马上通知监听者
                 notifyListenersNow();
             }
         });
@@ -555,21 +591,33 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
         });
     }
 
+    /**
+     * 马上通知所有监听者
+     */
     private void notifyListenersNow() {
         Object listeners;
+
+        // 锁住当前实例
         synchronized (this) {
             // Only proceed if there are listeners to notify and we are not already notifying listeners.
+            // 当且仅当有要通知的监听者，并且我们还未通知监听者，我们才处理。
             if (notifyingListeners || this.listeners == null) {
                 return;
             }
+            // 设置通知监听者标记
             notifyingListeners = true;
+            // 获得监听者，并清空该承诺的监听者
             listeners = this.listeners;
             this.listeners = null;
         }
+
         for (;;) {
+            // 如果监听者是默认未来监听者实例
             if (listeners instanceof DefaultFutureListeners) {
+                // 以下不细究
                 notifyListeners0((DefaultFutureListeners) listeners);
             } else {
+                // 如果监听者不是默认未来监听者实例，通知监听者
                 notifyListener0(this, (GenericFutureListener<?>) listeners);
             }
             synchronized (this) {
@@ -593,9 +641,16 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
         }
     }
 
+    /**
+     * 通知监听者
+     *
+     * @param future 未来
+     * @param l 通用未来监听者
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private static void notifyListener0(Future future, GenericFutureListener l) {
         try {
+            // 入参通用未来监听者操作完成
             l.operationComplete(future);
         } catch (Throwable t) {
             if (logger.isWarnEnabled()) {
@@ -604,12 +659,20 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
         }
     }
 
+    /**
+     * 对当前承诺添加监听者
+     *
+     * @param listener 通用未来监听者
+     */
     private void addListener0(GenericFutureListener<? extends Future<? super V>> listener) {
+        // 如果当前还没有监听者，则设置监听者
         if (listeners == null) {
             listeners = listener;
         } else if (listeners instanceof DefaultFutureListeners) {
+            // 以下不细究
             ((DefaultFutureListeners) listeners).add(listener);
         } else {
+            // 以下不细究
             listeners = new DefaultFutureListeners((GenericFutureListener<?>) listeners, listener);
         }
     }
@@ -622,6 +685,12 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
         }
     }
 
+    /**
+     * 设置成功
+     *
+     * @param result 计算结果
+     * @return 是否设置成功
+     */
     private boolean setSuccess0(V result) {
         return setValue0(result == null ? SUCCESS : result);
     }
@@ -642,6 +711,7 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
             RESULT_UPDATER.compareAndSet(this, UNCANCELLABLE, objResult)) {
             // 检查通知等待者
             if (checkNotifyWaiters()) {
+                // 通知监听者
                 notifyListeners();
             }
             return true;
@@ -657,10 +727,12 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
      * 如果有附加在承诺之上的监听器，则返回真，否则返回假。
      */
     private synchronized boolean checkNotifyWaiters() {
-        // 如果存在等待者，则通知所有
+        // 如果存在等待者，则通知所有等待者
         if (waiters > 0) {
             notifyAll();
         }
+
+        // 如果监听者不为null，则返回真，否则返回假
         return listeners != null;
     }
 
@@ -858,7 +930,14 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
         return result instanceof CauseHolder && ((CauseHolder) result).cause instanceof CancellationException;
     }
 
+    /**
+     * 该承诺是否已经完成
+     *
+     * @param result 计算结果
+     * @return 该承诺是否已经完成
+     */
     private static boolean isDone0(Object result) {
+        // 如果结果不为null，并且结果不是不可取消对象实例，则返回真
         return result != null && result != UNCANCELLABLE;
     }
 
@@ -869,6 +948,12 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
         }
     }
 
+    /**
+     * 安全执行
+     *
+     * @param executor 事件执行器
+     * @param task 可运行任务
+     */
     private static void safeExecute(EventExecutor executor, Runnable task) {
         try {
             executor.execute(task);

@@ -518,7 +518,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             } else {
                 // 当前线程不处于此事件循环中
                 try {
-                    // 向当前事件循环提交任务
+                    // 向当前事件循环提交任务（异步的，对于注册操作，每次都会实例新的线程来完成）
                     eventLoop.execute(new Runnable() {
                         @Override
                         public void run() {
@@ -573,6 +573,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 // 调用添加处理者，如果有必要的话
                 pipeline.invokeHandlerAddedIfNeeded();
 
+                // 安全设置成功
                 safeSetSuccess(promise);
                 pipeline.fireChannelRegistered();
                 // Only fire a channelActive if the channel has never been registered. This prevents firing
@@ -1073,6 +1074,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         /**
          * Marks the specified {@code promise} as success.  If the {@code promise} is done already, log a message.
+         *
+         * 将指定的承诺标记为成功。
+         * 如果承诺已经完成，记录信息。
          */
         protected final void safeSetSuccess(ChannelPromise promise) {
             if (!(promise instanceof VoidChannelPromise) && !promise.trySuccess()) {

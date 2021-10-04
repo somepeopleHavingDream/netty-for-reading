@@ -315,34 +315,50 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
      * @return 通道未来
      */
     private ChannelFuture doBind(final SocketAddress localAddress) {
-        // 初始化和注册
+        // 初始化和注册，获得一个注册的通道未来
         final ChannelFuture regFuture = initAndRegister();
+        // 获得注册通道未来的通道
         final Channel channel = regFuture.channel();
+
+        // 如果注册通道未来是失败的，则返回注册通道未来
         if (regFuture.cause() != null) {
             return regFuture;
         }
 
+        // 如果注册通道未来已经完成
         if (regFuture.isDone()) {
+            /*
+                以下不细究
+             */
             // At this point we know that the registration was complete and successful.
             ChannelPromise promise = channel.newPromise();
             doBind0(regFuture, channel, localAddress, promise);
             return promise;
         } else {
             // Registration future is almost always fulfilled already, but just in case it's not.
+            // 注册未来大部分总是完成的，但仅在这种情况下不是。
+            // 实例化一个待办注册承诺
             final PendingRegistrationPromise promise = new PendingRegistrationPromise(channel);
+            // 注册通道未来添加监听者
             regFuture.addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture future) throws Exception {
                     Throwable cause = future.cause();
+                    // 如果通道未来是失败的
                     if (cause != null) {
+                        /*
+                            以下不细究
+                         */
                         // Registration on the EventLoop failed so fail the ChannelPromise directly to not cause an
                         // IllegalStateException once we try to access the EventLoop of the Channel.
                         promise.setFailure(cause);
                     } else {
                         // Registration was successful, so set the correct executor to use.
                         // See https://github.com/netty/netty/issues/2586
+                        // 注册是成功的，所以设置正确的执行器以使用。
                         promise.registered();
 
+                        // 处理绑定
                         doBind0(regFuture, channel, localAddress, promise);
                     }
                 }
@@ -381,6 +397,9 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         // boss事件循环者注册通道
         ChannelFuture regFuture = config().group().register(channel);
         if (regFuture.cause() != null) {
+            /*
+                以下不细究
+             */
             if (channel.isRegistered()) {
                 channel.close();
             } else {
@@ -397,6 +416,17 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         //         because bind() or connect() will be executed *after* the scheduled registration task is executed
         //         because register(), bind(), and connect() are all bound to the same thread.
 
+        /*
+            如果我们到达这并且承诺未失败，则有以下几种情况：
+            1）如果我们尝试从事件循环注册，则在此时注册注册已经完成。
+                比如：现在尝试绑定或者连接操作是安全的，因为已经注册了通道。
+            2）如果我们尝试从其他线程注册，注册请求已经被成功地添加到事件循环任务队列里，以用于之后的执行。
+                比如：现在尝试去绑定或者连接是安全的：
+                    因为绑定或者连接将在调度注册任务被执行后执行，
+                    因为注册、绑定和连接都绑定在相同的线程。
+         */
+
+        // 返回未来
         return regFuture;
     }
 
@@ -408,12 +438,24 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
      */
     abstract void init(Channel channel) throws Exception;
 
+    /**
+     * 处理绑定
+     *
+     * @param regFuture 注册通道未来
+     * @param channel 通道
+     * @param localAddress 套接字地址
+     * @param promise 通道承诺
+     */
     private static void doBind0(
             final ChannelFuture regFuture, final Channel channel,
             final SocketAddress localAddress, final ChannelPromise promise) {
 
         // This method is invoked before channelRegistered() is triggered.  Give user handlers a chance to set up
         // the pipeline in its channelRegistered() implementation.
+        /*
+           此方法在通道注册之前被触发。
+           给用户处理者一个机会去在通道注册实现里设置流水线。
+         */
         channel.eventLoop().execute(new Runnable() {
             @Override
             public void run() {
@@ -440,6 +482,8 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
 
     /**
      * Returns the configured {@link EventLoopGroup} or {@code null} if non is configured yet.
+     *
+     * 返回配置了的事件循环组或者null，如果还未配置的话。
      *
      * @deprecated Use {@link #config()} instead.
      */
@@ -588,10 +632,17 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         return buf.toString();
     }
 
+    /**
+     * 待办注册承诺
+     */
     static final class PendingRegistrationPromise extends DefaultChannelPromise {
 
         // Is set to the correct EventExecutor once the registration was successful. Otherwise it will
         // stay null and so the GlobalEventExecutor.INSTANCE will be used for notifications.
+        /**
+         * 一旦注册成功，就被设置为正确的事件执行器。
+         * 否则它将保持null，因此全局事件执行器实例将被用于通知。
+         */
         private volatile boolean registered;
 
         PendingRegistrationPromise(Channel channel) {
