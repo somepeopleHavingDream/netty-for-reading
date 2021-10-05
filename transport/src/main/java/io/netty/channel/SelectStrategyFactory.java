@@ -22,6 +22,8 @@ public interface SelectStrategyFactory {
 
     /**
      * Creates a new {@link SelectStrategy}.
+     *
+     * 创建一个新的选择策略。
      */
     SelectStrategy newSelectStrategy();
 }

@@ -27,6 +27,11 @@ import java.util.concurrent.TimeUnit;
 final class ScheduledFutureTask<V> extends PromiseTask<V> implements ScheduledFuture<V>, PriorityQueueNode {
     private static final long START_TIME = System.nanoTime();
 
+    /**
+     * 返回当前可调度未来任务的纳秒时间
+     *
+     * @return 当前可调度未来任务的纳秒时间
+     */
     static long nanoTime() {
         return System.nanoTime() - START_TIME;
     }
@@ -44,7 +49,11 @@ final class ScheduledFutureTask<V> extends PromiseTask<V> implements ScheduledFu
     // set once when added to priority queue
     private long id;
 
+    /**
+     * 该可调度任务的截止时间
+     */
     private long deadlineNanos;
+
     /* 0 - no repeat, >0 - repeat at fixed rate, <0 - repeat with fixed delay */
     private final long periodNanos;
 

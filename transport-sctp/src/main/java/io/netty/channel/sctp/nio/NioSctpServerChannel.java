@@ -61,6 +61,8 @@ public class NioSctpServerChannel extends AbstractNioMessageChannel
 
     /**
      * Create a new instance
+     *
+     * 创建一个新的实例
      */
     public NioSctpServerChannel() {
         super(null, newSocket(), SelectionKey.OP_ACCEPT);

@@ -58,9 +58,17 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     private static final int MIN_PREMATURE_SELECTOR_RETURNS = 3;
     private static final int SELECTOR_AUTO_REBUILD_THRESHOLD;
 
+    /**
+     * 马上选择提供者
+     */
     private final IntSupplier selectNowSupplier = new IntSupplier() {
         @Override
         public int get() throws Exception {
+            /*
+                selectNow()不会阻塞，不管什么通道就绪就立即返回。
+                此方法执行非阻塞的选择操作。
+                如果自从前一次选择操作后，没有通道变成可选择的，则此方法直接返回零。
+            */
             return selectNow();
         }
     };
@@ -102,6 +110,8 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
     /**
      * The NIO {@link Selector}.
+     *
+     * Nio选择器
      */
     private Selector selector;
 
@@ -124,12 +134,32 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     //    AWAKE            when EL is awake
     //    NONE             when EL is waiting with no wakeup scheduled
     //    other value T    when EL is waiting with wakeup scheduled at time T
+    /**
+     * 下次醒来的时刻是：
+     *  AWAKE，当事件循环是唤醒状态，
+     *  NONE，当事件循环正在等待且未安排唤醒时，
+     *  其他值，当事件循环正在等待，并且被安排在时刻t被唤醒。
+     */
     private final AtomicLong nextWakeupNanos = new AtomicLong(AWAKE);
 
+    /**
+     * 当前nio事件循环的选择策略
+     */
     private final SelectStrategy selectStrategy;
 
+    /**
+     * 输入输出率
+     */
     private volatile int ioRatio = 50;
+
+    /**
+     * 取消的键的个数
+     */
     private int cancelledKeys;
+
+    /**
+     * 是否需要再次选择
+     */
     private boolean needsToSelectAgain;
 
     NioEventLoop(NioEventLoopGroup parent, Executor executor, SelectorProvider selectorProvider,
@@ -138,8 +168,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         super(parent, executor, false, newTaskQueue(taskQueueFactory), newTaskQueue(tailTaskQueueFactory),
                 rejectedExecutionHandler);
         this.provider = ObjectUtil.checkNotNull(selectorProvider, "selectorProvider");
+        // 设置选择策略
         this.selectStrategy = ObjectUtil.checkNotNull(strategy, "selectStrategy");
-        // 打开选择器，获得选择器元祖
+        // 打开选择器，获得选择器元祖，分别设置选择器和未包装选择器
         final SelectorTuple selectorTuple = openSelector();
         this.selector = selectorTuple.selector;
         this.unwrappedSelector = selectorTuple.unwrappedSelector;
@@ -475,26 +506,34 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
     @Override
     protected void run() {
+        // 选择计数
         int selectCnt = 0;
         for (;;) {
             try {
                 int strategy;
                 try {
+                    // 计算出一个选择策略
                     strategy = selectStrategy.calculateStrategy(selectNowSupplier, hasTasks());
                     switch (strategy) {
                     case SelectStrategy.CONTINUE:
                         continue;
 
                     case SelectStrategy.BUSY_WAIT:
+                        // 以下不细究
                         // fall-through to SELECT since the busy-wait is not supported with NIO
 
                     case SelectStrategy.SELECT:
+                        // 获得当前调度任务的截止时间
                         long curDeadlineNanos = nextScheduledTaskDeadlineNanos();
                         if (curDeadlineNanos == -1L) {
+                            // 日历中什么都没有
                             curDeadlineNanos = NONE; // nothing on the calendar
                         }
+                        // 设置下一次事件循环的唤醒时间
                         nextWakeupNanos.set(curDeadlineNanos);
+
                         try {
+                            // 如果没有任务，做选择操作（有可能是阻塞的选择操作，导致该线程被阻塞了）
                             if (!hasTasks()) {
                                 strategy = select(curDeadlineNanos);
                             }
@@ -515,12 +554,19 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     continue;
                 }
 
+                // 更新一些值
                 selectCnt++;
                 cancelledKeys = 0;
                 needsToSelectAgain = false;
+                // 获得输入输出率
                 final int ioRatio = this.ioRatio;
                 boolean ranTasks;
+
+                // 如果输入输出率为100
                 if (ioRatio == 100) {
+                    /*
+                        以下不细究
+                     */
                     try {
                         if (strategy > 0) {
                             processSelectedKeys();
@@ -530,6 +576,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                         ranTasks = runAllTasks();
                     }
                 } else if (strategy > 0) {
+                    /*
+                        以下不细究
+                     */
                     final long ioStartTime = System.nanoTime();
                     try {
                         processSelectedKeys();
@@ -539,6 +588,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                         ranTasks = runAllTasks(ioTime * (100 - ioRatio) / ioRatio);
                     }
                 } else {
+                    // 这将运行任务的最小数量
                     ranTasks = runAllTasks(0); // This will run the minimum number of tasks
                 }
 
@@ -853,9 +903,14 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     }
 
     private int select(long deadlineNanos) throws IOException {
+        // 如果没有选择结束事件，则做阻塞的选择操作
         if (deadlineNanos == NONE) {
             return selector.select();
         }
+
+        /*
+            以下不细究
+         */
         // Timeout will only be 0 if deadline is within 5 microsecs
         long timeoutMillis = deadlineToDelayNanos(deadlineNanos + 995000L) / 1000000L;
         return timeoutMillis <= 0 ? selector.selectNow() : selector.select(timeoutMillis);

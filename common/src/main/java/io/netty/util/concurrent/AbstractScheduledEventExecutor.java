@@ -38,11 +38,17 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
                 }
             };
 
+    /**
+     * 唤醒任务
+     */
    static final Runnable WAKEUP_TASK = new Runnable() {
        @Override
        public void run() { } // Do nothing
     };
 
+    /**
+     * 用于此调度事件执行器的调度任务队列
+     */
     PriorityQueue<ScheduledFutureTask<?>> scheduledTaskQueue;
 
     long nextTaskId;
@@ -54,6 +60,11 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
         super(parent);
     }
 
+    /**
+     * 可调度未来任务的纳秒时刻
+     *
+     * @return 调度未来任务的纳秒时刻
+     */
     protected static long nanoTime() {
         return ScheduledFutureTask.nanoTime();
     }
@@ -122,14 +133,22 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
     /**
      * Return the {@link Runnable} which is ready to be executed with the given {@code nanoTime}.
      * You should use {@link #nanoTime()} to retrieve the correct {@code nanoTime}.
+     *
+     * 返回一个准备以给定纳秒时间执行的可运行实例。
+     * 你应该使用纳秒时间方法以获取正确的纳秒时间。
      */
     protected final Runnable pollScheduledTask(long nanoTime) {
+        // 断言：当前线程处于事件循环里
         assert inEventLoop();
 
+        // 取得可调度任务
         ScheduledFutureTask<?> scheduledTask = peekScheduledTask();
+        // 如果可调度任务为null，或者已经超过可调度任务的截止事件，则直接返回null
         if (scheduledTask == null || scheduledTask.deadlineNanos() - nanoTime > 0) {
             return null;
         }
+
+        // 可调度队列移除队首
         scheduledTaskQueue.remove();
         scheduledTask.setConsumed();
         return scheduledTask;
@@ -146,14 +165,20 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
     /**
      * Return the deadline (in nanoseconds) when the next scheduled task is ready to be run or {@code -1}
      * if no task is scheduled.
+     *
+     * 返回当下一个调度任务准备运行时的截止时间（纳秒），或者返回-1，如果没有任务被调度。
      */
     protected final long nextScheduledTaskDeadlineNanos() {
+        // 获得一个调度任务
         ScheduledFutureTask<?> scheduledTask = peekScheduledTask();
+        // 如果存在调度任务，则返回该调度任务的截止时间，否则返回-1
         return scheduledTask != null ? scheduledTask.deadlineNanos() : -1;
     }
 
     final ScheduledFutureTask<?> peekScheduledTask() {
+        // 获得可调度任务队列
         Queue<ScheduledFutureTask<?>> scheduledTaskQueue = this.scheduledTaskQueue;
+        // 如果队列不为null，则拿到队头的可调度任务，否则返回null
         return scheduledTaskQueue != null ? scheduledTaskQueue.peek() : null;
     }
 
