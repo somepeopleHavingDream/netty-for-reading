@@ -363,6 +363,8 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
                     }
                 }
             });
+
+            // 返回待办注册承诺
             return promise;
         }
     }
@@ -461,8 +463,10 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             public void run() {
                 // 如果注册通道未来是成功的
                 if (regFuture.isSuccess()) {
+                    // 做绑定操作，再添加监听者
                     channel.bind(localAddress, promise).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
                 } else {
+                    // 不细究
                     promise.setFailure(regFuture.cause());
                 }
             }
@@ -650,6 +654,9 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             super(channel);
         }
 
+        /**
+         * 设置待办处理承诺的状态为已注册
+         */
         void registered() {
             registered = true;
         }

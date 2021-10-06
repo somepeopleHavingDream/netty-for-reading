@@ -98,6 +98,7 @@ public class DefaultChannelPromise extends DefaultPromise<Void> implements Chann
 
     @Override
     public ChannelPromise addListener(GenericFutureListener<? extends Future<? super Void>> listener) {
+        // 添加监听者，返回本身实例
         super.addListener(listener);
         return this;
     }

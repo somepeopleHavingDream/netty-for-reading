@@ -544,7 +544,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         /**
          * 注册
          *
-         * @param promise 承诺
+         * @param promise 通道承诺
          */
         private void register0(ChannelPromise promise) {
             try {
@@ -567,7 +567,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 // Ensure we call handlerAdded(...) before we actually notify the promise. This is needed as the
                 // user may already fire events through the pipeline in the ChannelFutureListener.
                 /*
-                    在我们实际地通知承诺之前，确保我们调用被添加的处理者方法。
+                    在我们实际地通知承诺之前，确保我们调用添加处理者方法。
                     这是被需要的，因为用户可能已经在通道未来监听者里通过流水线触发事件。
                  */
                 // 调用添加处理者，如果有必要的话
@@ -575,10 +575,20 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
                 // 安全设置成功
                 safeSetSuccess(promise);
+                // 流水线触发注册通道方法
                 pipeline.fireChannelRegistered();
+
                 // Only fire a channelActive if the channel has never been registered. This prevents firing
                 // multiple channel actives if the channel is deregistered and re-registered.
+                /*
+                    如果通道从未被注册，仅触发激活通道方法。
+                    如果通道被取消注册和重复注册，这阻止了触发多个通道激活。
+                 */
+                // 如果通道活跃
                 if (isActive()) {
+                    /*
+                        以下不细究
+                     */
                     if (firstRegistration) {
                         pipeline.fireChannelActive();
                     } else if (config().isAutoRead()) {
@@ -590,6 +600,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                     }
                 }
             } catch (Throwable t) {
+                /*
+                    以下不细究
+                 */
                 // Close the channel directly to avoid FD leak.
                 closeForcibly();
                 closeFuture.setClosed();
@@ -599,12 +612,15 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         @Override
         public final void bind(final SocketAddress localAddress, final ChannelPromise promise) {
+            // 断言：处于事件循环中
             assertEventLoop();
 
+            // 如果通道承诺设置不可取消失败，或者不能确保通道已经打开，则直接返回
             if (!promise.setUncancellable() || !ensureOpen(promise)) {
                 return;
             }
 
+            // 不细究
             // See: https://github.com/netty/netty/issues/576
             if (Boolean.TRUE.equals(config().getOption(ChannelOption.SO_BROADCAST)) &&
                 localAddress instanceof InetSocketAddress &&
@@ -618,24 +634,33 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                         "address (" + localAddress + ") anyway as requested.");
             }
 
+            // 通道是否活跃
             boolean wasActive = isActive();
             try {
+                // 做绑定操作
                 doBind(localAddress);
             } catch (Throwable t) {
+                /*
+                    以下不细究
+                 */
                 safeSetFailure(promise, t);
                 closeIfClosed();
                 return;
             }
 
+            // 如果通道原先不是活跃状态，但是当前处于活跃状态
             if (!wasActive && isActive()) {
+                // 设置随后调用的回调方法（异步地，交由此通道的事件循环执行）
                 invokeLater(new Runnable() {
                     @Override
                     public void run() {
+                        // 通道流水线触发激活通道方法
                         pipeline.fireChannelActive();
                     }
                 });
             }
 
+            // 安全地设置承诺为成功的
             safeSetSuccess(promise);
         }
 
@@ -1079,7 +1104,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
          * 如果承诺已经完成，记录信息。
          */
         protected final void safeSetSuccess(ChannelPromise promise) {
+            // 如果通道承诺不是Void通道承诺，并且通道承诺不是成功的，则记录日志
             if (!(promise instanceof VoidChannelPromise) && !promise.trySuccess()) {
+                // 以下不细究
                 logger.warn("Failed to mark a promise as success because it is done already: {}", promise);
             }
         }
@@ -1100,6 +1127,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             close(voidPromise());
         }
 
+        /**
+         * 随后调用
+         *
+         * @param task 需要调用的可运行任务
+         */
         private void invokeLater(Runnable task) {
             try {
                 // This method is used by outbound operation implementations to trigger an inbound event later.
@@ -1113,8 +1145,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 //         -> handlerA.channelInactive() - (2) another inbound handler method called while in (1) yet
                 //
                 // which means the execution of two inbound handler methods of the same handler overlap undesirably.
+
+                // 该通道的事件循环，执行此任务
                 eventLoop().execute(task);
             } catch (RejectedExecutionException e) {
+                // 以下不细究
                 logger.warn("Can't invoke task later as EventLoop rejected it", e);
             }
         }
@@ -1168,6 +1203,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      * 在通道被注册后调用，该通道的事件循环作为注册过程中的一部分。
      *
      * Sub-classes may override this method
+     *
+     * 子类可能会覆写此方法。
      */
     protected void doRegister() throws Exception {
         // NOOP
@@ -1175,6 +1212,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     /**
      * Bind the {@link Channel} to the {@link SocketAddress}
+     *
+     * 将通道绑定到套接字地址上
      */
     protected abstract void doBind(SocketAddress localAddress) throws Exception;
 

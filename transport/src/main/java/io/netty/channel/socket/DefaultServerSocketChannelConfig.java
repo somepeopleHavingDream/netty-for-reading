@@ -36,11 +36,17 @@ import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
 
 /**
  * The default {@link ServerSocketChannelConfig} implementation.
+ *
+ * 默认的服务端套接字通道配置实现。
  */
 public class DefaultServerSocketChannelConfig extends DefaultChannelConfig
                                               implements ServerSocketChannelConfig {
 
     protected final ServerSocket javaSocket;
+
+    /**
+     * 积压值
+     */
     private volatile int backlog = NetUtil.SOMAXCONN;
 
     /**

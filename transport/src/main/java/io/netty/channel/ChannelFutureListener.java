@@ -48,10 +48,15 @@ public interface ChannelFutureListener extends GenericFutureListener<ChannelFutu
     /**
      * A {@link ChannelFutureListener} that closes the {@link Channel} when the
      * operation ended up with a failure or cancellation rather than a success.
+     *
+     * 当操作以失败或者取消而不是以成功结束时，该通道未来监听者关闭通道。
      */
     ChannelFutureListener CLOSE_ON_FAILURE = new ChannelFutureListener() {
         @Override
         public void operationComplete(ChannelFuture future) {
+            /*
+                以下不细究
+             */
             if (!future.isSuccess()) {
                 future.channel().close();
             }

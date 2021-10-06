@@ -164,10 +164,16 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
     }
 
     static void invokeChannelRegistered(final AbstractChannelHandlerContext next) {
+        // 拿到通道处理者上下文的事件执行器
         EventExecutor executor = next.executor();
+        // 如果事件执行器处于事件循环
         if (executor.inEventLoop()) {
+            // 调用注册通道方法
             next.invokeChannelRegistered();
         } else {
+            /*
+                以下不细究
+             */
             executor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -177,14 +183,21 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         }
     }
 
+    /**
+     * 调用注册通道
+     */
     private void invokeChannelRegistered() {
+        // 如果能调用处理者
         if (invokeHandler()) {
             try {
+                // 获得处理者，强转为通道入境处理者，再调用处理者的注册通道方法（一般为用户代码）
                 ((ChannelInboundHandler) handler()).channelRegistered(this);
             } catch (Throwable t) {
+                // 以下不细究
                 invokeExceptionCaught(t);
             }
         } else {
+            // 不细究
             fireChannelRegistered();
         }
     }
@@ -228,10 +241,13 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
     }
 
     static void invokeChannelActive(final AbstractChannelHandlerContext next) {
+        // 获得入参通道处理者上下文的事件执行器
         EventExecutor executor = next.executor();
+        // 如果该事件执行器处于事件循环中，则由该事件执行器调用激活通道方法
         if (executor.inEventLoop()) {
             next.invokeChannelActive();
         } else {
+            // 不细究
             executor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -242,13 +258,17 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
     }
 
     private void invokeChannelActive() {
+        // 如果能调用处理者
         if (invokeHandler()) {
             try {
+                // 获得处理者，强转为通道入境处理者，调用激活通道方法
                 ((ChannelInboundHandler) handler()).channelActive(this);
             } catch (Throwable t) {
+                // 不细究
                 invokeExceptionCaught(t);
             }
         } else {
+            // 不细究
             fireChannelActive();
         }
     }
@@ -496,17 +516,26 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
 
     @Override
     public ChannelFuture bind(final SocketAddress localAddress, final ChannelPromise promise) {
+        // 检查本地地址
         ObjectUtil.checkNotNull(localAddress, "localAddress");
+        // 如果不是有效的通道承诺，则直接返回入参通道承诺
         if (isNotValidPromise(promise, false)) {
             // cancelled
             return promise;
         }
 
+        // 找到出境上下文
         final AbstractChannelHandlerContext next = findContextOutbound(MASK_BIND);
+        // 获得出境上下文的事件执行器
         EventExecutor executor = next.executor();
+        // 如果事件执行器处于事件循环
         if (executor.inEventLoop()) {
+            // 通道处理者上下文调用绑定方法
             next.invokeBind(localAddress, promise);
         } else {
+            /*
+                以下不细究
+             */
             safeExecute(executor, new Runnable() {
                 @Override
                 public void run() {
@@ -518,13 +547,17 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
     }
 
     private void invokeBind(SocketAddress localAddress, ChannelPromise promise) {
+        // 如果能调用处理者
         if (invokeHandler()) {
             try {
+                // 获得通道处理者，强转为通道出境处理者，做绑定操作
                 ((ChannelOutboundHandler) handler()).bind(this, localAddress, promise);
             } catch (Throwable t) {
+                // 不细究
                 notifyOutboundHandlerException(t, promise);
             }
         } else {
+            // 不细究
             bind(localAddress, promise);
         }
     }
@@ -856,8 +889,10 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
     }
 
     private boolean isNotValidPromise(ChannelPromise promise, boolean allowVoidPromise) {
+        // 检查入参通道承诺
         ObjectUtil.checkNotNull(promise, "promise");
 
+        // 如果通道承诺已经完成
         if (promise.isDone()) {
             // Check if the promise was cancelled and if so signal that the processing of the operation
             // should not be performed.
@@ -900,11 +935,16 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
     }
 
     private AbstractChannelHandlerContext findContextOutbound(int mask) {
+        // 拿到当前通道处理者上下文
         AbstractChannelHandlerContext ctx = this;
+        // 拿到执行器
         EventExecutor currentExecutor = executor();
         do {
             ctx = ctx.prev;
+            // 跳过上下文（不细究）
         } while (skipContext(ctx, currentExecutor, mask, MASK_ONLY_OUTBOUND));
+
+        // 返回出境上下文
         return ctx;
     }
 
@@ -1003,7 +1043,14 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
      */
     private boolean invokeHandler() {
         // Store in local variable to reduce volatile reads.
+        // 存进本地变量，以减少易变读。
         int handlerState = this.handlerState;
+
+        /*
+         * 如果处理者状态满足以下任一两种条件之一，就返回真
+         * 1 处理者状态为添加完成
+         * 2 无序，并且处理者状态为添加待办
+         */
         return handlerState == ADD_COMPLETE || (!ordered && handlerState == ADD_PENDING);
     }
 

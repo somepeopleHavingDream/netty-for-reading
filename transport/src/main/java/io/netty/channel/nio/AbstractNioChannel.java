@@ -50,7 +50,11 @@ public abstract class AbstractNioChannel extends AbstractChannel {
      */
     protected final int readInterestOp;
 
+    /**
+     * 选择键
+     */
     volatile SelectionKey selectionKey;
+
     boolean readPending;
     private final Runnable clearReadPendingRunnable = new Runnable() {
         @Override
@@ -386,7 +390,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         boolean selected = false;
         for (;;) {
             try {
-                // 获取jdk底层可选择通道，注册事件
+                // 获取jdk底层可选择通道，注册事件，获得选择键
                 selectionKey = javaChannel().register(eventLoop().unwrappedSelector(), 0, this);
                 return;
             } catch (CancelledKeyException e) {

@@ -35,6 +35,9 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
     private static final int MAX_LISTENER_STACK_DEPTH = Math.min(8,
             SystemPropertyUtil.getInt("io.netty.defaultPromise.maxListenerStackDepth", 8));
 
+    /**
+     * 计算结果更新器
+     */
     @SuppressWarnings("rawtypes")
     private static final AtomicReferenceFieldUpdater<DefaultPromise, Object> RESULT_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(DefaultPromise.class, Object.class, "result");
@@ -73,7 +76,7 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
      *
      * Threading - synchronized(this). We must support adding listeners when there is no EventExecutor.
      *
-     * 线程的 - 同步块。
+     * 线程的 - 同步当前实例。
      * 当没有事件执行器时，我们必须支持添加监听者。
      */
     private Object listeners;
@@ -162,7 +165,9 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
 
     @Override
     public boolean isSuccess() {
+        // 获得通道承诺的计算结果
         Object result = this.result;
+        // 如果通道承诺的计算结果存在，且该结果不是不可需要的，并且该计算结果也不是原因拥有者实例，则返回真，代表成功
         return result != null && result != UNCANCELLABLE && !(result instanceof CauseHolder);
     }
 
@@ -223,6 +228,7 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
 
         // 如果该承诺已经完成，则通知所有监听者
         if (isDone()) {
+            // 通知所有监听者
             notifyListeners();
         }
 
@@ -438,6 +444,7 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
 
     @Override
     public boolean isDone() {
+        // 返回当前默认承诺是否已经完成
         return isDone0(result);
     }
 

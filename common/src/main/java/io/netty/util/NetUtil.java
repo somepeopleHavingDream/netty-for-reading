@@ -72,6 +72,11 @@ public final class NetUtil {
     /**
      * The SOMAXCONN value of the current machine.  If failed to get the value,  {@code 200}  is used as a
      * default value for Windows or {@code 128} for others.
+     *
+     * 当前机器的值。
+     * 如果获得此值失败，则对于windows系统使用200作为默认值，对于其他使用128作为默认值。
+     *
+     * 不细究此值在该默认服务端套接字通道配置类中的静态块是怎么初始化的。
      */
     public static final int SOMAXCONN;
 

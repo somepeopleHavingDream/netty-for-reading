@@ -68,7 +68,15 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     private static final AtomicReferenceFieldUpdater<DefaultChannelPipeline, MessageSizeEstimator.Handle> ESTIMATOR =
             AtomicReferenceFieldUpdater.newUpdater(
                     DefaultChannelPipeline.class, MessageSizeEstimator.Handle.class, "estimatorHandle");
+
+    /**
+     * 通道处理者上下文，队头
+     */
     final AbstractChannelHandlerContext head;
+
+    /**
+     * 通道处理者上下文，队尾
+     */
     final AbstractChannelHandlerContext tail;
 
     private final Channel channel;
@@ -959,6 +967,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelPipeline fireChannelRegistered() {
+        // 通道处理者上下文调用注册通道方法
         AbstractChannelHandlerContext.invokeChannelRegistered(head);
         return this;
     }
@@ -1039,6 +1048,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelPipeline fireChannelActive() {
+        // 通道处理者上下文调用激活通道方法
         AbstractChannelHandlerContext.invokeChannelActive(head);
         return this;
     }
@@ -1117,6 +1127,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelFuture bind(SocketAddress localAddress, ChannelPromise promise) {
+        // 尾通道处理者上下文绑定本地地址
         return tail.bind(localAddress, promise);
     }
 
@@ -1521,6 +1532,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         @Override
         public void bind(
                 ChannelHandlerContext ctx, SocketAddress localAddress, ChannelPromise promise) {
+            // 一般是头通道处理者上下文负责绑定操作
             unsafe.bind(localAddress, promise);
         }
 

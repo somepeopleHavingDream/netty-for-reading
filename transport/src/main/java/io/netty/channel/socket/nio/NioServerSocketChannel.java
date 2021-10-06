@@ -78,6 +78,9 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
         }
     }
 
+    /**
+     * 用于此nio服务套接字通道的服务端套接字通道配置
+     */
     private final ServerSocketChannelConfig config;
 
     /**
@@ -125,6 +128,9 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
     public boolean isActive() {
         // As java.nio.ServerSocketChannel.isBound() will continue to return true even after the channel was closed
         // we will also need to check if it is open.
+        /*
+            因为服务端套接字通道的是否绑定方法将持续地返回真，即使在关闭通道之后，我们也将需要去检查是否它是打开的。
+         */
         return isOpen() && javaChannel().socket().isBound();
     }
 
@@ -147,8 +153,10 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
     @Override
     protected void doBind(SocketAddress localAddress) throws Exception {
         if (PlatformDependent.javaVersion() >= 7) {
+            // 获得底层结构jdk的通道，做绑定操作
             javaChannel().bind(localAddress, config.getBacklog());
         } else {
+            // 以下不细究
             javaChannel().socket().bind(localAddress, config.getBacklog());
         }
     }

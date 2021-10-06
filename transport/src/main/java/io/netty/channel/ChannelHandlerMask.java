@@ -45,7 +45,12 @@ final class ChannelHandlerMask {
     static final int MASK_CHANNEL_READ_COMPLETE = 1 << 6;
     static final int MASK_USER_EVENT_TRIGGERED = 1 << 7;
     static final int MASK_CHANNEL_WRITABILITY_CHANGED = 1 << 8;
+
+    /**
+     * 掩码-绑定
+     */
     static final int MASK_BIND = 1 << 9;
+
     static final int MASK_CONNECT = 1 << 10;
     static final int MASK_DISCONNECT = 1 << 11;
     static final int MASK_CLOSE = 1 << 12;

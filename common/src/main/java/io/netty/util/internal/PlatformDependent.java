@@ -300,6 +300,8 @@ public final class PlatformDependent {
 
     /**
      * Return the version of Java under which this library is used.
+     *
+     * 返回此库使用的java版本。
      */
     public static int javaVersion() {
         return PlatformDependent0.javaVersion();

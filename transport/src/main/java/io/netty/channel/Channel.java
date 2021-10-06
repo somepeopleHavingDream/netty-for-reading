@@ -113,6 +113,8 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
 
     /**
      * Return {@code true} if the {@link Channel} is active and so connected.
+     *
+     * 如果通道是活跃的且已连接，则返回真。
      */
     boolean isActive();
 
@@ -231,12 +233,16 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
         /**
          * Register the {@link Channel} of the {@link ChannelPromise} and notify
          * the {@link ChannelFuture} once the registration was complete.
+         *
+         * 注册通道承诺的通道，一旦注册完成通知通道未来。
          */
         void register(EventLoop eventLoop, ChannelPromise promise);
 
         /**
          * Bind the {@link SocketAddress} to the {@link Channel} of the {@link ChannelPromise} and notify
          * it once its done.
+         *
+         * 将套接字地址绑定到通道承诺的通道，并且一旦完成就通知它。
          */
         void bind(SocketAddress localAddress, ChannelPromise promise);
 
