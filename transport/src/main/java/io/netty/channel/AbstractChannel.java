@@ -56,6 +56,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     private final DefaultChannelPipeline pipeline;
 
     private final VoidChannelPromise unsafeVoidPromise = new VoidChannelPromise(this, false);
+
+    /**
+     * 用于此通道的关闭未来
+     */
     private final CloseFuture closeFuture = new CloseFuture(this);
 
     private volatile SocketAddress localAddress;
@@ -1270,6 +1274,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     static final class CloseFuture extends DefaultChannelPromise {
 
         CloseFuture(AbstractChannel ch) {
+            // 调用父构造方法，设置通道
             super(ch);
         }
 

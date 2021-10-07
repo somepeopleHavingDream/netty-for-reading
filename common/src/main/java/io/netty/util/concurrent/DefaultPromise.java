@@ -284,26 +284,36 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
 
     @Override
     public Promise<V> await() throws InterruptedException {
+        // 如果当前承诺是完成的，则返回承诺实例本身
         if (isDone()) {
             return this;
         }
 
+        // 当前线程是否被中断，若被中断，则抛出异常
         if (Thread.interrupted()) {
             throw new InterruptedException(toString());
         }
 
+        // 检查死锁
         checkDeadLock();
 
+        // 锁住当前实例
         synchronized (this) {
+            // 当当前承诺未完成，则不退出循环
             while (!isDone()) {
+                // 增加等待者
                 incWaiters();
                 try {
+                    // 放开对当前实例的锁，等待唤醒通知
                     wait();
                 } finally {
+                    // 减少等待者
                     decWaiters();
                 }
             }
         }
+
+        // 返回当前承诺实例
         return this;
     }
 
@@ -450,8 +460,11 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
 
     @Override
     public Promise<V> sync() throws InterruptedException {
+        // 等待
         await();
+        // 如果失败的话，则再抛出异常
         rethrowIfFailed();
+        // 返回当前承诺实例本身
         return this;
     }
 
@@ -506,7 +519,9 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
     }
 
     protected void checkDeadLock() {
+        // 获得当前承诺的事件执行器
         EventExecutor e = executor();
+        // 如果当前承诺的事件执行器存在，并且仍存在于事件循环中，则抛出阻塞操作异常
         if (e != null && e.inEventLoop()) {
             throw new BlockingOperationException(toString());
         }
@@ -627,6 +642,8 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
                 // 如果监听者不是默认未来监听者实例，通知监听者
                 notifyListener0(this, (GenericFutureListener<?>) listeners);
             }
+
+            // 锁住当前实例，更改监听者的一些信息
             synchronized (this) {
                 if (this.listeners == null) {
                     // Nothing can throw from within this method, so setting notifyingListeners back to false does not
@@ -736,6 +753,7 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
     private synchronized boolean checkNotifyWaiters() {
         // 如果存在等待者，则通知所有等待者
         if (waiters > 0) {
+            // 对等待当前实例的所有线程进行通知
             notifyAll();
         }
 
@@ -744,22 +762,29 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
     }
 
     private void incWaiters() {
+        // 如果等待者的数量到达短整形的最大值，则抛出违规状态异常
         if (waiters == Short.MAX_VALUE) {
             throw new IllegalStateException("too many waiters: " + this);
         }
+
+        // 等待者数量加1
         ++waiters;
     }
 
     private void decWaiters() {
+        // 等待者数减1
         --waiters;
     }
 
     private void rethrowIfFailed() {
+        // 获得可抛出原因
         Throwable cause = cause();
+        // 如果可抛出原因不存在，则直接返回
         if (cause == null) {
             return;
         }
 
+        // 以下不细究
         PlatformDependent.throwException(cause);
     }
 
