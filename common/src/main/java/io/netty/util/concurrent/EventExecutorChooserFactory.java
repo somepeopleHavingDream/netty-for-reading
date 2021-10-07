@@ -25,6 +25,8 @@ public interface EventExecutorChooserFactory {
 
     /**
      * Returns a new {@link EventExecutorChooser}.
+     *
+     * 返回一个恶心的事件执行器选择者。
      */
     EventExecutorChooser newChooser(EventExecutor[] executors);
 

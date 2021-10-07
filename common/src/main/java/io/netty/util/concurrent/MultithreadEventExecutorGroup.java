@@ -121,7 +121,6 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
                 throw new IllegalStateException("failed to create a child event loop", e);
             } finally {
                 // 以下不细究
-                // 如果不成功
                 if (!success) {
                     // 不成功，则关闭所有子事件执行器
                     for (int j = 0; j < i; j ++) {

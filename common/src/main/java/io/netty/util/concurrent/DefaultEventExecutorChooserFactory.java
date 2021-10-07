@@ -34,9 +34,11 @@ public final class DefaultEventExecutorChooserFactory implements EventExecutorCh
 
     @Override
     public EventExecutorChooser newChooser(EventExecutor[] executors) {
+        // 如果事件执行器数组的长度是2的幂，则返回2的幂事件执行器选择者
         if (isPowerOfTwo(executors.length)) {
             return new PowerOfTwoEventExecutorChooser(executors);
         } else {
+            // 不细究
             return new GenericEventExecutorChooser(executors);
         }
     }
@@ -47,9 +49,14 @@ public final class DefaultEventExecutorChooserFactory implements EventExecutorCh
 
     private static final class PowerOfTwoEventExecutorChooser implements EventExecutorChooser {
         private final AtomicInteger idx = new AtomicInteger();
+
+        /**
+         * 用于该事件执行器选择者的事件执行器数组
+         */
         private final EventExecutor[] executors;
 
         PowerOfTwoEventExecutorChooser(EventExecutor[] executors) {
+            // 设置事件选择器数组
             this.executors = executors;
         }
 
