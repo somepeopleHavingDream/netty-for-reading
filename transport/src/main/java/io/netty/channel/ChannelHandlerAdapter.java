@@ -23,11 +23,17 @@ import java.util.Map;
 
 /**
  * Skeleton implementation of a {@link ChannelHandler}.
+ *
+ * 通道处理者的骨架实现。
  */
 public abstract class ChannelHandlerAdapter implements ChannelHandler {
 
     // Not using volatile because it's used only for a sanity check.
-    // 不使用易变关键字，因为它只被用作健全检查。
+    /**
+     * 不使用易变关键字，因为它只被用作健全检查。
+     *
+     * 表示该通道处理者是否已被添加到一个通道流水线中。
+     */
     boolean added;
 
     /**

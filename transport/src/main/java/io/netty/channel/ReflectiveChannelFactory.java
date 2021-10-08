@@ -50,6 +50,7 @@ public class ReflectiveChannelFactory<T extends Channel> implements ChannelFacto
             // 通过构造器实例化一个实例
             return constructor.newInstance();
         } catch (Throwable t) {
+            // 不细究
             throw new ChannelException("Unable to create Channel from class " + constructor.getDeclaringClass(), t);
         }
     }

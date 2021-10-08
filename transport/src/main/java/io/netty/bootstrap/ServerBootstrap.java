@@ -39,7 +39,9 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
     // The order in which child ChannelOptions are applied is important they may depend on each other for validation
     // purposes.
-    // 应用子通道选项的顺序是很重要的。它们也许彼此依赖以达到校验目的。
+    /**
+     * 应用子通道选项的顺序是很重要的，它们也许彼此依赖以达到校验目的。
+     */
     private final Map<ChannelOption<?>, Object> childOptions = new LinkedHashMap<ChannelOption<?>, Object>();
 
     /**
@@ -172,23 +174,25 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
     @Override
     void init(Channel channel) {
-        // 设置通道选项（一般是空的）
+        // 设置通道选项（一般是空的，暂不细究）
         setChannelOptions(channel, newOptionsArray(), logger);
-        // 设置属性（一般是空的）
+        // 设置属性（一般是空的，暂不细究）
         setAttributes(channel, newAttributesArray());
 
         // 获得通道流水线
         ChannelPipeline p = channel.pipeline();
 
-        // 当前子事件循环组
+        // 子事件循环组
         final EventLoopGroup currentChildGroup = childGroup;
-        // 当前子处理者（一般是匿名类实现）
+        // 子处理者（一般是匿名类实现）
         final ChannelHandler currentChildHandler = childHandler;
-        // 当前的子选项数组
+
+        // 子选项数组
         final Entry<ChannelOption<?>, Object>[] currentChildOptions = newOptionsArray(childOptions);
-        // 当前子属性数组
+        // 子属性数组
         final Entry<AttributeKey<?>, Object>[] currentChildAttrs = newAttributesArray(childAttrs);
 
+        // 通道流水线添加通道处理者
         p.addLast(new ChannelInitializer<Channel>() {
             @Override
             public void initChannel(final Channel ch) {

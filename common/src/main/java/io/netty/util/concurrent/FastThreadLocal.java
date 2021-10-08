@@ -44,7 +44,7 @@ import java.util.Set;
 public class FastThreadLocal<V> {
 
     /**
-     * 将被移除的变量索引
+     * 将被移除的变量的变量表索引
      */
     private static final int variablesToRemoveIndex = InternalThreadLocalMap.nextVariableIndex();
 
@@ -99,7 +99,7 @@ public class FastThreadLocal<V> {
 
     @SuppressWarnings("unchecked")
     private static void addToVariablesToRemove(InternalThreadLocalMap threadLocalMap, FastThreadLocal<?> variable) {
-        // 获得将要移除位置的索引变量
+        // 获得当前线程本地将要移除位置的索引变量
         Object v = threadLocalMap.indexedVariable(variablesToRemoveIndex);
 
         // 将被移除的快速线程本地集合
@@ -115,7 +115,7 @@ public class FastThreadLocal<V> {
             variablesToRemove = (Set<FastThreadLocal<?>>) v;
         }
 
-        // 将被移除的快速线程本地集合添加入参快速线程本地实例
+        // 将被移除的快速线程本地添加将被移除的变量表集合内
         variablesToRemove.add(variable);
     }
 
@@ -145,15 +145,22 @@ public class FastThreadLocal<V> {
 
     /**
      * Returns the current value for the current thread
+     *
+     * 返回当前线程的当前值
      */
     @SuppressWarnings("unchecked")
     public final V get() {
+        // 获得内部线程本地映射
         InternalThreadLocalMap threadLocalMap = InternalThreadLocalMap.get();
+
+        // 从内部线程本地映射的索引表中，获得对应值
         Object v = threadLocalMap.indexedVariable(index);
+        // 如果该值已经被设置，则直接返回
         if (v != InternalThreadLocalMap.UNSET) {
             return (V) v;
         }
 
+        // 如果该值还未被初始化，则进行初始化操作，返回初始值
         return initialize(threadLocalMap);
     }
 
@@ -189,13 +196,19 @@ public class FastThreadLocal<V> {
     private V initialize(InternalThreadLocalMap threadLocalMap) {
         V v = null;
         try {
+            // 获得初始值
             v = initialValue();
         } catch (Exception e) {
+            // 不细究
             PlatformDependent.throwException(e);
         }
 
+        // 线程本地映射设置内部索引表变量
         threadLocalMap.setIndexedVariable(index, v);
+        // 将此快速线程本地添加到将要移除的变量表
         addToVariablesToRemove(threadLocalMap, this);
+
+        // 返回初始值
         return v;
     }
 
@@ -289,8 +302,11 @@ public class FastThreadLocal<V> {
 
     /**
      * Returns the initial value for this thread-local variable.
+     *
+     * 返回此线程本地变量的初始值。
      */
     protected V initialValue() throws Exception {
+        // 初始值为null
         return null;
     }
 

@@ -56,7 +56,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(NioServerSocketChannel.class);
 
     /**
-     * 实例化一个套接字
+     * 实例化一个套接字（实际上是返回一个服务端套接字通道）
      *
      * @param provider 选择器提供者
      * @return 服务端套接字通道
@@ -67,12 +67,15 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
              *  Use the {@link SelectorProvider} to open {@link SocketChannel} and so remove condition in
              *  {@link SelectorProvider#provider()} which is called by each ServerSocketChannel.open() otherwise.
              *
+             *  使用选择器提供者以打开套接字通道，因此删除选择器提供者里的条件，否则这些条件由服务端套接字通道打开方法来调用。
+             *
              *  See <a href="https://github.com/netty/netty/issues/2308">#2308</a>.
              */
 
             // jdk提供的打开服务端套接字通道
             return provider.openServerSocketChannel();
         } catch (IOException e) {
+            // 以下不细究
             throw new ChannelException(
                     "Failed to open a server socket.", e);
         }
@@ -106,6 +109,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
      */
     public NioServerSocketChannel(ServerSocketChannel channel) {
         super(null, channel, SelectionKey.OP_ACCEPT);
+        // 实例化并且设置nio服务端套接字通道配置
         config = new NioServerSocketChannelConfig(this, javaChannel().socket());
     }
 

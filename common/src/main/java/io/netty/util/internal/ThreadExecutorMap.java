@@ -92,6 +92,7 @@ public final class ThreadExecutorMap {
                 try {
                     command.run();
                 } finally {
+                    // 当任务执行完，修改当前事件执行器
                     setCurrentEventExecutor(null);
                 }
             }

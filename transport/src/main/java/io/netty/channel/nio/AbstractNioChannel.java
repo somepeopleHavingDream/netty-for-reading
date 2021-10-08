@@ -89,6 +89,9 @@ public abstract class AbstractNioChannel extends AbstractChannel {
             // 设置通道为非阻塞模式
             ch.configureBlocking(false);
         } catch (IOException e) {
+            /*
+                以下不细究
+             */
             try {
                 ch.close();
             } catch (IOException e2) {
@@ -397,7 +400,6 @@ public abstract class AbstractNioChannel extends AbstractChannel {
                 /*
                     以下不细究
                  */
-
                 if (!selected) {
                     // Force the Selector to select now as the "canceled" SelectionKey may still be
                     // cached and not removed because no Select.select(..) operation was called yet.

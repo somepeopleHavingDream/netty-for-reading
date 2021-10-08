@@ -19,12 +19,12 @@ import io.netty.util.internal.DefaultPriorityQueue;
 import io.netty.util.internal.ObjectUtil;
 import io.netty.util.internal.PriorityQueue;
 
-import static io.netty.util.concurrent.ScheduledFutureTask.deadlineNanos;
-
 import java.util.Comparator;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+
+import static io.netty.util.concurrent.ScheduledFutureTask.deadlineNanos;
 
 /**
  * Abstract base class for {@link EventExecutor}s that want to support scheduling.
@@ -175,6 +175,11 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
         return scheduledTask != null ? scheduledTask.deadlineNanos() : -1;
     }
 
+    /**
+     * 获得调度任务
+     *
+     * @return 调度任务队列队头的调度任务
+     */
     final ScheduledFutureTask<?> peekScheduledTask() {
         // 获得可调度任务队列
         Queue<ScheduledFutureTask<?>> scheduledTaskQueue = this.scheduledTaskQueue;

@@ -55,14 +55,20 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     @SuppressWarnings("unchecked")
     private static final Map.Entry<AttributeKey<?>, Object>[] EMPTY_ATTRIBUTE_ARRAY = new Map.Entry[0];
 
+    /**
+     * 用于当前引导类的事件循环组
+     */
     volatile EventLoopGroup group;
+
     @SuppressWarnings("deprecation")
     private volatile ChannelFactory<? extends C> channelFactory;
     private volatile SocketAddress localAddress;
 
     // The order in which ChannelOptions are applied is important they may depend on each other for validation
     // purposes.
-    // 应用子通道选项的顺序是很重要的。它们也许彼此依赖以达到校验目的。
+    /**
+     * 应用子通道选项的顺序是很重要的，它们也许彼此依赖以达到校验目的。
+     */
     private final Map<ChannelOption<?>, Object> options = new LinkedHashMap<ChannelOption<?>, Object>();
 
     /**
@@ -377,7 +383,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     final ChannelFuture initAndRegister() {
         Channel channel = null;
         try {
-            // 从通道工厂中实例化一个通道
+            // 从通道工厂中实例化一个通道（jdk的通道）
             channel = channelFactory.newChannel();
             // 初始化通道
             init(channel);
@@ -396,7 +402,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             return new DefaultChannelPromise(new FailedChannel(), GlobalEventExecutor.INSTANCE).setFailure(t);
         }
 
-        // boss事件循环者注册通道
+        // boss事件循环者组注册通道，获得注册通道未来，即该注册过程可能未完成（nio事件循环组注册通道）
         ChannelFuture regFuture = config().group().register(channel);
         if (regFuture.cause() != null) {
             /*
@@ -651,6 +657,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         private volatile boolean registered;
 
         PendingRegistrationPromise(Channel channel) {
+            // 设置通道
             super(channel);
         }
 

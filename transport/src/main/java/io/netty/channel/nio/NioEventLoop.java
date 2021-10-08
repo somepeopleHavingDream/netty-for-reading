@@ -526,7 +526,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                         // 获得当前调度任务的截止时间
                         long curDeadlineNanos = nextScheduledTaskDeadlineNanos();
                         if (curDeadlineNanos == -1L) {
-                            // 日历中什么都没有
+                            // 日历中什么都没有，即任务没有截止时间
                             curDeadlineNanos = NONE; // nothing on the calendar
                         }
                         // 设置下一次事件循环的唤醒时间
@@ -905,9 +905,16 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         return selector.selectNow();
     }
 
+    /**
+     * 做选择操作
+     *
+     * @param deadlineNanos 截止时间（纳秒）
+     * @return 就绪操作设置为已更新的键集的数量
+     * @throws IOException 输入输出异常
+     */
     private int select(long deadlineNanos) throws IOException {
-        // 如果没有选择结束事件，则做阻塞的选择操作
         if (deadlineNanos == NONE) {
+            // 做阻塞的选择操作
             return selector.select();
         }
 

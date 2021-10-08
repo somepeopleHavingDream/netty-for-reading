@@ -253,15 +253,15 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         // 新的通道处理者上下文
         final AbstractChannelHandlerContext newCtx;
 
-        // 锁住当前实例
+        // 锁住当前通道流水线实例
         synchronized (this) {
-            // 检查多样性
+            // 检查通道处理者的多多重性
             checkMultiplicity(handler);
 
-            // 实例一个上下文
+            // 实例一个通道处理者上下文
             newCtx = newContext(group, filterName(name, handler), handler);
 
-            // 实际地添加到流水线末尾的操作
+            // 将通道处理者上下文实际地添加到流水线末尾的操作
             addLast0(newCtx);
 
             // If the registered is false it means that the channel was not registered on an eventLoop yet.
@@ -276,13 +276,13 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             if (!registered) {
                 // 通道处理者上下文状态设置为添加待办
                 newCtx.setAddPending();
-                // 调用处理者之后回调方法
+                // 稍后调用处理者回调
                 callHandlerCallbackLater(newCtx, true);
                 // 返回当前默认通道流水线
                 return this;
             }
 
-            // 如果至少有个通道已被注册到流水线上，则拿到该通道处理者上下文的事件执行器
+            // 如果至少有一个通道已被注册到流水线上，则拿到该通道处理者上下文的事件执行器
             EventExecutor executor = newCtx.executor();
             // 如果该执行器不处于事件循环之中，则需要做一些处理
             if (!executor.inEventLoop()) {
@@ -359,19 +359,22 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     /**
-     * 过滤者名称
+     * 过滤通道处理者名称
      *
      * @param name 入参名称
      * @param handler 通道处理者
-     * @return 过滤者名称
+     * @return 过滤后的通道处理者名称
      */
     private String filterName(String name, ChannelHandler handler) {
         // 如果入参名为空，则生成名称
         if (name == null) {
+            // 生成
             return generateName(handler);
         }
 
-        // 检查是否有重复的处理者名称，如果没有则返回处理者名称
+        /*
+            以下不细究
+         */
         checkDuplicateName(name);
         return name;
     }
@@ -464,30 +467,33 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelPipeline addLast(EventExecutorGroup executor, ChannelHandler... handlers) {
+        // 校验入参通道处理者
         ObjectUtil.checkNotNull(handlers, "handlers");
 
-        // 依次添加到尾部
+        // 将通道处理者依次添加到流水线尾部
         for (ChannelHandler h: handlers) {
             if (h == null) {
                 break;
             }
+
             // 添加到流水线尾部
             addLast(executor, null, h);
         }
 
+        // 返回此通道流水线
         return this;
     }
 
     /**
-     * 生成名称
+     * 生成通道处理者名称
      *
      * @param handler 通道处理者
      * @return 通道处理者名称
      */
     private String generateName(ChannelHandler handler) {
-        // 拿到名称映射
+        // 从名称缓存中拿到名称映射
         Map<Class<?>, String> cache = nameCaches.get();
-        // 通道处理者的类对象
+        // 获得通道处理者的类对象
         Class<?> handlerType = handler.getClass();
         // 通过通道处理者的类对象拿到通道处理者名称
         String name = cache.get(handlerType);
@@ -525,9 +531,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     /**
-     * 生成一个名称
+     * 生成一个通道处理者名称
      *
-     * @param handlerType 处理者类型
+     * @param handlerType 通道处理者类型
      * @return 名称
      */
     private static String generateName0(Class<?> handlerType) {
@@ -715,7 +721,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     /**
-     * 检查多样性
+     * 检查入参通道处理者的多重性
      *
      * @param handler 通道处理者
      */
@@ -1220,7 +1226,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     /**
-     * 通过名称，返回通道处理者上下文
+     * 通过通道处理者名称，返回通道处理者上下文
      *
      * @param name 通道处理者名称
      * @return 通道处理者上下文
@@ -1303,7 +1309,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     /**
-     * 调用处理者之后回调方法
+     * 稍后调用处理者回调方法
      *
      * @param ctx 通道处理者上下文
      * @param added 是否有通道被添加
@@ -1312,7 +1318,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         // 断言：流水线上还未有通道被注册上去
         assert !registered;
 
-        // 生成待办处理者任务（添加的任务或删除的任务）
+        // 生成待办处理者回调（添加的任务或删除的任务）
         PendingHandlerCallback task = added ? new PendingHandlerAddedTask(ctx) : new PendingHandlerRemovedTask(ctx);
         // 首个待办处理者回调
         PendingHandlerCallback pending = pendingHandlerCallbackHead;
@@ -1321,8 +1327,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         if (pending == null) {
             pendingHandlerCallbackHead = task;
         } else {
+            /*
+                以下不细究
+             */
             // Find the tail of the linked-list.
-            // 找到链表的尾部
             while (pending.next != null) {
                 pending = pending.next;
             }

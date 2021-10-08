@@ -58,6 +58,9 @@ public final class DefaultChannelId implements ChannelId {
     }
 
     static {
+        /*
+            设置进程Id
+         */
         int processId = -1;
         String customProcessId = SystemPropertyUtil.get("io.netty.processId");
         if (customProcessId != null) {
@@ -83,6 +86,10 @@ public final class DefaultChannelId implements ChannelId {
         }
 
         PROCESS_ID = processId;
+
+        /*
+            设置机器Id
+         */
 
         byte[] machineId = null;
         String customMachineId = SystemPropertyUtil.get("io.netty.machineId");

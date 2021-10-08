@@ -635,6 +635,11 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         // NOOP
     }
 
+    /**
+     * 做唤醒操作
+     *
+     * @param inEventLoop 当前线程是否处于事件循环中
+     */
     protected void wakeup(boolean inEventLoop) {
         // 如果未处于事件循环内，则提供任务
         if (!inEventLoop) {
@@ -907,7 +912,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     public void execute(Runnable task) {
         // 检查入参可运行任务不为null
         ObjectUtil.checkNotNull(task, "task");
-        // 执行任务
+        // 执行任务（一般都是立即执行）
         execute(task, !(task instanceof LazyRunnable) && wakesUpForTask(task));
     }
 
@@ -916,15 +921,21 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         execute(ObjectUtil.checkNotNull(task, "task"), false);
     }
 
+    /**
+     * 执行任务
+     *
+     * @param task 可运行任务
+     * @param immediate 是否立即执行
+     */
     private void execute(Runnable task, boolean immediate) {
-        // 是否处于事件循环内
+        // 当前线程是否处于事件循环内
         boolean inEventLoop = inEventLoop();
         // 添加任务到队列中
         addTask(task);
 
         // 如果当前线程未处于事件循环中
         if (!inEventLoop) {
-            // 开启线程（内部是异步的）
+            // 开启线程（异步的）
             startThread();
 
             // 如果当前单线程事件处理器已经关闭
@@ -950,6 +961,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
 
         // 如果不是添加任务唤醒，并且是立即的，则当即做唤醒操作
         if (!addTaskWakesUp && immediate) {
+            // 做唤醒操作
             wakeup(inEventLoop);
         }
     }
@@ -1056,16 +1068,16 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     private void startThread() {
         // 如果当前单线程事件执行器还未开启
         if (state == ST_NOT_STARTED) {
-            // 设置当前单线程事件执行器的状态
+            // 设置当前单线程事件执行器的状态为已开启状态
             if (STATE_UPDATER.compareAndSet(this, ST_NOT_STARTED, ST_STARTED)) {
                 boolean success = false;
                 try {
-                    // 处理开启线程
+                    // 处理开启线程（内部是异步的，异步开启一个线程）
                     doStartThread();
                     // 设置开启线程成功
                     success = true;
                 } finally {
-                    // 修改当前单线程事件执行器的状态
+                    // 如果开启线程失败，则修改当前单线程事件执行器的状态
                     if (!success) {
                         STATE_UPDATER.compareAndSet(this, ST_STARTED, ST_NOT_STARTED);
                     }

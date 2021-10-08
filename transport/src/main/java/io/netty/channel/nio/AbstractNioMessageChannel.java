@@ -41,6 +41,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
 
     @Override
     protected AbstractNioUnsafe newUnsafe() {
+        // 实例化并返回一个nio消息不安全实例
         return new NioMessageUnsafe();
     }
 

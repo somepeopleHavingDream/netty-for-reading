@@ -56,7 +56,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
     private final Promise<?> terminationFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);
 
     /**
-     * 事件执行器选择器
+     * 用于此事件执行器组的事件执行器选择器
      */
     private final EventExecutorChooserFactory.EventExecutorChooser chooser;
 

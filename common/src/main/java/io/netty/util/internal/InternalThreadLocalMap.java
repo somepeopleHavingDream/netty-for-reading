@@ -194,6 +194,9 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
     public static int nextVariableIndex() {
         int index = nextIndex.getAndIncrement();
         if (index < 0) {
+            /*
+                以下不细究
+             */
             nextIndex.decrementAndGet();
             throw new IllegalStateException("too many thread-local indexed variables");
         }
@@ -405,6 +408,8 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
     public boolean setIndexedVariable(int index, Object value) {
         // 获得当前内部线程本地映射的索引变量表
         Object[] lookup = indexedVariables;
+
+        // 如果要设置的索引下标在当前索引变量表的范围内，则直接设置，否则做扩容操作
         if (index < lookup.length) {
             // 获得旧值
             Object oldValue = lookup[index];
@@ -424,8 +429,11 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
     }
 
     private void expandIndexedVariableTableAndSet(int index, Object value) {
+        // 获得当前内部线程本地映射的索引变量表和索引变量表的旧容量
         Object[] oldArray = indexedVariables;
         final int oldCapacity = oldArray.length;
+
+        // 计算出新的索引表容量
         int newCapacity = index;
         newCapacity |= newCapacity >>>  1;
         newCapacity |= newCapacity >>>  2;
@@ -434,9 +442,12 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         newCapacity |= newCapacity >>> 16;
         newCapacity ++;
 
+        // 新表赋值
         Object[] newArray = Arrays.copyOf(oldArray, newCapacity);
         Arrays.fill(newArray, oldCapacity, newArray.length, UNSET);
         newArray[index] = value;
+
+        // 重新设置当前内部线程本地映射的索引表
         indexedVariables = newArray;
     }
 

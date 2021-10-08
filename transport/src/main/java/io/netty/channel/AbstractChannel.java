@@ -47,6 +47,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      */
     private final Channel parent;
 
+    /**
+     * 通道Id
+     */
     private final ChannelId id;
     private final Unsafe unsafe;
 
@@ -87,9 +90,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      *        the parent of this channel. {@code null} if there's no parent.
      */
     protected AbstractChannel(Channel parent) {
-        // 设置父通道、id、unsafe、流水线
+        // 设置父通道
         this.parent = parent;
+        // 设置通道Id
         id = newId();
+        // 设置不安全实例
         unsafe = newUnsafe();
         // 实例化一个通道流水线
         pipeline = newChannelPipeline();
@@ -133,7 +138,6 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      * 此类也许会覆写此方法以将自定义的通道Id赋值给通道。
      */
     protected ChannelId newId() {
-        // （不细究）
         return DefaultChannelId.newInstance();
     }
 
@@ -143,6 +147,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      * 返回一个新的默认通道流水线实例。
      */
     protected DefaultChannelPipeline newChannelPipeline() {
+        // 实例化并返回一个默认通道流水线实例
         return new DefaultChannelPipeline(this);
     }
 

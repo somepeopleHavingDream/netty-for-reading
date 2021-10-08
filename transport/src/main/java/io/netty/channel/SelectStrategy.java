@@ -50,6 +50,8 @@ public interface SelectStrategy {
      * The {@link SelectStrategy} can be used to steer the outcome of a potential select
      * call.
      *
+     * 选择策略被用于控制潜在选择调用的输出。
+     *
      * @param selectSupplier The supplier with the result of a select result.
      * @param hasTasks true if tasks are waiting to be processed.
      * @return {@link #SELECT} if the next step should be blocking select {@link #CONTINUE} if
