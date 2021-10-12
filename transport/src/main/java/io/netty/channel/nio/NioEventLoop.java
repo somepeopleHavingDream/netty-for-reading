@@ -148,7 +148,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     private final SelectStrategy selectStrategy;
 
     /**
-     * 输入输出率
+     * 输入输出率，默认为50
      */
     private volatile int ioRatio = 50;
 
@@ -516,6 +516,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     strategy = selectStrategy.calculateStrategy(selectNowSupplier, hasTasks());
                     switch (strategy) {
                     case SelectStrategy.CONTINUE:
+                        // 以下不细究
                         continue;
 
                     case SelectStrategy.BUSY_WAIT:
@@ -526,7 +527,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                         // 获得当前调度任务的截止时间
                         long curDeadlineNanos = nextScheduledTaskDeadlineNanos();
                         if (curDeadlineNanos == -1L) {
-                            // 日历中什么都没有，即任务没有截止时间
+                            // 日历中什么都没有，即任务没有截止时间，当事件循环正在等待且未安排唤醒时，
                             curDeadlineNanos = NONE; // nothing on the calendar
                         }
                         // 设置下一次事件循环的唤醒时间
@@ -535,11 +536,15 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                         try {
                             // 如果没有任务，做选择操作（有可能是阻塞的选择操作，导致该线程被阻塞了）
                             if (!hasTasks()) {
+                                // 做选择操作
                                 strategy = select(curDeadlineNanos);
                             }
                         } finally {
                             // This update is just to help block unnecessary selector wakeups
                             // so use of lazySet is ok (no race condition)
+                            /*
+                                此更新只是为了帮助阻止非必要的选择器更新，因此可以使用懒集（没有竞争条件）
+                             */
                             nextWakeupNanos.lazySet(AWAKE);
                         }
                         // fall through
@@ -561,6 +566,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 selectCnt++;
                 cancelledKeys = 0;
                 needsToSelectAgain = false;
+
                 // 获得输入输出率
                 final int ioRatio = this.ioRatio;
                 boolean ranTasks;
@@ -579,11 +585,10 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                         ranTasks = runAllTasks();
                     }
                 } else if (strategy > 0) {
-                    /*
-                        以下不细究
-                     */
+                    // 记录输入输出开始时间
                     final long ioStartTime = System.nanoTime();
                     try {
+                        // 处理被选择的键
                         processSelectedKeys();
                     } finally {
                         // Ensure we always run tasks.
@@ -671,6 +676,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
+    /**
+     * 处理所有的键
+     */
     private void processSelectedKeys() {
         if (selectedKeys != null) {
             processSelectedKeysOptimized();
@@ -913,8 +921,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
      * @throws IOException 输入输出异常
      */
     private int select(long deadlineNanos) throws IOException {
+        // 如果没设置选择结束时间，则做阻塞的选择操作
         if (deadlineNanos == NONE) {
-            // 做阻塞的选择操作
+            // 做阻塞的选择操作，直到选择器有选择返回
             return selector.select();
         }
 

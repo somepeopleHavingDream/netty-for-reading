@@ -23,7 +23,11 @@ import java.util.NoSuchElementException;
 
 final class SelectedSelectionKeySet extends AbstractSet<SelectionKey> {
 
+    /**
+     * 被选择的选择键
+     */
     SelectionKey[] keys;
+
     int size;
 
     SelectedSelectionKeySet() {
@@ -84,10 +88,19 @@ final class SelectedSelectionKeySet extends AbstractSet<SelectionKey> {
         };
     }
 
+    /**
+     * 重置
+     */
     void reset() {
+        // 做重置操作
         reset(0);
     }
 
+    /**
+     * 重置
+     *
+     * @param start 起始偏移位置
+     */
     void reset(int start) {
         Arrays.fill(keys, start, size, null);
         size = 0;

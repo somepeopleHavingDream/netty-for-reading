@@ -22,7 +22,15 @@ import java.nio.channels.spi.SelectorProvider;
 import java.util.Set;
 
 final class SelectedSelectionKeySetSelector extends Selector {
+
+    /**
+     * 被选择的选择键集
+     */
     private final SelectedSelectionKeySet selectionKeys;
+
+    /**
+     * 代理选择器
+     */
     private final Selector delegate;
 
     SelectedSelectionKeySetSelector(Selector delegate, SelectedSelectionKeySet selectionKeys) {
@@ -52,7 +60,9 @@ final class SelectedSelectionKeySetSelector extends Selector {
 
     @Override
     public int selectNow() throws IOException {
+        // 重置被选择的选择键集
         selectionKeys.reset();
+        // 代理选择器做马上选择操作
         return delegate.selectNow();
     }
 
