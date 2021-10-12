@@ -48,10 +48,15 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
 
     /**
      * {@link ChannelHandler#handlerAdded(ChannelHandlerContext)} is about to be called.
+     *
+     * 通道处理者的添加处理者将被调用。
      */
     private static final int ADD_PENDING = 1;
+
     /**
      * {@link ChannelHandler#handlerAdded(ChannelHandlerContext)} was called.
+     *
+     * 通道处理者的添加处理者被调用。
      */
     private static final int ADD_COMPLETE = 2;
 
