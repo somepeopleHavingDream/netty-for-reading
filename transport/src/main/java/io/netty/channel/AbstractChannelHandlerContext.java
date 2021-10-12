@@ -23,40 +23,16 @@ import io.netty.util.ResourceLeakHint;
 import io.netty.util.concurrent.AbstractEventExecutor;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.OrderedEventExecutor;
-import io.netty.util.internal.ObjectPool;
+import io.netty.util.internal.*;
 import io.netty.util.internal.ObjectPool.Handle;
 import io.netty.util.internal.ObjectPool.ObjectCreator;
-import io.netty.util.internal.PromiseNotificationUtil;
-import io.netty.util.internal.ThrowableUtil;
-import io.netty.util.internal.ObjectUtil;
-import io.netty.util.internal.StringUtil;
-import io.netty.util.internal.SystemPropertyUtil;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.net.SocketAddress;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
-import static io.netty.channel.ChannelHandlerMask.MASK_BIND;
-import static io.netty.channel.ChannelHandlerMask.MASK_CHANNEL_ACTIVE;
-import static io.netty.channel.ChannelHandlerMask.MASK_CHANNEL_INACTIVE;
-import static io.netty.channel.ChannelHandlerMask.MASK_CHANNEL_READ;
-import static io.netty.channel.ChannelHandlerMask.MASK_CHANNEL_READ_COMPLETE;
-import static io.netty.channel.ChannelHandlerMask.MASK_CHANNEL_REGISTERED;
-import static io.netty.channel.ChannelHandlerMask.MASK_CHANNEL_UNREGISTERED;
-import static io.netty.channel.ChannelHandlerMask.MASK_CHANNEL_WRITABILITY_CHANGED;
-import static io.netty.channel.ChannelHandlerMask.MASK_CLOSE;
-import static io.netty.channel.ChannelHandlerMask.MASK_CONNECT;
-import static io.netty.channel.ChannelHandlerMask.MASK_DEREGISTER;
-import static io.netty.channel.ChannelHandlerMask.MASK_DISCONNECT;
-import static io.netty.channel.ChannelHandlerMask.MASK_EXCEPTION_CAUGHT;
-import static io.netty.channel.ChannelHandlerMask.MASK_FLUSH;
-import static io.netty.channel.ChannelHandlerMask.MASK_ONLY_INBOUND;
-import static io.netty.channel.ChannelHandlerMask.MASK_ONLY_OUTBOUND;
-import static io.netty.channel.ChannelHandlerMask.MASK_READ;
-import static io.netty.channel.ChannelHandlerMask.MASK_USER_EVENT_TRIGGERED;
-import static io.netty.channel.ChannelHandlerMask.MASK_WRITE;
-import static io.netty.channel.ChannelHandlerMask.mask;
+import static io.netty.channel.ChannelHandlerMask.*;
 
 abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, ResourceLeakHint {
 
@@ -257,6 +233,9 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         }
     }
 
+    /**
+     * 调用激活通道
+     */
     private void invokeChannelActive() {
         // 如果能调用处理者
         if (invokeHandler()) {
@@ -546,6 +525,12 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         return promise;
     }
 
+    /**
+     * 调用绑定
+     *
+     * @param localAddress 本地地址
+     * @param promise 通道承诺
+     */
     private void invokeBind(SocketAddress localAddress, ChannelPromise promise) {
         // 如果能调用处理者
         if (invokeHandler()) {
@@ -821,16 +806,24 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
     private void write(Object msg, boolean flush, ChannelPromise promise) {
         ObjectUtil.checkNotNull(msg, "msg");
         try {
+            // 如果不是一个有效的承诺
             if (isNotValidPromise(promise, true)) {
+                /*
+                    以下不细究
+                 */
                 ReferenceCountUtil.release(msg);
                 // cancelled
                 return;
             }
         } catch (RuntimeException e) {
+            /*
+                以下不细究
+             */
             ReferenceCountUtil.release(msg);
             throw e;
         }
 
+        // 找到出境上下文
         final AbstractChannelHandlerContext next = findContextOutbound(flush ?
                 (MASK_WRITE | MASK_FLUSH) : MASK_WRITE);
         final Object m = pipeline.touch(msg, next);
@@ -866,6 +859,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
 
     @Override
     public ChannelPromise newPromise() {
+        // 实例化并返回默认通道承诺
         return new DefaultChannelPromise(channel(), executor());
     }
 
@@ -888,6 +882,15 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         return new FailedChannelFuture(channel(), executor(), cause);
     }
 
+    /**
+     * 是否不是有效的承诺
+     *
+     * 不细究
+     *
+     * @param promise 通道承诺
+     * @param allowVoidPromise 允许void承诺
+     * @return 是否不是有效的承诺
+     */
     private boolean isNotValidPromise(ChannelPromise promise, boolean allowVoidPromise) {
         // 检查入参通道承诺
         ObjectUtil.checkNotNull(promise, "promise");
@@ -934,6 +937,12 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         return ctx;
     }
 
+    /**
+     * 找到出境上下文
+     *
+     * @param mask 掩码
+     * @return 出境上下文
+     */
     private AbstractChannelHandlerContext findContextOutbound(int mask) {
         // 拿到当前通道处理者上下文
         AbstractChannelHandlerContext ctx = this;
@@ -941,7 +950,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         EventExecutor currentExecutor = executor();
         do {
             ctx = ctx.prev;
-            // 跳过上下文（不细究）
+            // 跳过上下文（暂不细究）
         } while (skipContext(ctx, currentExecutor, mask, MASK_ONLY_OUTBOUND));
 
         // 返回出境上下文
@@ -1007,6 +1016,11 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         assert updated; // This should always be true as it MUST be called before setAddComplete() or setRemoved().
     }
 
+    /**
+     * 调用添加处理者
+     *
+     * @throws Exception 异常
+     */
     final void callHandlerAdded() throws Exception {
         // We must call setAddComplete before calling handlerAdded. Otherwise if the handlerAdded method generates
         // any pipeline events ctx.handler() will miss them because the state will not allow it.

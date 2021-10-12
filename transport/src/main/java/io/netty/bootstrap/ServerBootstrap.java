@@ -206,9 +206,11 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                     pipeline.addLast(handler);
                 }
 
+                // 获取通道的事件循环，事件循环执行入参匿名方法
                 ch.eventLoop().execute(new Runnable() {
                     @Override
                     public void run() {
+                        //
                         pipeline.addLast(new ServerBootstrapAcceptor(
                                 ch, currentChildGroup, currentChildHandler, currentChildOptions, currentChildAttrs));
                     }

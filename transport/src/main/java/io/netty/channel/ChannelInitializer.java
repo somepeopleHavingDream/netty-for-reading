@@ -54,8 +54,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class ChannelInitializer<C extends Channel> extends ChannelInboundHandlerAdapter {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(ChannelInitializer.class);
+
     // We use a Set as a ChannelInitializer is usually shared between all Channels in a Bootstrap /
     // ServerBootstrap. This way we can reduce the memory usage compared to use Attributes.
+    /**
+     * 我们使用作为通道初始者的集合，通常共享于引导和服务引导的所有通道。
+     * 比较于使用属性，通过这种方式，我们可以减少内存。
+     */
     private final Set<ChannelHandlerContext> initMap = Collections.newSetFromMap(
             new ConcurrentHashMap<ChannelHandlerContext, Boolean>());
 
@@ -101,14 +106,24 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
 
     /**
      * {@inheritDoc} If override this method ensure you call super!
+     *
+     * 如果覆盖此方法，确保你调用父类！
      */
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        // 如果入参通道处理者上下文已被注册
         if (ctx.channel().isRegistered()) {
             // This should always be true with our current DefaultChannelPipeline implementation.
             // The good thing about calling initChannel(...) in handlerAdded(...) is that there will be no ordering
             // surprises if a ChannelInitializer will add another ChannelInitializer. This is as all handlers
             // will be added in the expected order.
+
+            /*
+                对于我们当前默认通道流水线实现，这应该总是为真。
+                在添加通道处理者方法中调用初始化通道方法是一件好事情，因为如果通道初始者将添加另一个通道初始者，将不会发送排序意外。
+                因为所有的处理者将以期待的顺序被添加。
+             */
+            // 如果初始化通道成功
             if (initChannel(ctx)) {
 
                 // We are done with init the Channel, removing the initializer now.
@@ -124,8 +139,10 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
 
     @SuppressWarnings("unchecked")
     private boolean initChannel(ChannelHandlerContext ctx) throws Exception {
+        // 防止再次重新进入（如果已存在，则此处判断为假）
         if (initMap.add(ctx)) { // Guard against re-entrance.
             try {
+                // 初始化通道
                 initChannel((C) ctx.channel());
             } catch (Throwable cause) {
                 // Explicitly call exceptionCaught(...) as we removed the handler before calling initChannel(...).
