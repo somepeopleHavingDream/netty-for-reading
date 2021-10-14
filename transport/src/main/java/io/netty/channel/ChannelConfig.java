@@ -176,6 +176,8 @@ public interface ChannelConfig {
 
     /**
      * Returns {@link RecvByteBufAllocator} which is used for the channel to allocate receive buffers.
+     *
+     * 返回接收字节缓冲分配器，该分配器被用于通道以使用接收缓冲。
      */
     <T extends RecvByteBufAllocator> T getRecvByteBufAllocator();
 

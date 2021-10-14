@@ -28,6 +28,10 @@ import static io.netty.util.internal.ObjectUtil.checkPositive;
  * 最大消息接收字节缓冲分配器的默认实现，它符合了通道配置的是否是自动读方法，并且也阻止了溢出。
  */
 public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessagesRecvByteBufAllocator {
+
+    /**
+     * 每次读的最大消息数
+     */
     private volatile int maxMessagesPerRead;
 
     /**

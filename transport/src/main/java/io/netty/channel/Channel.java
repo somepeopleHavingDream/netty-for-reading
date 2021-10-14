@@ -122,6 +122,8 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
 
     /**
      * Return the {@link ChannelMetadata} of the {@link Channel} which describe the nature of the {@link Channel}.
+     *
+     * 返回通道的通道元数据，该元数据描述了通道的性质。
      */
     ChannelMetadata metadata();
 

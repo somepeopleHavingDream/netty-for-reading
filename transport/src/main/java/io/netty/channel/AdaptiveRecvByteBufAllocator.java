@@ -59,16 +59,19 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
     private static final int[] SIZE_TABLE;
 
     static {
+        // 实例化大小表，并依次赋值
         List<Integer> sizeTable = new ArrayList<Integer>();
         for (int i = 16; i < 512; i += 16) {
             sizeTable.add(i);
         }
 
         // Suppress a warning since i becomes negative when an integer overflow happens
+        // 自从当整型溢出发生，i变成负数，取消警告
         for (int i = 512; i > 0; i <<= 1) { // lgtm[java/constant-comparison]
             sizeTable.add(i);
         }
 
+        // 给成员变量大小表赋值
         SIZE_TABLE = new int[sizeTable.size()];
         for (int i = 0; i < SIZE_TABLE.length; i ++) {
             SIZE_TABLE[i] = sizeTable.get(i);
@@ -81,6 +84,12 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
     @Deprecated
     public static final AdaptiveRecvByteBufAllocator DEFAULT = new AdaptiveRecvByteBufAllocator();
 
+    /**
+     * 获得入参大小在大小表中的索引
+     *
+     * @param size 大小值
+     * @return 入参大小值在大小表中的索引
+     */
     private static int getSizeTableIndex(final int size) {
         for (int low = 0, high = SIZE_TABLE.length - 1;;) {
             if (high < low) {
@@ -105,6 +114,9 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
         }
     }
 
+    /**
+     * 处理实现
+     */
     private final class HandleImpl extends MaxMessageHandle {
         private final int minIndex;
         private final int maxIndex;
@@ -192,11 +204,14 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
     /**
      * Creates a new predictor with the specified parameters.
      *
+     * 用给定参数创建新的预测器。
+     *
      * @param minimum  the inclusive lower bound of the expected buffer size
      * @param initial  the initial buffer size when no feed back was received
      * @param maximum  the inclusive upper bound of the expected buffer size
      */
     public AdaptiveRecvByteBufAllocator(int minimum, int initial, int maximum) {
+        // 检查入参
         checkPositive(minimum, "minimum");
         if (initial < minimum) {
             throw new IllegalArgumentException("initial: " + initial);
@@ -205,6 +220,7 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
             throw new IllegalArgumentException("maximum: " + maximum);
         }
 
+        // 设置最小索引
         int minIndex = getSizeTableIndex(minimum);
         if (SIZE_TABLE[minIndex] < minimum) {
             this.minIndex = minIndex + 1;
@@ -212,6 +228,7 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
             this.minIndex = minIndex;
         }
 
+        // 设置最大索引
         int maxIndex = getSizeTableIndex(maximum);
         if (SIZE_TABLE[maxIndex] > maximum) {
             this.maxIndex = maxIndex - 1;
@@ -219,6 +236,7 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
             this.maxIndex = maxIndex;
         }
 
+        // 设置初始容量大小
         this.initial = initial;
     }
 

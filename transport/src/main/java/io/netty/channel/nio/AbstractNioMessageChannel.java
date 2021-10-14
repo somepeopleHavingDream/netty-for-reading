@@ -85,7 +85,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
             // 接收字节缓冲分配器的处理者
             final RecvByteBufAllocator.Handle allocHandle = unsafe().recvBufAllocHandle();
 
-            // 接收字节缓冲分配器的处理者重新设置
+            // 接收字节缓冲分配器处理重新设置
             allocHandle.reset(config);
 
             boolean closed = false;
@@ -116,6 +116,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
                         // 如果能继续读，则再次循环
                     } while (continueReading(allocHandle));
                 } catch (Throwable t) {
+                    // 以下不细究
                     exception = t;
                 }
 

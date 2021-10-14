@@ -21,6 +21,8 @@ import java.net.SocketAddress;
 
 /**
  * Represents the properties of a {@link Channel} implementation.
+ *
+ * 代表通道实现的属性。
  */
 public final class ChannelMetadata {
 
@@ -41,6 +43,8 @@ public final class ChannelMetadata {
     /**
      * Create a new instance
      *
+     * 创建一个新实例
+     *
      * @param hasDisconnect     {@code true} if and only if the channel has the {@code disconnect()} operation
      *                          that allows a user to disconnect and then call {@link Channel#connect(SocketAddress)}
      *                          again, such as UDP/IP.
@@ -48,7 +52,10 @@ public final class ChannelMetadata {
      * set for {@link MaxMessagesRecvByteBufAllocator#maxMessagesPerRead()}. Must be {@code > 0}.
      */
     public ChannelMetadata(boolean hasDisconnect, int defaultMaxMessagesPerRead) {
+        // 检查每次读的默认最大消息数
         checkPositive(defaultMaxMessagesPerRead, "defaultMaxMessagesPerRead");
+
+        // 设置已断开连接和默认每次读的最大消息数
         this.hasDisconnect = hasDisconnect;
         this.defaultMaxMessagesPerRead = defaultMaxMessagesPerRead;
     }
@@ -65,6 +72,8 @@ public final class ChannelMetadata {
     /**
      * If a {@link MaxMessagesRecvByteBufAllocator} is in use, then this is the default value for
      * {@link MaxMessagesRecvByteBufAllocator#maxMessagesPerRead()}.
+     *
+     * 如果最大消息接收字节缓冲分配器处于使用中，这是对于最大消息接收字节缓冲分配器的每次读的最大消息数方法的默认值。
      */
     public int defaultMaxMessagesPerRead() {
         return defaultMaxMessagesPerRead;

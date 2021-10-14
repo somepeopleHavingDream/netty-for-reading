@@ -46,6 +46,9 @@ import java.util.Map;
 public class NioServerSocketChannel extends AbstractNioMessageChannel
                              implements io.netty.channel.socket.ServerSocketChannel {
 
+    /**
+     * 用于此nio服务套接字通道的通道元数据
+     */
     private static final ChannelMetadata METADATA = new ChannelMetadata(false, 16);
 
     /**
@@ -234,7 +237,11 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * nio服务套接字通道配置
+     */
     private final class NioServerSocketChannelConfig extends DefaultServerSocketChannelConfig {
+
         private NioServerSocketChannelConfig(NioServerSocketChannel channel, ServerSocket javaSocket) {
             super(channel, javaSocket);
         }
