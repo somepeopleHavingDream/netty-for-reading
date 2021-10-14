@@ -219,6 +219,8 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
         /**
          * Return the assigned {@link RecvByteBufAllocator.Handle} which will be used to allocate {@link ByteBuf}'s when
          * receiving data.
+         *
+         * 返回分配的接收字节缓冲分配器的处理者，该处理者在接收数据时将被使用以分配字节缓冲。
          */
         RecvByteBufAllocator.Handle recvBufAllocHandle();
 

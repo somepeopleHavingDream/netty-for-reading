@@ -40,7 +40,9 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
     static final int DEFAULT_MINIMUM = 64;
 
     // Use an initial value that is bigger than the common MTU of 1500
-    // 使用大于1500的常见最大传输单元的初始值
+    /**
+     * 使用大于1500的常见最大传输单元的初始值
+     */
     static final int DEFAULT_INITIAL = 2048;
 
     /**
@@ -51,6 +53,9 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
     private static final int INDEX_INCREMENT = 4;
     private static final int INDEX_DECREMENT = 1;
 
+    /**
+     * 大小表
+     */
     private static final int[] SIZE_TABLE;
 
     static {
@@ -108,10 +113,13 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
         private boolean decreaseNow;
 
         HandleImpl(int minIndex, int maxIndex, int initial) {
+            // 设置最小索引和最大索引
             this.minIndex = minIndex;
             this.maxIndex = maxIndex;
 
+            // 计算出初始位置的索引，也即初始容量大小
             index = getSizeTableIndex(initial);
+            // 设置下一个接收缓冲大小
             nextReceiveBufferSize = SIZE_TABLE[index];
         }
 
@@ -154,8 +162,19 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
         }
     }
 
+    /**
+     * 最小索引
+     */
     private final int minIndex;
+
+    /**
+     * 最大索引
+     */
     private final int maxIndex;
+
+    /**
+     * 初始值
+     */
     private final int initial;
 
     /**
@@ -206,6 +225,7 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
     @SuppressWarnings("deprecation")
     @Override
     public Handle newHandle() {
+        // 实例化一个处理实现并返回
         return new HandleImpl(minIndex, maxIndex, initial);
     }
 

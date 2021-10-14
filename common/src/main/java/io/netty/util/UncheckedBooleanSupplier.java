@@ -19,8 +19,12 @@ package io.netty.util;
  * Represents a supplier of {@code boolean}-valued results which doesn't throw any checked exceptions.
  */
 public interface UncheckedBooleanSupplier extends BooleanSupplier {
+
     /**
      * Gets a boolean value.
+     *
+     * 获得一个布尔值。
+     *
      * @return a boolean value.
      */
     @Override

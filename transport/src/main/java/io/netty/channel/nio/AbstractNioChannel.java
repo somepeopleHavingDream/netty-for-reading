@@ -82,7 +82,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
      */
     protected AbstractNioChannel(Channel parent, SelectableChannel ch, int readInterestOp) {
         super(parent);
-        // 设置通道和读感兴趣操作
+        // 设置通道和读感兴趣操作（一般为accept操作）
         this.ch = ch;
         this.readInterestOp = readInterestOp;
         try {
@@ -213,11 +213,15 @@ public abstract class AbstractNioChannel extends AbstractChannel {
 
         /**
          * Finish connect
+         *
+         * 结束连接
          */
         void finishConnect();
 
         /**
          * Read from underlying {@link SelectableChannel}
+         *
+         * 从底层的可选通道中读
          */
         void read();
 
@@ -342,10 +346,15 @@ public abstract class AbstractNioChannel extends AbstractChannel {
             // Note this method is invoked by the event loop only if the connection attempt was
             // neither cancelled nor timed out.
 
+            /*
+                注意，仅当连接既不是取消的也不是超时的，此方法被事件循环调用。
+             */
             assert eventLoop().inEventLoop();
 
             try {
+                // 当前通道是否是活跃的
                 boolean wasActive = isActive();
+                // 做结束连接操作
                 doFinishConnect();
                 fulfillConnectPromise(connectPromise, wasActive);
             } catch (Throwable t) {
@@ -393,7 +402,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         boolean selected = false;
         for (;;) {
             try {
-                // 获取jdk底层可选择通道，注册事件，获得选择键
+                // 获取jdk底层可选择通道，注册事件，将当前通道实例附加上，获得选择键
                 selectionKey = javaChannel().register(eventLoop().unwrappedSelector(), 0, this);
                 return;
             } catch (CancelledKeyException e) {
@@ -442,6 +451,8 @@ public abstract class AbstractNioChannel extends AbstractChannel {
 
     /**
      * Finish the connect
+     *
+     * 结束连接
      */
     protected abstract void doFinishConnect() throws Exception;
 

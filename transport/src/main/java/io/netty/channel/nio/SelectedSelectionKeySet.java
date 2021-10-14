@@ -36,12 +36,16 @@ final class SelectedSelectionKeySet extends AbstractSet<SelectionKey> {
 
     @Override
     public boolean add(SelectionKey o) {
+        // 如果选择键为null，则直接返回添加失败
         if (o == null) {
             return false;
         }
 
+        // 赋值
         keys[size++] = o;
+        // 如果键数量已满，则做扩容操作
         if (size == keys.length) {
+            // 扩容
             increaseCapacity();
         }
 
@@ -106,7 +110,11 @@ final class SelectedSelectionKeySet extends AbstractSet<SelectionKey> {
         size = 0;
     }
 
+    /**
+     * 扩容
+     */
     private void increaseCapacity() {
+        // 扩容为原来的两倍
         SelectionKey[] newKeys = new SelectionKey[keys.length << 1];
         System.arraycopy(keys, 0, newKeys, 0, size);
         keys = newKeys;

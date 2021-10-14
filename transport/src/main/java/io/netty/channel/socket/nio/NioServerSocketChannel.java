@@ -49,7 +49,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
     private static final ChannelMetadata METADATA = new ChannelMetadata(false, 16);
 
     /**
-     * 默认选择器提供者
+     * 默认的选择器提供者
      */
     private static final SelectorProvider DEFAULT_SELECTOR_PROVIDER = SelectorProvider.provider();
 
@@ -92,6 +92,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
      * 创建一个新的实例
      */
     public NioServerSocketChannel() {
+        // 使用默认的选择器提供者
         this(newSocket(DEFAULT_SELECTOR_PROVIDER));
     }
 
@@ -172,14 +173,21 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
 
     @Override
     protected int doReadMessages(List<Object> buf) throws Exception {
+        // 底层服务端套接字通道做接收操作，获得套接字通道
         SocketChannel ch = SocketUtils.accept(javaChannel());
 
         try {
+            // 如果套接字通道不为null
             if (ch != null) {
+                // 实例化一个nio套接字通道，放入到入参缓冲集合中
                 buf.add(new NioSocketChannel(this, ch));
+                // 返回1，表示接收了一个客户端
                 return 1;
             }
         } catch (Throwable t) {
+            /*
+                以下不细究
+             */
             logger.warn("Failed to create a new channel from an accepted socket.", t);
 
             try {
@@ -189,6 +197,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
             }
         }
 
+        // 以下不细究
         return 0;
     }
 
@@ -201,6 +210,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
 
     @Override
     protected void doFinishConnect() throws Exception {
+        // 直接抛出不支持操作异常
         throw new UnsupportedOperationException();
     }
 

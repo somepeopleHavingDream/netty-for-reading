@@ -461,11 +461,18 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     /**
      * {@link Unsafe} implementation which sub-classes must extend and use.
+     *
+     * 不安全实现，该实现子类必须扩展并且使用。
      */
     protected abstract class AbstractUnsafe implements Unsafe {
 
         private volatile ChannelOutboundBuffer outboundBuffer = new ChannelOutboundBuffer(AbstractChannel.this);
+
+        /**
+         * 接收字节缓冲分配器处理者
+         */
         private RecvByteBufAllocator.Handle recvHandle;
+
         private boolean inFlush0;
 
         /**
@@ -481,9 +488,13 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         @Override
         public RecvByteBufAllocator.Handle recvBufAllocHandle() {
+            // 如果当前通道的接收处理为null
             if (recvHandle == null) {
+                // 从配置中获取接收字节缓冲分配器，用该分配器实例化处理者，并赋值
                 recvHandle = config().getRecvByteBufAllocator().newHandle();
             }
+
+            // 返回接收处理
             return recvHandle;
         }
 

@@ -271,6 +271,8 @@ public final class PlatformDependent {
 
     /**
      * Returns {@code true} if and only if the current platform is Android
+     *
+     * 当且仅当当前平台为安卓时返回真
      */
     public static boolean isAndroid() {
         return PlatformDependent0.isAndroid();
@@ -309,6 +311,8 @@ public final class PlatformDependent {
 
     /**
      * Returns {@code true} if and only if it is fine to enable TCP_NODELAY socket option by default.
+     *
+     * 当且仅当能默认打开tcp_nodelay选项的时候，返回真。
      */
     public static boolean canEnableTcpNoDelayByDefault() {
         return CAN_ENABLE_TCP_NODELAY_BY_DEFAULT;

@@ -16,12 +16,7 @@
 package io.netty.channel.socket;
 
 import io.netty.buffer.ByteBufAllocator;
-import io.netty.channel.ChannelException;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.DefaultChannelConfig;
-import io.netty.channel.MessageSizeEstimator;
-import io.netty.channel.RecvByteBufAllocator;
-import io.netty.channel.WriteBufferWaterMark;
+import io.netty.channel.*;
 import io.netty.util.internal.ObjectUtil;
 import io.netty.util.internal.PlatformDependent;
 
@@ -33,26 +28,37 @@ import static io.netty.channel.ChannelOption.*;
 
 /**
  * The default {@link SocketChannelConfig} implementation.
+ *
+ * 默认的套接字通道配置实现。
  */
 public class DefaultSocketChannelConfig extends DefaultChannelConfig
                                         implements SocketChannelConfig {
 
+    /**
+     * 用于当前套接字通道配置的java套接字
+     */
     protected final Socket javaSocket;
+
     private volatile boolean allowHalfClosure;
 
     /**
      * Creates a new instance.
+     *
+     * 创建一个新的实例。
      */
     public DefaultSocketChannelConfig(SocketChannel channel, Socket javaSocket) {
         super(channel);
         this.javaSocket = ObjectUtil.checkNotNull(javaSocket, "javaSocket");
 
         // Enable TCP_NODELAY by default if possible.
+        // 如果可能的话，默认打开tcp_nodelay。
         if (PlatformDependent.canEnableTcpNoDelayByDefault()) {
             try {
+                // 设置tcp无延迟
                 setTcpNoDelay(true);
             } catch (Exception e) {
                 // Ignore.
+                // 忽略
             }
         }
     }
@@ -135,6 +141,7 @@ public class DefaultSocketChannelConfig extends DefaultChannelConfig
     @Override
     public int getSendBufferSize() {
         try {
+            // 获得发送缓冲区大小
             return javaSocket.getSendBufferSize();
         } catch (SocketException e) {
             throw new ChannelException(e);
@@ -250,10 +257,14 @@ public class DefaultSocketChannelConfig extends DefaultChannelConfig
     @Override
     public SocketChannelConfig setTcpNoDelay(boolean tcpNoDelay) {
         try {
+            // 底层jdk套接字设置tcp无延迟
             javaSocket.setTcpNoDelay(tcpNoDelay);
         } catch (SocketException e) {
+            // 以下不细究
             throw new ChannelException(e);
         }
+
+        // 返回当前套接字通道配置实例
         return this;
     }
 

@@ -53,20 +53,39 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
         super.doBeginRead();
     }
 
+    /**
+     * 当前nio消息通道是否能持续读
+     *
+     * @param allocHandle 已分配的处理
+     * @return 当前nio消息通道是否能持续读
+     */
     protected boolean continueReading(RecvByteBufAllocator.Handle allocHandle) {
         return allocHandle.continueReading();
     }
 
+    /**
+     * nio消息不安全实例
+     */
     private final class NioMessageUnsafe extends AbstractNioUnsafe {
 
+        /**
+         * 读缓冲
+         */
         private final List<Object> readBuf = new ArrayList<Object>();
 
         @Override
         public void read() {
+            // 断言，当前线程处于事件循环中
             assert eventLoop().inEventLoop();
+
+            // 通道配置
             final ChannelConfig config = config();
+            // 通道流水线
             final ChannelPipeline pipeline = pipeline();
+            // 接收字节缓冲分配器的处理者
             final RecvByteBufAllocator.Handle allocHandle = unsafe().recvBufAllocHandle();
+
+            // 接收字节缓冲分配器的处理者重新设置
             allocHandle.reset(config);
 
             boolean closed = false;
@@ -74,16 +93,27 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
             try {
                 try {
                     do {
+                        // 处理读消息，获得读消息数
                         int localRead = doReadMessages(readBuf);
+
+                        // 如果读消息数为0，则直接退出当前循环
                         if (localRead == 0) {
                             break;
                         }
+
+                        // 如果读消息数小于0
                         if (localRead < 0) {
+                            /*
+                                以下不细究
+                             */
                             closed = true;
                             break;
                         }
 
+                        // 增加读消息数
                         allocHandle.incMessagesRead(localRead);
+
+                        // 如果能继续读，则再次循环
                     } while (continueReading(allocHandle));
                 } catch (Throwable t) {
                     exception = t;
@@ -197,6 +227,8 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
 
     /**
      * Read messages into the given array and return the amount which was read.
+     *
+     * 将消息读进给定数组里，并且返回读取的数量。
      */
     protected abstract int doReadMessages(List<Object> buf) throws Exception;
 

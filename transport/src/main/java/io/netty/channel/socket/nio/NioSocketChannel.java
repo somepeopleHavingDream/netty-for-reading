@@ -16,16 +16,7 @@
 package io.netty.channel.socket.nio;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelException;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelOutboundBuffer;
-import io.netty.channel.ChannelPromise;
-import io.netty.channel.EventLoop;
-import io.netty.channel.FileRegion;
-import io.netty.channel.RecvByteBufAllocator;
+import io.netty.channel.*;
 import io.netty.channel.nio.AbstractNioByteChannel;
 import io.netty.channel.socket.DefaultSocketChannelConfig;
 import io.netty.channel.socket.ServerSocketChannel;
@@ -98,11 +89,14 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
     /**
      * Create a new instance
      *
+     * 创建一个新实例
+     *
      * @param parent    the {@link Channel} which created this instance or {@code null} if it was created by the user
      * @param socket    the {@link SocketChannel} which will be used
      */
     public NioSocketChannel(Channel parent, SocketChannel socket) {
         super(parent, socket);
+        // 实例化并设置nio套接字通道配置
         config = new NioSocketChannelConfig(this, socket.socket());
     }
 
@@ -464,10 +458,19 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         }
     }
 
+    /**
+     * nio套接字通道配置
+     */
     private final class NioSocketChannelConfig extends DefaultSocketChannelConfig {
+
+        /**
+         * 每次收集写入的最大字节数
+         */
         private volatile int maxBytesPerGatheringWrite = Integer.MAX_VALUE;
+
         private NioSocketChannelConfig(NioSocketChannel channel, Socket javaSocket) {
             super(channel, javaSocket);
+            // 计算每次收集写入的最大字节
             calculateMaxBytesPerGatheringWrite();
         }
 
@@ -515,9 +518,14 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
             return maxBytesPerGatheringWrite;
         }
 
+        /**
+         * 计算每次收集写入的最大字节
+         */
         private void calculateMaxBytesPerGatheringWrite() {
             // Multiply by 2 to give some extra space in case the OS can process write data faster than we can provide.
+            // 乘以2，以给一些额外的空间，防止操作系统能够更快地处理比我们能提供的写数据。
             int newSendBufferSize = getSendBufferSize() << 1;
+            // 如果新的发送缓冲区大小大于0，则设置每次收集写数据的最大字节
             if (newSendBufferSize > 0) {
                 setMaxBytesPerGatheringWrite(newSendBufferSize);
             }

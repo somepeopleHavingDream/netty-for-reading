@@ -52,7 +52,10 @@ final class PlatformDependent0 {
      * Java版本
      */
     private static final int JAVA_VERSION = javaVersion0();
-    
+
+    /**
+     * 当前平台是否为安卓平台
+     */
     private static final boolean IS_ANDROID = isAndroid0();
 
     private static final Throwable UNSAFE_UNAVAILABILITY_CAUSE;
@@ -923,6 +926,13 @@ final class PlatformDependent0 {
         return IS_ANDROID;
     }
 
+    /**
+     * 当前平台是否是安卓平台
+     *
+     * 以下不细究
+     *
+     * @return 当前平台是否是安卓平台
+     */
     private static boolean isAndroid0() {
         // Idea: Sometimes java binaries include Android classes on the classpath, even if it isn't actually Android.
         // Rather than check if certain classes are present, just check the VM, which is tied to the JDK.

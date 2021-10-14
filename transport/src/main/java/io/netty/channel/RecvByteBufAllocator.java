@@ -25,11 +25,17 @@ import static io.netty.util.internal.ObjectUtil.checkNotNull;
 /**
  * Allocates a new receive buffer whose capacity is probably large enough to read all inbound data and small enough
  * not to waste its space.
+ *
+ * 分配新的接收缓冲，它的容量对于读取所有入境数据可能是足够大的，并且足够小以不浪费它的空间。
  */
 public interface RecvByteBufAllocator {
+
     /**
      * Creates a new handle.  The handle provides the actual operations and keeps the internal information which is
      * required for predicting an optimal buffer capacity.
+     *
+     * 创建一个新的处理。
+     * 此处理提供实际的操作，并且保留预测最优缓冲容量的内部信息。
      */
     Handle newHandle();
 
@@ -63,6 +69,9 @@ public interface RecvByteBufAllocator {
 
         /**
          * Increment the number of messages that have been read for the current read loop.
+         *
+         * 增加当前读循环已经读取的消息数。
+         *
          * @param numMessages The amount to increment by.
          */
         void incMessagesRead(int numMessages);
@@ -97,6 +106,9 @@ public interface RecvByteBufAllocator {
 
         /**
          * Determine if the current read loop should continue.
+         *
+         * 决定是否当前读循环应该继续。
+         *
          * @return {@code true} if the read loop should continue reading. {@code false} if the read loop is complete.
          */
         boolean continueReading();

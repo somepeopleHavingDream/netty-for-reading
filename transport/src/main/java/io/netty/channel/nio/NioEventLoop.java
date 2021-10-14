@@ -680,7 +680,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
      * 处理所有的键
      */
     private void processSelectedKeys() {
+        // 如果被选择的键不为null
         if (selectedKeys != null) {
+            // 处理优化的选择键
             processSelectedKeysOptimized();
         } else {
             processSelectedKeysPlain(selector.selectedKeys());
@@ -745,16 +747,28 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
+    /**
+     * 处理优化的选择键
+     */
     private void processSelectedKeysOptimized() {
+        // 依次遍历处理
         for (int i = 0; i < selectedKeys.size; ++i) {
+            // 获得当前选择键
             final SelectionKey k = selectedKeys.keys[i];
+
             // null out entry in the array to allow to have it GC'ed once the Channel close
             // See https://github.com/netty/netty/issues/2363
+            /*
+                通道关闭后，清空数组中的条目以允许它垃圾回收结束。
+             */
             selectedKeys.keys[i] = null;
 
+            // 获得该选择键上的附加物
             final Object a = k.attachment();
 
+            // 根据附加对象的不同，做不同处理
             if (a instanceof AbstractNioChannel) {
+                // 强转附加对象为nio通道，处理选择键
                 processSelectedKey(k, (AbstractNioChannel) a);
             } else {
                 @SuppressWarnings("unchecked")
@@ -773,9 +787,20 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
+    /**
+     * 处理选择键
+     *
+     * @param k 选择键
+     * @param ch Nio通道
+     */
     private void processSelectedKey(SelectionKey k, AbstractNioChannel ch) {
+        // 获得入参nio通道的不安全实例
         final AbstractNioChannel.NioUnsafe unsafe = ch.unsafe();
+        // 如果选择键不是有效的
         if (!k.isValid()) {
+            /*
+                以下不细究
+             */
             final EventLoop eventLoop;
             try {
                 eventLoop = ch.eventLoop();
@@ -797,28 +822,48 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
 
         try {
+            // 获得入参选择键的就绪操作
             int readyOps = k.readyOps();
+
             // We first need to call finishConnect() before try to trigger a read(...) or write(...) as otherwise
             // the NIO JDK channel implementation may throw a NotYetConnectedException.
+            /*
+                在尝试去触发读方法和写方法之前，我们首先需要去调用关闭连接方法，否则nio的jdk通道实现可能会抛出还未连接异常。
+             */
             if ((readyOps & SelectionKey.OP_CONNECT) != 0) {
+                /*
+                    以下不细究
+                 */
+
                 // remove OP_CONNECT as otherwise Selector.select(..) will always return without blocking
                 // See https://github.com/netty/netty/issues/924
+                /*
+                    移除连接操作，否则选择器的选择方法将总是不阻塞地返回
+                 */
+                // 获得入参选择键的感兴趣操作，重新设置入参选择键的感兴趣操作
                 int ops = k.interestOps();
                 ops &= ~SelectionKey.OP_CONNECT;
                 k.interestOps(ops);
 
+                // 不安全实例做结束连接操作
                 unsafe.finishConnect();
             }
 
             // Process OP_WRITE first as we may be able to write some queued buffers and so free memory.
+            // 首先处理写入操作，因为我们也能够写入一些排队缓冲，并且释放内存。
             if ((readyOps & SelectionKey.OP_WRITE) != 0) {
+                /*
+                    以下不细究
+                 */
                 // Call forceFlush which will also take care of clear the OP_WRITE once there is nothing left to write
                 ch.unsafe().forceFlush();
             }
 
             // Also check for readOps of 0 to workaround possible JDK bug which may otherwise lead
             // to a spin loop
+            // 也要检查0的就绪集，已解决可能导致自旋循环的jdk bug。
             if ((readyOps & (SelectionKey.OP_READ | SelectionKey.OP_ACCEPT)) != 0 || readyOps == 0) {
+                // 通道不安全实例做读操作
                 unsafe.read();
             }
         } catch (CancelledKeyException ignored) {

@@ -187,6 +187,9 @@ public interface ChannelConfig {
     /**
      * Returns {@code true} if and only if {@link ChannelHandlerContext#read()} will be invoked automatically so that
      * a user application doesn't need to call it at all. The default value is {@code true}.
+     *
+     * 当且仅当通道处理者上下文的读方法将被自动调用返回真，以便用户应用不需要一直调用。
+     * 默认值是真。
      */
     boolean isAutoRead();
 
