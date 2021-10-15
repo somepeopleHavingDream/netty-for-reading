@@ -120,9 +120,11 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
                     exception = t;
                 }
 
+                // 获得读缓冲的大小
                 int size = readBuf.size();
                 for (int i = 0; i < size; i ++) {
                     readPending = false;
+                    // 通道流水线触发读通道
                     pipeline.fireChannelRead(readBuf.get(i));
                 }
                 readBuf.clear();

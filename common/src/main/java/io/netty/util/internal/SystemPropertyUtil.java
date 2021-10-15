@@ -42,6 +42,8 @@ public final class SystemPropertyUtil {
      * Returns the value of the Java system property with the specified
      * {@code key}, while falling back to {@code null} if the property access fails.
      *
+     * 返回指定键的Java系统属性值，如果属性访问失败，则回滚到null。
+     *
      * @return the property value or {@code null}
      */
     public static String get(String key) {

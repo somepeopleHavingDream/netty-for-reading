@@ -82,6 +82,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     private final Channel channel;
     private final ChannelFuture succeededFuture;
     private final VoidChannelPromise voidPromise;
+
+    /**
+     * 当前通道流水线是否触摸（取决于资源泄露侦测器是否打开）
+     */
     private final boolean touch = ResourceLeakDetector.isEnabled();
 
     private Map<EventExecutorGroup, EventExecutor> childExecutors;
@@ -145,6 +149,13 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         return handle;
     }
 
+    /**
+     * 触碰
+     *
+     * @param msg 消息
+     * @param next 通道处理者上下文
+     * @return
+     */
     final Object touch(Object msg, AbstractChannelHandlerContext next) {
         return touch ? ReferenceCountUtil.touch(msg, next) : msg;
     }
@@ -1079,6 +1090,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelPipeline fireChannelRead(Object msg) {
+        // 通道处理者上下文调用通道读方法
         AbstractChannelHandlerContext.invokeChannelRead(head, msg);
         return this;
     }

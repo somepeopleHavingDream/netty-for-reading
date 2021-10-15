@@ -55,7 +55,11 @@ public abstract class AbstractNioChannel extends AbstractChannel {
      */
     volatile SelectionKey selectionKey;
 
+    /**
+     * 当前通道是否读待办
+     */
     boolean readPending;
+
     private final Runnable clearReadPendingRunnable = new Runnable() {
         @Override
         public void run() {

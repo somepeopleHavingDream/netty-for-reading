@@ -23,8 +23,8 @@ import io.netty.util.internal.SystemPropertyUtil;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
-import java.lang.ref.WeakReference;
 import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,34 +35,63 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-import static io.netty.util.internal.StringUtil.EMPTY_STRING;
-import static io.netty.util.internal.StringUtil.NEWLINE;
-import static io.netty.util.internal.StringUtil.simpleClassName;
+import static io.netty.util.internal.StringUtil.*;
 
 public class ResourceLeakDetector<T> {
 
     private static final String PROP_LEVEL_OLD = "io.netty.leakDetectionLevel";
     private static final String PROP_LEVEL = "io.netty.leakDetection.level";
+
+    /**
+     * 资源泄露检测的默认级别
+     */
     private static final Level DEFAULT_LEVEL = Level.SIMPLE;
 
+    /**
+     * 属性-目标记录
+     */
     private static final String PROP_TARGET_RECORDS = "io.netty.leakDetection.targetRecords";
+
+    /**
+     * 默认目标记录数
+     */
     private static final int DEFAULT_TARGET_RECORDS = 4;
 
+    /**
+     * 属性-采样间隔
+     */
     private static final String PROP_SAMPLING_INTERVAL = "io.netty.leakDetection.samplingInterval";
+
     // There is a minor performance benefit in TLR if this is a power of 2.
+    /**
+     * 如果是2的幂，则tlr有较小的性能收益。
+     */
     private static final int DEFAULT_SAMPLING_INTERVAL = 128;
 
+    /**
+     * 目标记录数
+     */
     private static final int TARGET_RECORDS;
+
+    /**
+     * 采样间隔
+     */
     static final int SAMPLING_INTERVAL;
 
     /**
      * Represents the level of resource leak detection.
+     *
+     * 代表资源泄露检查的级别。
      */
     public enum Level {
+
         /**
          * Disables resource leak detection.
+         *
+         * 关闭资源泄露检测。
          */
         DISABLED,
+
         /**
          * Enables simplistic sampling resource leak detection which reports there is a leak or not,
          * at the cost of small overhead (default).
@@ -96,35 +125,51 @@ public class ResourceLeakDetector<T> {
         }
     }
 
+    /**
+     * 当前资源泄露检测器级别
+     */
     private static Level level;
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(ResourceLeakDetector.class);
 
     static {
         final boolean disabled;
+
+        // 如果配置项不为null
         if (SystemPropertyUtil.get("io.netty.noResourceLeakDetection") != null) {
+            /*
+                以下不细究
+             */
             disabled = SystemPropertyUtil.getBoolean("io.netty.noResourceLeakDetection", false);
             logger.debug("-Dio.netty.noResourceLeakDetection: {}", disabled);
             logger.warn(
                     "-Dio.netty.noResourceLeakDetection is deprecated. Use '-D{}={}' instead.",
                     PROP_LEVEL, DEFAULT_LEVEL.name().toLowerCase());
         } else {
+            // 默认为不打开
             disabled = false;
         }
 
+        // 设置默认级别
         Level defaultLevel = disabled? Level.DISABLED : DEFAULT_LEVEL;
 
         // First read old property name
+        // 手写读取旧属性名
         String levelStr = SystemPropertyUtil.get(PROP_LEVEL_OLD, defaultLevel.name());
 
         // If new property name is present, use it
+        // 如果新的属性名存在，则使用它
         levelStr = SystemPropertyUtil.get(PROP_LEVEL, levelStr);
+        // 解析出级别
         Level level = Level.parseLevel(levelStr);
 
+        // 设置目标记录数和采样间隔
         TARGET_RECORDS = SystemPropertyUtil.getInt(PROP_TARGET_RECORDS, DEFAULT_TARGET_RECORDS);
         SAMPLING_INTERVAL = SystemPropertyUtil.getInt(PROP_SAMPLING_INTERVAL, DEFAULT_SAMPLING_INTERVAL);
 
+        // 设置当前资源泄露检测器级别
         ResourceLeakDetector.level = level;
+        // 打印日志
         if (logger.isDebugEnabled()) {
             logger.debug("-D{}: {}", PROP_LEVEL, level.name().toLowerCase());
             logger.debug("-D{}: {}", PROP_TARGET_RECORDS, TARGET_RECORDS);
@@ -141,8 +186,11 @@ public class ResourceLeakDetector<T> {
 
     /**
      * Returns {@code true} if resource leak detection is enabled.
+     *
+     * 如果资源泄露侦测是有效的，返回真。
      */
     public static boolean isEnabled() {
+        // 如果当前资源泄露侦测器的级别高于关闭级别，则当前资源泄露侦测器是打开的
         return getLevel().ordinal() > Level.DISABLED.ordinal();
     }
 
@@ -155,6 +203,8 @@ public class ResourceLeakDetector<T> {
 
     /**
      * Returns the current resource leak detection level.
+     *
+     * 返回当前资源泄露检测级别。
      */
     public static Level getLevel() {
         return level;
