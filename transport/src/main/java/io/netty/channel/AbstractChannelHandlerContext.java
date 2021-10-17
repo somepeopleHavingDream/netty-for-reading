@@ -217,6 +217,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
 
     @Override
     public ChannelHandlerContext fireChannelActive() {
+        // 调用激活通道方法
         invokeChannelActive(findContextInbound(MASK_CHANNEL_ACTIVE));
         return this;
     }
@@ -226,6 +227,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         EventExecutor executor = next.executor();
         // 如果该事件执行器处于事件循环中，则由该事件执行器调用激活通道方法
         if (executor.inEventLoop()) {
+            // 通道处理者上下文调用激活通道方法
             next.invokeChannelActive();
         } else {
             // 不细究
@@ -375,6 +377,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
 
     @Override
     public ChannelHandlerContext fireChannelRead(final Object msg) {
+        // 先找到入境通道处理者上下文，调用读通道方法
         invokeChannelRead(findContextInbound(MASK_CHANNEL_READ), msg);
         return this;
     }
@@ -386,10 +389,13 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
      * @param msg 消息
      */
     static void invokeChannelRead(final AbstractChannelHandlerContext next, Object msg) {
-        // 入参通道处理者上下文所在的流水线做触摸操作
+        // 入参通道处理者上下文所在的流水线做触摸操作，获得触摸后的消息对象
         final Object m = next.pipeline.touch(ObjectUtil.checkNotNull(msg, "msg"), next);
+        // 获得当前通道处理者上下文的执行器
         EventExecutor executor = next.executor();
+        // 如果当前通道处理者上下文环境的执行器处于事件循环中
         if (executor.inEventLoop()) {
+            // 入参通道处理者上下文调用读通道方法
             next.invokeChannelRead(m);
         } else {
             executor.execute(new Runnable() {
@@ -401,14 +407,23 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         }
     }
 
+    /**
+     * 调用读通道方法
+     *
+     * @param msg 消息
+     */
     private void invokeChannelRead(Object msg) {
+        // 当前通道处理者上下文是否能调用处理者
         if (invokeHandler()) {
             try {
+                // 获得当前通道处理者上下文的通道处理者，使用该通道处理者调用读通道方法
                 ((ChannelInboundHandler) handler()).channelRead(this, msg);
             } catch (Throwable t) {
+                // 以下不细究
                 invokeExceptionCaught(t);
             }
         } else {
+            // 不细究
             fireChannelRead(msg);
         }
     }
@@ -419,9 +434,17 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         return this;
     }
 
+    /**
+     * 调用通道读完成方法
+     *
+     * @param next 通道处理者上下文
+     */
     static void invokeChannelReadComplete(final AbstractChannelHandlerContext next) {
+        // 获得入参通道处理者上下文的事件执行器
         EventExecutor executor = next.executor();
+        // 如果事件执行器处于事件循环之中
         if (executor.inEventLoop()) {
+            // 通道处理者上下文调用通道读完成方法
             next.invokeChannelReadComplete();
         } else {
             Tasks tasks = next.invokeTasks;
@@ -432,14 +455,21 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         }
     }
 
+    /**
+     * 调用通道读完成
+     */
     private void invokeChannelReadComplete() {
+        // 如果能调用处理者
         if (invokeHandler()) {
             try {
+                // 获得当前通道处理者，再调用该通道的读完成方法
                 ((ChannelInboundHandler) handler()).channelReadComplete(this);
             } catch (Throwable t) {
+                // 不细究
                 invokeExceptionCaught(t);
             }
         } else {
+            // 不细究
             fireChannelReadComplete();
         }
     }
@@ -712,9 +742,13 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
 
     @Override
     public ChannelHandlerContext read() {
+        // 找到出境上下文，获得通道处理者上下文
         final AbstractChannelHandlerContext next = findContextOutbound(MASK_READ);
+        // 拿到出境上下文的事件执行器
         EventExecutor executor = next.executor();
+        // 如果当前的通道处理者上下文的执行器处于事件循环中
         if (executor.inEventLoop()) {
+            // 通道处理者上下文调用读方法
             next.invokeRead();
         } else {
             Tasks tasks = next.invokeTasks;
@@ -727,7 +761,11 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         return this;
     }
 
+    /**
+     * 调用读方法
+     */
     private void invokeRead() {
+        // 如果能调用处理者
         if (invokeHandler()) {
             try {
                 ((ChannelOutboundHandler) handler()).read(this);
@@ -940,12 +978,23 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         return false;
     }
 
+    /**
+     * 找到入境通道处理者上下文
+     *
+     * @param mask 掩码
+     * @return 通道处理者上下文
+     */
     private AbstractChannelHandlerContext findContextInbound(int mask) {
+        // 获得当前通道处理者上下文和当前的事件执行器
         AbstractChannelHandlerContext ctx = this;
         EventExecutor currentExecutor = executor();
+
+        // 找到符合条件的通道处理者上下文
         do {
             ctx = ctx.next;
         } while (skipContext(ctx, currentExecutor, mask, MASK_ONLY_INBOUND));
+
+        // 返回通道处理者上下文
         return ctx;
     }
 
@@ -969,6 +1018,17 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         return ctx;
     }
 
+    /**
+     * 跳过上下文
+     *
+     * （该方法不细究）
+     *
+     * @param ctx 通道处理者上下文
+     * @param currentExecutor 当前执行器
+     * @param mask 掩码
+     * @param onlyMask 唯一掩码
+     * @return 是否能跳过上下文
+     */
     private static boolean skipContext(
             AbstractChannelHandlerContext ctx, EventExecutor currentExecutor, int mask, int onlyMask) {
         // Ensure we correctly handle MASK_EXCEPTION_CAUGHT which is not included in the MASK_EXCEPTION_CAUGHT

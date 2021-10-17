@@ -290,6 +290,9 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
         /**
          * Schedules a read operation that fills the inbound buffer of the first {@link ChannelInboundHandler} in the
          * {@link ChannelPipeline}.  If there's already a pending read operation, this method does nothing.
+         *
+         * 调度读操作，该读操作填满此通道流水线里首个通道入境处理者的入境缓冲。
+         * 如果已经有待办读操作，此方法不做任何事。
          */
         void beginRead();
 

@@ -30,6 +30,10 @@ import java.util.List;
  * 用于通道来操作消息的抽象非阻塞输入输出通道基类。
  */
 public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
+
+    /**
+     * 当前nio消息通道的输入流是否已关闭
+     */
     boolean inputShutdown;
 
     /**
@@ -47,6 +51,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
 
     @Override
     protected void doBeginRead() throws Exception {
+        // 如果当前通道的输入流已关闭，则直接返回
         if (inputShutdown) {
             return;
         }
@@ -123,21 +128,33 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
                 // 获得读缓冲的大小
                 int size = readBuf.size();
                 for (int i = 0; i < size; i ++) {
+                    // 修改读待办标记
                     readPending = false;
                     // 通道流水线触发读通道
                     pipeline.fireChannelRead(readBuf.get(i));
                 }
+                // 清空读缓冲
                 readBuf.clear();
+                // 已分配的处理做读完成操作
                 allocHandle.readComplete();
+                // 通道流水线触发通道读完成方法
                 pipeline.fireChannelReadComplete();
 
+                // 如果存在异常
                 if (exception != null) {
+                    /*
+                        以下不细究
+                     */
                     closed = closeOnReadError(exception);
 
                     pipeline.fireExceptionCaught(exception);
                 }
 
+                // 如果关闭
                 if (closed) {
+                    /*
+                        以下不细究
+                     */
                     inputShutdown = true;
                     if (isOpen()) {
                         close(voidPromise());
@@ -150,7 +167,16 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
                 // * The user called Channel.read() or ChannelHandlerContext.read() in channelReadComplete(...) method
                 //
                 // See https://github.com/netty/netty/issues/2254
+
+                /*
+                    检查是否有读待办至今未被处理。
+                    这能是两种原因：
+                    用户在channelRead()方法里调用Channel.read()方法或ChannelHandlerContext.read()方法，
+                    用户在channelReadComplete()方法里调用Channel().read()或者ChannelHandlerContext.read()方法。
+                 */
+                // 如果当前通道读待办，并且不是可自动读的
                 if (!readPending && !config.isAutoRead()) {
+                    // 以下不细究
                     removeReadOp();
                 }
             }

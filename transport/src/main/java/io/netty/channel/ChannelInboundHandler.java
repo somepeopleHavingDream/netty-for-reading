@@ -18,6 +18,9 @@ package io.netty.channel;
 /**
  * {@link ChannelHandler} which adds callbacks for state changes. This allows the user
  * to hook in to state changes easily.
+ *
+ * 为状态改变添加回调的通道处理者。
+ * 这允许用户简单地了解状态变化。
  */
 public interface ChannelInboundHandler extends ChannelHandler {
 
@@ -33,6 +36,8 @@ public interface ChannelInboundHandler extends ChannelHandler {
 
     /**
      * The {@link Channel} of the {@link ChannelHandlerContext} is now active
+     *
+     * 通道处理者上下文的通道当前是活跃的。
      */
     void channelActive(ChannelHandlerContext ctx) throws Exception;
 
@@ -44,6 +49,8 @@ public interface ChannelInboundHandler extends ChannelHandler {
 
     /**
      * Invoked when the current {@link Channel} has read a message from the peer.
+     *
+     * 当当前通道已经从对等方读取了消息时被调用。
      */
     void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception;
 

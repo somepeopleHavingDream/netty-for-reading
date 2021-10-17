@@ -54,7 +54,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     private final Unsafe unsafe;
 
     /**
-     * 默认通道流水线
+     * 用于当前通道的默认通道流水线
      */
     private final DefaultChannelPipeline pipeline;
 
@@ -321,6 +321,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     @Override
     public Channel read() {
+        // 当前通道流水线做读操作
         pipeline.read();
         return this;
     }
@@ -952,9 +953,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         @Override
         public final void beginRead() {
+            // 断言事件循环
             assertEventLoop();
 
             try {
+                // 做开始读操作
                 doBeginRead();
             } catch (final Exception e) {
                 invokeLater(new Runnable() {
@@ -1267,6 +1270,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     /**
      * Schedule a read operation.
+     *
+     * 调度读操作。
      */
     protected abstract void doBeginRead() throws Exception;
 

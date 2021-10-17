@@ -72,12 +72,19 @@ public final class ReferenceCountUtil {
      * Tries to call {@link ReferenceCounted#touch(Object)} if the specified message implements
      * {@link ReferenceCounted}.  If the specified message doesn't implement {@link ReferenceCounted},
      * this method does nothing.
+     *
+     * 如果指定的消息实现了引用计数接口，则尝试调用引用计数的触碰方法。
+     * 如果指定的消息没实现引用计数接口，此方法不做任何事。
      */
     @SuppressWarnings("unchecked")
     public static <T> T touch(T msg, Object hint) {
+        // 如果消息是引用计数实例
         if (msg instanceof ReferenceCounted) {
+            // 以下不细究
             return (T) ((ReferenceCounted) msg).touch(hint);
         }
+
+        // 返回入参消息
         return msg;
     }
 

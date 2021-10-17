@@ -76,6 +76,8 @@ public interface ChannelOutboundHandler extends ChannelHandler {
 
     /**
      * Intercepts {@link ChannelHandlerContext#read()}.
+     *
+     * 拦截通道处理者上下文的读方法。
      */
     void read(ChannelHandlerContext ctx) throws Exception;
 

@@ -218,7 +218,13 @@ public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessa
             attemptedBytesRead = bytes;
         }
 
+        /**
+         * 总共读了多少个字节
+         *
+         * @return 总共读了多少个字节
+         */
         protected final int totalBytesRead() {
+            // 如果读取的总字节数小于0，则返回整型的最大值，否则直接返回原值
             return totalBytesRead < 0 ? Integer.MAX_VALUE : totalBytesRead;
         }
     }

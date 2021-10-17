@@ -120,8 +120,17 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
     private final class HandleImpl extends MaxMessageHandle {
         private final int minIndex;
         private final int maxIndex;
+
+        /**
+         * 在大小表中的索引
+         */
         private int index;
+
         private int nextReceiveBufferSize;
+
+        /**
+         * 是否现在减少
+         */
         private boolean decreaseNow;
 
         HandleImpl(int minIndex, int maxIndex, int initial) {
@@ -129,7 +138,7 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
             this.minIndex = minIndex;
             this.maxIndex = maxIndex;
 
-            // 计算出初始位置的索引，也即初始容量大小
+            // 计算出初始位置的索引，也即初始容量大小所在大小表中的索引
             index = getSizeTableIndex(initial);
             // 设置下一个接收缓冲大小
             nextReceiveBufferSize = SIZE_TABLE[index];
@@ -152,16 +161,30 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
             return nextReceiveBufferSize;
         }
 
+        /**
+         * 记录实际读取的字节数
+         *
+         * @param actualReadBytes 实际读取的字节数
+         */
         private void record(int actualReadBytes) {
+            // 经过一些条件判断，做一些标记
             if (actualReadBytes <= SIZE_TABLE[max(0, index - INDEX_DECREMENT)]) {
+                // 如果现在减少
                 if (decreaseNow) {
+                    /*
+                        以下不细究
+                     */
                     index = max(index - INDEX_DECREMENT, minIndex);
                     nextReceiveBufferSize = SIZE_TABLE[index];
                     decreaseNow = false;
                 } else {
+                    // 将当前减少标记修改为真
                     decreaseNow = true;
                 }
             } else if (actualReadBytes >= nextReceiveBufferSize) {
+                /*
+                    以下不细究
+                 */
                 index = min(index + INDEX_INCREMENT, maxIndex);
                 nextReceiveBufferSize = SIZE_TABLE[index];
                 decreaseNow = false;
@@ -170,6 +193,7 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
 
         @Override
         public void readComplete() {
+            // 记录总共读取的字节数
             record(totalBytesRead());
         }
     }

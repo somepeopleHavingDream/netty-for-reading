@@ -685,6 +685,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             // 处理优化的选择键
             processSelectedKeysOptimized();
         } else {
+            // 不细究
             processSelectedKeysPlain(selector.selectedKeys());
         }
     }
@@ -771,12 +772,19 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 // 强转附加对象为nio通道，处理选择键
                 processSelectedKey(k, (AbstractNioChannel) a);
             } else {
+                /*
+                    以下不细究
+                 */
                 @SuppressWarnings("unchecked")
                 NioTask<SelectableChannel> task = (NioTask<SelectableChannel>) a;
                 processSelectedKey(k, task);
             }
 
+            // 如果需要去再次选择
             if (needsToSelectAgain) {
+                /*
+                    以下不细究
+                 */
                 // null out entries in the array to allow to have it GC'ed once the Channel close
                 // See https://github.com/netty/netty/issues/2363
                 selectedKeys.reset(i + 1);
@@ -867,6 +875,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 unsafe.read();
             }
         } catch (CancelledKeyException ignored) {
+            // 以下不细究
             unsafe.close(unsafe.voidPromise());
         }
     }

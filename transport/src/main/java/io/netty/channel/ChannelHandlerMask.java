@@ -36,12 +36,24 @@ final class ChannelHandlerMask {
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(ChannelHandlerMask.class);
 
     // Using to mask which methods must be called for a ChannelHandler.
+    // 用于屏蔽哪些方法将被调用于通道处理者。
+
     static final int MASK_EXCEPTION_CAUGHT = 1;
     static final int MASK_CHANNEL_REGISTERED = 1 << 1;
     static final int MASK_CHANNEL_UNREGISTERED = 1 << 2;
+
+    /**
+     * 掩码-通道激活
+     */
     static final int MASK_CHANNEL_ACTIVE = 1 << 3;
+
     static final int MASK_CHANNEL_INACTIVE = 1 << 4;
+
+    /**
+     * 掩码-通道读
+     */
     static final int MASK_CHANNEL_READ = 1 << 5;
+
     static final int MASK_CHANNEL_READ_COMPLETE = 1 << 6;
     static final int MASK_USER_EVENT_TRIGGERED = 1 << 7;
     static final int MASK_CHANNEL_WRITABILITY_CHANGED = 1 << 8;
@@ -55,7 +67,12 @@ final class ChannelHandlerMask {
     static final int MASK_DISCONNECT = 1 << 11;
     static final int MASK_CLOSE = 1 << 12;
     static final int MASK_DEREGISTER = 1 << 13;
+
+    /**
+     * 掩码-读
+     */
     static final int MASK_READ = 1 << 14;
+
     static final int MASK_WRITE = 1 << 15;
     static final int MASK_FLUSH = 1 << 16;
 

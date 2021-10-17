@@ -79,7 +79,11 @@ public class DefaultChannelPipeline implements ChannelPipeline {
      */
     final AbstractChannelHandlerContext tail;
 
+    /**
+     * 用于当前通道流水线的通道
+     */
     private final Channel channel;
+
     private final ChannelFuture succeededFuture;
     private final VoidChannelPromise voidPromise;
 
@@ -154,7 +158,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
      *
      * @param msg 消息
      * @param next 通道处理者上下文
-     * @return
+     * @return 消息
      */
     final Object touch(Object msg, AbstractChannelHandlerContext next) {
         return touch ? ReferenceCountUtil.touch(msg, next) : msg;
@@ -1177,6 +1181,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelPipeline read() {
+        // 尾通道处理者上下文做读操作
         tail.read();
         return this;
     }
@@ -1521,9 +1526,15 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
     }
 
+    /**
+     * 头环境
+     */
     final class HeadContext extends AbstractChannelHandlerContext
             implements ChannelOutboundHandler, ChannelInboundHandler {
 
+        /**
+         * 用于当前头上下文的不安全实例
+         */
         private final Unsafe unsafe;
 
         HeadContext(DefaultChannelPipeline pipeline) {
@@ -1581,6 +1592,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void read(ChannelHandlerContext ctx) {
+            // 不安全实例开始读
             unsafe.beginRead();
         }
 
@@ -1617,8 +1629,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
+            // 入参通道处理者上下文触发激活通道方法
             ctx.fireChannelActive();
 
+            // 如果是自动读，则做读操作
             readIfIsAutoRead();
         }
 
@@ -1629,6 +1643,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
+            // 入参通道处理者上下文触发读通道方法
             ctx.fireChannelRead(msg);
         }
 
@@ -1639,8 +1654,12 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             readIfIsAutoRead();
         }
 
+        /**
+         * 如果是自动读，则做读操作
+         */
         private void readIfIsAutoRead() {
             if (channel.config().isAutoRead()) {
+                // 读通道
                 channel.read();
             }
         }
