@@ -55,7 +55,11 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     private static final boolean DISABLE_KEY_SET_OPTIMIZATION =
             SystemPropertyUtil.getBoolean("io.netty.noKeySetOptimization", false);
 
+    /**
+     * 最小过早选择器返回次数
+     */
     private static final int MIN_PREMATURE_SELECTOR_RETURNS = 3;
+
     private static final int SELECTOR_AUTO_REBUILD_THRESHOLD;
 
     /**
@@ -592,7 +596,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                         processSelectedKeys();
                     } finally {
                         // Ensure we always run tasks.
+                        // 确保我们总是运行任务。
                         final long ioTime = System.nanoTime() - ioStartTime;
+                        // 运行所有任务
                         ranTasks = runAllTasks(ioTime * (100 - ioRatio) / ioRatio);
                     }
                 } else {
@@ -600,37 +606,53 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     ranTasks = runAllTasks(0); // This will run the minimum number of tasks
                 }
 
+                // 如果运行了任务并且策略值大于0
                 if (ranTasks || strategy > 0) {
+                    // 如果选择的次数大于最小过早选择器返回次数，则记录日志
                     if (selectCnt > MIN_PREMATURE_SELECTOR_RETURNS && logger.isDebugEnabled()) {
                         logger.debug("Selector.select() returned prematurely {} times in a row for Selector {}.",
                                 selectCnt - 1, selector);
                     }
+                    // 重置选择次数
                     selectCnt = 0;
                 } else if (unexpectedSelectorWakeup(selectCnt)) { // Unexpected wakeup (unusual case)
+                    // 不细究
                     selectCnt = 0;
                 }
             } catch (CancelledKeyException e) {
+                /*
+                    以下不细究
+                 */
                 // Harmless exception - log anyway
                 if (logger.isDebugEnabled()) {
                     logger.debug(CancelledKeyException.class.getSimpleName() + " raised by a Selector {} - JDK bug?",
                             selector, e);
                 }
             } catch (Error e) {
+                // 不细究
                 throw e;
             } catch (Throwable t) {
+                // 不细究
                 handleLoopException(t);
             } finally {
                 // Always handle shutdown even if the loop processing threw an exception.
+                // 即使循环处理抛出了异常，也总是处理关闭。
                 try {
+                    // 如果当前nio事件循环正在关闭
                     if (isShuttingDown()) {
+                        /*
+                            以下不细究
+                         */
                         closeAll();
                         if (confirmShutdown()) {
                             return;
                         }
                     }
                 } catch (Error e) {
+                    // 不细究
                     throw e;
                 } catch (Throwable t) {
+                    // 不细究
                     handleLoopException(t);
                 }
             }

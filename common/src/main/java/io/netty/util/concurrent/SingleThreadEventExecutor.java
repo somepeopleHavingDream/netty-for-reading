@@ -66,7 +66,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                     SingleThreadEventExecutor.class, ThreadProperties.class, "threadProperties");
 
     /**
-     * 任务队列
+     * 用于当前单线程事件执行器的任务队列
      */
     private final Queue<Runnable> taskQueue;
 
@@ -232,6 +232,12 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         return pollTaskFrom(taskQueue);
     }
 
+    /**
+     * 从任务队列中轮询出一些任务
+     *
+     * @param taskQueue 任务队列
+     * @return 可运行任务
+     */
     protected static Runnable pollTaskFrom(Queue<Runnable> taskQueue) {
         for (;;) {
             // 从任务队列中取出队首可运行实例
@@ -523,8 +529,9 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     protected boolean runAllTasks(long timeoutNanos) {
         // 从可调度任务队列里抓取一些可调度任务
         fetchFromScheduledTaskQueue();
-        // 轮询任务
+        // 轮询出一个任务
         Runnable task = pollTask();
+
         // 如果该任务为null
         if (task == null) {
             /*
@@ -570,7 +577,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
             }
         }
 
-        // 在运行完所有操作之后，更新最后直接事件，返回真
+        // 在运行完所有操作之后，更新最后执行事件，返回真
         afterRunningAllTasks();
         this.lastExecutionTime = lastExecutionTime;
         return true;

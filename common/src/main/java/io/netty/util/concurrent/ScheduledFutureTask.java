@@ -23,6 +23,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 可调度未来任务
+ *
+ * @param <V>
+ */
 @SuppressWarnings("ComparableImplementedButEqualsNotOverridden")
 final class ScheduledFutureTask<V> extends PromiseTask<V> implements ScheduledFuture<V>, PriorityQueueNode {
     private static final long START_TIME = System.nanoTime();
@@ -110,6 +115,11 @@ final class ScheduledFutureTask<V> extends PromiseTask<V> implements ScheduledFu
         return super.executor();
     }
 
+    /**
+     * 截止时间
+     *
+     * @return 截止时间
+     */
     public long deadlineNanos() {
         return deadlineNanos;
     }
@@ -143,10 +153,12 @@ final class ScheduledFutureTask<V> extends PromiseTask<V> implements ScheduledFu
 
     @Override
     public int compareTo(Delayed o) {
+        // 如果两个延迟对象的引用相同，则返回0
         if (this == o) {
             return 0;
         }
 
+        // 将入参延迟对象强转为可调度未来任务
         ScheduledFutureTask<?> that = (ScheduledFutureTask<?>) o;
         long d = deadlineNanos() - that.deadlineNanos();
         if (d < 0) {
