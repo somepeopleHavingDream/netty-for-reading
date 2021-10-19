@@ -232,17 +232,37 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         return this;
     }
 
+    /**
+     * 服务引导接收器
+     */
     private static class ServerBootstrapAcceptor extends ChannelInboundHandlerAdapter {
 
+        /**
+         * 子事件循环组
+         */
         private final EventLoopGroup childGroup;
+
+        /**
+         * 子通道处理者
+         */
         private final ChannelHandler childHandler;
+
+        /**
+         * 子选项
+         */
         private final Entry<ChannelOption<?>, Object>[] childOptions;
+
+        /**
+         * 子属性
+         */
         private final Entry<AttributeKey<?>, Object>[] childAttrs;
+
         private final Runnable enableAutoReadTask;
 
         ServerBootstrapAcceptor(
                 final Channel channel, EventLoopGroup childGroup, ChannelHandler childHandler,
                 Entry<ChannelOption<?>, Object>[] childOptions, Entry<AttributeKey<?>, Object>[] childAttrs) {
+            // 设置子事件循环组、子通道处理者、子选项、子属性
             this.childGroup = childGroup;
             this.childHandler = childHandler;
             this.childOptions = childOptions;
@@ -253,6 +273,11 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             // not be able to load the class because of the file limit it already reached.
             //
             // See https://github.com/netty/netty/issues/1328
+
+            /*
+                被安排重新启用自动读取的任务。
+                这很重要，在我们尝试去提交它之前，去创建这个任务，否则统一资源定位符类加载器可能不能加载类，因为已经到达文件限制。
+             */
             enableAutoReadTask = new Runnable() {
                 @Override
                 public void run() {
