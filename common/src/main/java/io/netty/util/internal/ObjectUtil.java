@@ -33,6 +33,10 @@ public final class ObjectUtil {
     /**
      * Checks that the given argument is not null. If it is, throws {@link NullPointerException}.
      * Otherwise, returns the argument.
+     *
+     * 检查给定参数不为null。
+     * 如果是，抛出空指针异常。
+     * 否则，返回参数。
      */
     public static <T> T checkNotNull(T arg, String text) {
         // 如果参数为null，则抛出空指针异常，提示信息为入参文本值

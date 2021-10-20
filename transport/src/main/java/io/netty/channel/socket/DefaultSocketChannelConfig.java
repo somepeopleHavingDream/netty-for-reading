@@ -104,7 +104,12 @@ public class DefaultSocketChannelConfig extends DefaultChannelConfig
 
     @Override
     public <T> boolean setOption(ChannelOption<T> option, T value) {
+        // 证实通道选项和通道值
         validate(option, value);
+
+        /*
+            以下不细究，都是调用jdk底层的接口，设置套接字的相关属性
+         */
 
         if (option == SO_RCVBUF) {
             setReceiveBufferSize((Integer) value);

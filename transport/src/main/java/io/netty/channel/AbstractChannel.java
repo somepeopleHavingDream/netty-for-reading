@@ -530,7 +530,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 return;
             }
 
-            // 设置该通道的当前事件循环
+            // 设置当前通道的事件循环
             AbstractChannel.this.eventLoop = eventLoop;
 
             // 如果当前线程处在此事件循环中（不细究）

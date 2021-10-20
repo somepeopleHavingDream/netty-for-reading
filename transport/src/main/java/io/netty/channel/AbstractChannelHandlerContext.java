@@ -398,6 +398,9 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
             // 入参通道处理者上下文调用读通道方法
             next.invokeChannelRead(m);
         } else {
+            /*
+                以下不细究
+             */
             executor.execute(new Runnable() {
                 @Override
                 public void run() {

@@ -159,6 +159,9 @@ public class ChannelOption<T> extends AbstractConstant<ChannelOption<T>> {
     /**
      * Validate the value which is set for the {@link ChannelOption}. Sub-classes
      * may override this for special checks.
+     *
+     * 校验设置给通道选项的值。
+     * 子类可能覆盖此方法，以用于特别的检查。
      */
     public void validate(T value) {
         ObjectUtil.checkNotNull(value, "value");

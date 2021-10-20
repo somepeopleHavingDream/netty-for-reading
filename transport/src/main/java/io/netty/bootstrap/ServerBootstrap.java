@@ -279,6 +279,11 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                 这很重要，在我们尝试去提交它之前，去创建这个任务，否则统一资源定位符类加载器可能不能加载类，因为已经到达文件限制。
              */
             enableAutoReadTask = new Runnable() {
+
+                /*
+                    以下不细究
+                 */
+
                 @Override
                 public void run() {
                     channel.config().setAutoRead(true);
@@ -289,23 +294,30 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         @Override
         @SuppressWarnings("unchecked")
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
+            // 入参消息必定是Nio套接字通道
             final Channel child = (Channel) msg;
 
+            // 子通道的通道流水线添加子通道处理者
             child.pipeline().addLast(childHandler);
 
+            // 设置子通道选项、子通道属性
             setChannelOptions(child, childOptions, logger);
             setAttributes(child, childAttrs);
 
             try {
+                // 子事件循环组注册子通道
                 childGroup.register(child).addListener(new ChannelFutureListener() {
                     @Override
                     public void operationComplete(ChannelFuture future) throws Exception {
+                        // 如果未来不是成功的
                         if (!future.isSuccess()) {
+                            // 以下不细究
                             forceClose(child, future.cause());
                         }
                     }
                 });
             } catch (Throwable t) {
+                // 以下不细究
                 forceClose(child, t);
             }
         }

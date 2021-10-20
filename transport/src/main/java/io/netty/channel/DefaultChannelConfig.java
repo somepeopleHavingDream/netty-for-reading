@@ -199,6 +199,13 @@ public class DefaultChannelConfig implements ChannelConfig {
         return true;
     }
 
+    /**
+     * 校验
+     *
+     * @param option 通道选项
+     * @param value 通道选项值
+     * @param <T> 通道值的类型
+     */
     protected <T> void validate(ChannelOption<T> option, T value) {
         ObjectUtil.checkNotNull(option, "option").validate(value);
     }

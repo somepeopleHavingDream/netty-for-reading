@@ -34,6 +34,8 @@ public interface Attribute<T> {
 
     /**
      * Sets the value
+     *
+     * 设置值
      */
     void set(T value);
 

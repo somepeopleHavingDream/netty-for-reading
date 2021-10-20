@@ -591,10 +591,19 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         return Collections.unmodifiableMap(new HashMap<K, V>(map));
     }
 
+    /**
+     * 设置属性集
+     *
+     * @param channel 通道
+     * @param attrs 属性
+     */
     static void setAttributes(Channel channel, Map.Entry<AttributeKey<?>, Object>[] attrs) {
+        // 依次遍历
         for (Map.Entry<AttributeKey<?>, Object> e: attrs) {
+            // 拿到属性键
             @SuppressWarnings("unchecked")
             AttributeKey<Object> key = (AttributeKey<Object>) e.getKey();
+            // 属性键设置属性值
             channel.attr(key).set(e.getValue());
         }
     }
