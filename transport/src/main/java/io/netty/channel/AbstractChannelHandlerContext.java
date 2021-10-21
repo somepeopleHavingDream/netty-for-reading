@@ -222,6 +222,11 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         return this;
     }
 
+    /**
+     * 调用激活通道方法
+     *
+     * @param next 通道处理者上下文
+     */
     static void invokeChannelActive(final AbstractChannelHandlerContext next) {
         // 获得入参通道处理者上下文的事件执行器
         EventExecutor executor = next.executor();
@@ -754,6 +759,9 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
             // 通道处理者上下文调用读方法
             next.invokeRead();
         } else {
+            /*
+                以下不细究
+             */
             Tasks tasks = next.invokeTasks;
             if (tasks == null) {
                 next.invokeTasks = tasks = new Tasks(next);

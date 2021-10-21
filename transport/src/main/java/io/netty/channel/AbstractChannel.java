@@ -607,10 +607,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                  */
                 // 如果通道活跃
                 if (isActive()) {
-                    /*
-                        以下不细究
-                     */
+                    // 如果是首次注册
                     if (firstRegistration) {
+                        // 通道流水线触发激活通道
                         pipeline.fireChannelActive();
                     } else if (config().isAutoRead()) {
                         // This channel was registered before and autoRead() is set. This means we need to begin read
@@ -960,6 +959,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 // 做开始读操作
                 doBeginRead();
             } catch (final Exception e) {
+                /*
+                    以下不细究
+                 */
                 invokeLater(new Runnable() {
                     @Override
                     public void run() {

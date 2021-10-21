@@ -65,6 +65,9 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         }
     }
 
+    /**
+     * 用于当前nio套接字通道的套接字通道配置
+     */
     private final SocketChannelConfig config;
 
     /**
@@ -114,12 +117,15 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
 
     @Override
     protected SocketChannel javaChannel() {
+        // 调用父类的获取jdk底层通道的方法，并返回
         return (SocketChannel) super.javaChannel();
     }
 
     @Override
     public boolean isActive() {
+        // 获得jdk底层套接字通道
         SocketChannel ch = javaChannel();
+        // 如果jdk底层通道是已打开的和已连接的，则通道当前nio套接字通道是活跃的
         return ch.isOpen() && ch.isConnected();
     }
 

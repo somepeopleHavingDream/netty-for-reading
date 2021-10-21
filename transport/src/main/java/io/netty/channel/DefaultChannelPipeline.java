@@ -1658,6 +1658,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
          * 如果是自动读，则做读操作
          */
         private void readIfIsAutoRead() {
+            // 如果通道的配置是自动读的
             if (channel.config().isAutoRead()) {
                 // 读通道
                 channel.read();
