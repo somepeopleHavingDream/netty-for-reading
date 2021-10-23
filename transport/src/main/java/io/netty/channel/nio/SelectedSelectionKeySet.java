@@ -36,6 +36,10 @@ final class SelectedSelectionKeySet extends AbstractSet<SelectionKey> {
 
     @Override
     public boolean add(SelectionKey o) {
+        /*
+            覆写添加方法，使得对选择键的添加的时间复杂度为o(1)，因为jdk底层的选择键集的实现是hashset，添加操作的时间复杂度不是o(1)
+         */
+
         // 如果选择键为null，则直接返回添加失败
         if (o == null) {
             return false;
