@@ -60,6 +60,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
      */
     private static final int MIN_PREMATURE_SELECTOR_RETURNS = 3;
 
+    /**
+     * 选择器自动重建的阈值
+     */
     private static final int SELECTOR_AUTO_REBUILD_THRESHOLD;
 
     /**
@@ -82,30 +85,41 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     // See:
     // - https://bugs.java.com/view_bug.do?bug_id=6427854
     // - https://github.com/netty/netty/issues/203
+    /*
+        用于java开发包nio故障的解决办法。
+     */
     static {
+        // 获取故障级别
         final String key = "sun.nio.ch.bugLevel";
         final String bugLevel = SystemPropertyUtil.get(key);
+
+        // 如果故障级别为null，则设置故障级别
         if (bugLevel == null) {
             try {
                 AccessController.doPrivileged(new PrivilegedAction<Void>() {
                     @Override
                     public Void run() {
+                        // 设置故障级别属性值
                         System.setProperty(key, "");
                         return null;
                     }
                 });
             } catch (final SecurityException e) {
+                // 不细究
                 logger.debug("Unable to get/set System Property: " + key, e);
             }
         }
 
+        // 获得选择器自动重建阈值，默认为512
         int selectorAutoRebuildThreshold = SystemPropertyUtil.getInt("io.netty.selectorAutoRebuildThreshold", 512);
         if (selectorAutoRebuildThreshold < MIN_PREMATURE_SELECTOR_RETURNS) {
             selectorAutoRebuildThreshold = 0;
         }
 
+        // 设置选择器自动重建阈值
         SELECTOR_AUTO_REBUILD_THRESHOLD = selectorAutoRebuildThreshold;
 
+        // 打印日志
         if (logger.isDebugEnabled()) {
             logger.debug("-Dio.netty.noKeySetOptimization: {}", DISABLE_KEY_SET_OPTIMIZATION);
             logger.debug("-Dio.netty.selectorAutoRebuildThreshold: {}", SELECTOR_AUTO_REBUILD_THRESHOLD);
@@ -225,6 +239,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
      * @return 选择器元祖
      */
     private SelectorTuple openSelector() {
+        // 未包装的选择器
         final Selector unwrappedSelector;
         try {
             unwrappedSelector = provider.openSelector();
@@ -232,6 +247,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             throw new ChannelException("failed to open a new selector", e);
         }
 
+        // 如果关闭键集优化
         if (DISABLE_KEY_SET_OPTIMIZATION) {
             // 不细究
             return new SelectorTuple(unwrappedSelector);
@@ -263,6 +279,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             return new SelectorTuple(unwrappedSelector);
         }
 
+        // 记录可能的选择器实现类，实例化已选择的选择键集
         final Class<?> selectorImplClass = (Class<?>) maybeSelectorImplClass;
         final SelectedSelectionKeySet selectedKeySet = new SelectedSelectionKeySet();
 
@@ -327,7 +344,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         selectedKeys = selectedKeySet;
         logger.trace("instrumented a special java.util.Set into: {}", unwrappedSelector);
 
-        // 返回选择器元祖
+        // 返回选择器元组
         return new SelectorTuple(unwrappedSelector,
                                  new SelectedSelectionKeySetSelector(unwrappedSelector, selectedKeySet));
     }
@@ -427,17 +444,24 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     /**
      * Replaces the current {@link Selector} of this event loop with newly created {@link Selector}s to work
      * around the infamous epoll 100% CPU bug.
+     *
+     * 用新创建的选择器代替当前事件循环的选择器，已解决臭名昭著的epoll 100%中央处理单元故障。
      */
     public void rebuildSelector() {
+        // 如果当前线程未处于事件循环中
         if (!inEventLoop()) {
+            // 包装成任务，异步执行
             execute(new Runnable() {
                 @Override
                 public void run() {
+                    // 重建选择器
                     rebuildSelector0();
                 }
             });
             return;
         }
+
+        // 重建选择器
         rebuildSelector0();
     }
 
@@ -446,39 +470,64 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         return selector.keys().size() - cancelledKeys;
     }
 
+    /**
+     * 重建选择器
+     */
     private void rebuildSelector0() {
+        // 获得当前nio事件循环的选择器
         final Selector oldSelector = selector;
+        // 新的选择器元组
         final SelectorTuple newSelectorTuple;
 
+        // 如果当前nio事件循环的选择器为null，则直接返回
         if (oldSelector == null) {
             return;
         }
 
         try {
+            // 打开选择器，获得一个新的选择器元组
             newSelectorTuple = openSelector();
         } catch (Exception e) {
+            /*
+                以下不细究
+             */
+            // 如果捕捉到任何异常，则记录日志（创建新的选择器失败），返回
             logger.warn("Failed to create a new Selector.", e);
             return;
         }
 
         // Register all channels to the new Selector.
+        // 将所有的通道注册都新的选择器上。
         int nChannels = 0;
+        // 遍历当前选择器上的所有选择键
         for (SelectionKey key: oldSelector.keys()) {
+            // 获得当前选择键的附加物
             Object a = key.attachment();
             try {
+                // 如果键不是有效的，或者该键的通道已经注册到新选择器上，则跳过本轮循环
                 if (!key.isValid() || key.channel().keyFor(newSelectorTuple.unwrappedSelector) != null) {
                     continue;
                 }
 
+                // 获得当前选择键的感兴趣操作
                 int interestOps = key.interestOps();
+                // 取消当前键
                 key.cancel();
+                // 将当前键的通道和对应的感兴趣事件及附加物注册到新的选择器上，获得新的选择键
                 SelectionKey newKey = key.channel().register(newSelectorTuple.unwrappedSelector, interestOps, a);
+
+                // 如果附加物是抽象nio通道的实例
                 if (a instanceof AbstractNioChannel) {
                     // Update SelectionKey
+                    // 更新选择键
                     ((AbstractNioChannel) a).selectionKey = newKey;
                 }
+                // 通道数加1
                 nChannels ++;
             } catch (Exception e) {
+                /*
+                    以下不细究
+                 */
                 logger.warn("Failed to re-register a Channel to the new Selector.", e);
                 if (a instanceof AbstractNioChannel) {
                     AbstractNioChannel ch = (AbstractNioChannel) a;
@@ -491,18 +540,24 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             }
         }
 
+        // 设置当前nio事件循环的选择器和未包装选择器
         selector = newSelectorTuple.selector;
         unwrappedSelector = newSelectorTuple.unwrappedSelector;
 
         try {
             // time to close the old selector as everything else is registered to the new one
+            // 是时候关闭旧选择器了，因为其他所有事情被注册到新的选择器上了
             oldSelector.close();
         } catch (Throwable t) {
+            /*
+                以下不细究
+             */
             if (logger.isWarnEnabled()) {
                 logger.warn("Failed to close the old Selector.", t);
             }
         }
 
+        // 打印迁移日志
         if (logger.isInfoEnabled()) {
             logger.info("Migrated " + nChannels + " channel(s) to the new Selector.");
         }
@@ -510,7 +565,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
     @Override
     protected void run() {
-        // 选择计数
+        // 进行了多少次选择操作
         int selectCnt = 0;
         for (;;) {
             try {
@@ -555,14 +610,19 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     default:
                     }
                 } catch (IOException e) {
-                    /*
-                        以下不细究
-                     */
                     // If we receive an IOException here its because the Selector is messed up. Let's rebuild
                     // the selector and retry. https://github.com/netty/netty/issues/8566
+                    /*
+                        如果我们在这收到了输入输出异常，是因为它的选择器搞砸了。
+                        让我们重新构建选择器，并且再次尝试。
+                     */
+                    // 重新构建选择器
                     rebuildSelector0();
+                    // 将进行选择操作的计数清零
                     selectCnt = 0;
+                    // 处理循环异常
                     handleLoopException(e);
+                    // 跳过本轮循环
                     continue;
                 }
 
@@ -616,7 +676,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     // 重置选择次数
                     selectCnt = 0;
                 } else if (unexpectedSelectorWakeup(selectCnt)) { // Unexpected wakeup (unusual case)
-                    // 不细究
+                    // 重置选择次数
                     selectCnt = 0;
                 }
             } catch (CancelledKeyException e) {
@@ -632,7 +692,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 // 不细究
                 throw e;
             } catch (Throwable t) {
-                // 不细究
+                // 处理循环异常
                 handleLoopException(t);
             } finally {
                 // Always handle shutdown even if the loop processing threw an exception.
@@ -652,7 +712,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     // 不细究
                     throw e;
                 } catch (Throwable t) {
-                    // 不细究
+                    // 处理循环异常
                     handleLoopException(t);
                 }
             }
@@ -660,13 +720,25 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     }
 
     // returns true if selectCnt should be reset
+
+    /**
+     * 如果选择次数应该被重置，则返回真
+     *
+     * @param selectCnt 选择次数
+     * @return 选择次数是否应该被重置
+     */
     private boolean unexpectedSelectorWakeup(int selectCnt) {
+        // 如果当前线程被中断了
         if (Thread.interrupted()) {
             // Thread was interrupted so reset selected keys and break so we not run into a busy loop.
             // As this is most likely a bug in the handler of the user or it's client library we will
             // also log it.
             //
             // See https://github.com/netty/netty/issues/2426
+            /*
+                线程被中断了，所以重置选择键并打断，使我们不再进入繁忙循环。
+                因为这最有可能是用户处理者或客户链接里的故障，我们也要记录它。
+             */
             if (logger.isDebugEnabled()) {
                 logger.debug("Selector.select() returned prematurely because " +
                         "Thread.currentThread().interrupt() was called. Use " +
@@ -674,10 +746,17 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             }
             return true;
         }
+
+        // 如果选择器自动重建阈值大于0，并且选择的次数大于等于选择器自动重建阈值
         if (SELECTOR_AUTO_REBUILD_THRESHOLD > 0 &&
                 selectCnt >= SELECTOR_AUTO_REBUILD_THRESHOLD) {
             // The selector returned prematurely many times in a row.
             // Rebuild the selector to work around the problem.
+            /*
+                选择器连续多次提前返回。
+                重建选择器以解决问题。
+             */
+            // 记录日志，重建选择器，并返回真
             logger.warn("Selector.select() returned prematurely {} times in a row; rebuilding Selector {}.",
                     selectCnt, selector);
             rebuildSelector();
@@ -686,15 +765,23 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         return false;
     }
 
+    /**
+     * 处理循环异常
+     *
+     * @param t 可抛出的异常
+     */
     private static void handleLoopException(Throwable t) {
         logger.warn("Unexpected exception in the selector loop.", t);
 
         // Prevent possible consecutive immediate failures that lead to
         // excessive CPU consumption.
+        // 阻止可能会导致过多中央处理单元消耗的连续立即失败。
         try {
+            // 休眠一秒
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             // Ignore.
+            // 忽略异常
         }
     }
 
