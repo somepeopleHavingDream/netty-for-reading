@@ -612,6 +612,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                         // 通道流水线触发激活通道
                         pipeline.fireChannelActive();
                     } else if (config().isAutoRead()) {
+                        /*
+                            以下不细究
+                         */
                         // This channel was registered before and autoRead() is set. This means we need to begin read
                         // again so that we process inbound data.
                         //
