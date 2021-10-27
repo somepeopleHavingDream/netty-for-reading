@@ -125,7 +125,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
                     exception = t;
                 }
 
-                // 获得读缓冲的大小
+                // 获得读缓冲（子连接）的大小
                 int size = readBuf.size();
                 for (int i = 0; i < size; i ++) {
                     // 修改读待办标记

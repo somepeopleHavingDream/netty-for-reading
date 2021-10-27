@@ -533,8 +533,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             // 设置当前通道的事件循环
             AbstractChannel.this.eventLoop = eventLoop;
 
-            // 如果当前线程处在此事件循环中（不细究）
+            // 如果当前线程处在此事件循环中
             if (eventLoop.inEventLoop()) {
+                // 不细究
                 register0(promise);
             } else {
                 // 当前线程不处于此事件循环中

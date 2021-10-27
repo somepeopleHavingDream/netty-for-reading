@@ -1094,7 +1094,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelPipeline fireChannelRead(Object msg) {
-        // 通道处理者上下文调用通道读方法
+        // 通道处理者上下文调用读通道法
         AbstractChannelHandlerContext.invokeChannelRead(head, msg);
         return this;
     }
