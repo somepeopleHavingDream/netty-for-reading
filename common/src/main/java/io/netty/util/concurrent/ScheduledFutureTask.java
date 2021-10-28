@@ -61,6 +61,9 @@ final class ScheduledFutureTask<V> extends PromiseTask<V> implements ScheduledFu
     }
 
     // set once when added to priority queue
+    /**
+     * 当添加到优先级队列时设置一次
+     */
     private long id;
 
     /**
@@ -126,10 +129,19 @@ final class ScheduledFutureTask<V> extends PromiseTask<V> implements ScheduledFu
         return period;
     }
 
+    /**
+     * 设置调度未来任务的Id
+     *
+     * @param id 调度未来任务Id
+     * @return 调度未来任务
+     */
     ScheduledFutureTask<V> setId(long id) {
+        // 如果当前调度未来任务的id未被设置，则设置该调度未来任务的id
         if (this.id == 0L) {
             this.id = id;
         }
+
+        // 返回当前调度未来任务实例
         return this;
     }
 

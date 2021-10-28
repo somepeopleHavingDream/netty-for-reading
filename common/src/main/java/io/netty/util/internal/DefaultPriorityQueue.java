@@ -26,18 +26,39 @@ import static io.netty.util.internal.PriorityQueueNode.INDEX_NOT_IN_QUEUE;
 /**
  * A priority queue which uses natural ordering of elements. Elements are also required to be of type
  * {@link PriorityQueueNode} for the purpose of maintaining the index in the priority queue.
+ *
+ * 使用元素自然序的优先队列。
+ * 元素被要求是优先队列节点类型，用以维持优先队列的索引。
+ *
  * @param <T> The object that is maintained in the queue.
  */
 public final class DefaultPriorityQueue<T extends PriorityQueueNode> extends AbstractQueue<T>
                                                                      implements PriorityQueue<T> {
+
+    /**
+     * 用于当前默认优先队列的优先级队列节点空数组
+     */
     private static final PriorityQueueNode[] EMPTY_ARRAY = new PriorityQueueNode[0];
+
+    /**
+     * 用于当前默认优先队列的比较器
+     */
     private final Comparator<T> comparator;
+
     private T[] queue;
     private int size;
 
+    /**
+     * 默认优先级队列的构造方法
+     *
+     * @param comparator 比较器
+     * @param initialSize 初始容量
+     */
     @SuppressWarnings("unchecked")
     public DefaultPriorityQueue(Comparator<T> comparator, int initialSize) {
+        // 检查并设置比较器
         this.comparator = ObjectUtil.checkNotNull(comparator, "comparator");
+        // 实例化并赋值数据队列
         queue = (T[]) (initialSize != 0 ? new PriorityQueueNode[initialSize] : EMPTY_ARRAY);
     }
 

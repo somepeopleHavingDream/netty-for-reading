@@ -20,8 +20,11 @@ package io.netty.util.internal;
  * used outside the scope of {@link DefaultPriorityQueue}.
  */
 public interface PriorityQueueNode {
+
     /**
      * This should be used to initialize the storage returned by {@link #priorityQueueIndex(DefaultPriorityQueue)}.
+     *
+     * 这应该被用来初始化由优先队列索引方法返回的存储。
      */
     int INDEX_NOT_IN_QUEUE = -1;
 

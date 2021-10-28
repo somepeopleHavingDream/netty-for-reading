@@ -32,6 +32,10 @@ import static io.netty.util.concurrent.ScheduledFutureTask.deadlineNanos;
  * 用于想要支持调度的事件执行器的基类。
  */
 public abstract class AbstractScheduledEventExecutor extends AbstractEventExecutor {
+
+    /**
+     * 调度未来任务比较器
+     */
     private static final Comparator<ScheduledFutureTask<?>> SCHEDULED_FUTURE_TASK_COMPARATOR =
             new Comparator<ScheduledFutureTask<?>>() {
                 @Override
@@ -104,8 +108,11 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
             scheduledTaskQueue = new DefaultPriorityQueue<ScheduledFutureTask<?>>(
                     SCHEDULED_FUTURE_TASK_COMPARATOR,
                     // Use same initial capacity as java.util.PriorityQueue
+                    // 使用与java.util.PriorityQueue相同的初始容量
                     11);
         }
+
+        // 返回调度任务队列
         return scheduledTaskQueue;
     }
 
