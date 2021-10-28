@@ -62,6 +62,9 @@ class PromiseTask<V> extends DefaultPromise<V> implements RunnableFuture<V> {
     }
 
     // Strictly of type Callable<V> or Runnable
+    /**
+     * 严格属于可调用类型或可运行类型
+     */
     private Object task;
 
     PromiseTask(EventExecutor executor, Runnable runnable, V result) {
@@ -69,8 +72,16 @@ class PromiseTask<V> extends DefaultPromise<V> implements RunnableFuture<V> {
         task = result == null ? runnable : new RunnableAdapter<V>(runnable, result);
     }
 
+    /**
+     * 承诺任务的构造方法
+     *
+     * @param executor 事件执行器
+     * @param runnable 可运行实例
+     */
     PromiseTask(EventExecutor executor, Runnable runnable) {
+        // 调用父类的构造方法，赋值事件执行器
         super(executor);
+        // 赋值可运行任务
         task = runnable;
     }
 

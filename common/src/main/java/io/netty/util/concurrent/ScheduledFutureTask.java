@@ -41,9 +41,18 @@ final class ScheduledFutureTask<V> extends PromiseTask<V> implements ScheduledFu
         return System.nanoTime() - START_TIME;
     }
 
+    /**
+     * 截止时间（纳秒）
+     *
+     * @param delay 时延
+     * @return 截止时间（纳秒）
+     */
     static long deadlineNanos(long delay) {
+        // 计算出任务的截止时间
         long deadlineNanos = nanoTime() + delay;
+
         // Guard against overflow
+        // 确保不会溢出
         return deadlineNanos < 0 ? Long.MAX_VALUE : deadlineNanos;
     }
 
@@ -60,14 +69,28 @@ final class ScheduledFutureTask<V> extends PromiseTask<V> implements ScheduledFu
     private long deadlineNanos;
 
     /* 0 - no repeat, >0 - repeat at fixed rate, <0 - repeat with fixed delay */
+    /**
+     * 0-不重复，
+     * >0-以固定频率重复，
+     * <0-以固定时延重复
+     */
     private final long periodNanos;
 
     private int queueIndex = INDEX_NOT_IN_QUEUE;
 
+    /**
+     * 可调度未来任务的构造器
+     *
+     * @param executor 可调度事件执行器
+     * @param runnable 可运行实例
+     * @param nanoTime 任务截止时间
+     */
     ScheduledFutureTask(AbstractScheduledEventExecutor executor,
             Runnable runnable, long nanoTime) {
-
+        // 调用父类的构造方法，对执行器和可运行实例赋值
         super(executor, runnable);
+
+        // 设置任务的截止时间和任务运行周期
         deadlineNanos = nanoTime;
         periodNanos = 0;
     }

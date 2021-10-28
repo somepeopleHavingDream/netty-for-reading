@@ -28,6 +28,8 @@ import static io.netty.util.concurrent.ScheduledFutureTask.deadlineNanos;
 
 /**
  * Abstract base class for {@link EventExecutor}s that want to support scheduling.
+ *
+ * 用于想要支持调度的事件执行器的基类。
  */
 public abstract class AbstractScheduledEventExecutor extends AbstractEventExecutor {
     private static final Comparator<ScheduledFutureTask<?>> SCHEDULED_FUTURE_TASK_COMPARATOR =
@@ -51,6 +53,9 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
      */
     PriorityQueue<ScheduledFutureTask<?>> scheduledTaskQueue;
 
+    /**
+     * 下一个任务Id
+     */
     long nextTaskId;
 
     protected AbstractScheduledEventExecutor() {
@@ -87,8 +92,15 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
         return ScheduledFutureTask.initialNanoTime();
     }
 
+    /**
+     * 获得调度事件执行器的调度任务队列
+     *
+     * @return 存调度未来任务的优先级队列
+     */
     PriorityQueue<ScheduledFutureTask<?>> scheduledTaskQueue() {
+        // 如果调度任务队列为null
         if (scheduledTaskQueue == null) {
+            // 实例化默认优先级队列，并赋值给可调度任务队列
             scheduledTaskQueue = new DefaultPriorityQueue<ScheduledFutureTask<?>>(
                     SCHEDULED_FUTURE_TASK_COMPARATOR,
                     // Use same initial capacity as java.util.PriorityQueue
@@ -197,13 +209,18 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
 
     @Override
     public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+        // 检查入参命令和时间单位
         ObjectUtil.checkNotNull(command, "command");
         ObjectUtil.checkNotNull(unit, "unit");
+
+        // 如果时延值小于0，则设置为0
         if (delay < 0) {
             delay = 0;
         }
+        // 校验调度
         validateScheduled0(delay, unit);
 
+        // 实例化一个调度未来任务，并开始调度
         return schedule(new ScheduledFutureTask<Void>(
                 this,
                 command,
@@ -263,11 +280,14 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
 
     @SuppressWarnings("deprecation")
     private void validateScheduled0(long amount, TimeUnit unit) {
+        // 校验调度
         validateScheduled(amount, unit);
     }
 
     /**
      * Sub-classes may override this to restrict the maximal amount of time someone can use to schedule a task.
+     *
+     * 子类可能覆写此方法以限制某人此次能用以调度任务的最大时间。
      *
      * @deprecated will be removed in the future.
      */
@@ -276,15 +296,33 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
         // NOOP
     }
 
+    /**
+     * 从事件循环中调度任务
+     *
+     * @param task 可调度未来任务
+     */
     final void scheduleFromEventLoop(final ScheduledFutureTask<?> task) {
         // nextTaskId a long and so there is no chance it will overflow back to 0
+        // 下一个任务Id很长，并且不可能溢出回0
         scheduledTaskQueue().add(task.setId(++nextTaskId));
     }
 
+    /**
+     * 对可调度未来任务进行调度操作
+     *
+     * @param task 可调度未来任务
+     * @param <V> 可调度未来的返回值类型
+     * @return 可调度未来
+     */
     private <V> ScheduledFuture<V> schedule(final ScheduledFutureTask<V> task) {
+        // 如果当前线程处于事件循环
         if (inEventLoop()) {
+            // 从事件循环中调度任务
             scheduleFromEventLoop(task);
         } else {
+            /*
+                以下不细究
+             */
             final long deadlineNanos = task.deadlineNanos();
             // task will add itself to scheduled task queue when run if not expired
             if (beforeScheduledTaskSubmitted(deadlineNanos)) {
