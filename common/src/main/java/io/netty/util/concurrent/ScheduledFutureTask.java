@@ -106,10 +106,20 @@ final class ScheduledFutureTask<V> extends PromiseTask<V> implements ScheduledFu
         periodNanos = validatePeriod(period);
     }
 
+    /**
+     * 可调度未来任务的构造器
+     *
+     * @param executor 调度事件执行器
+     * @param callable 可调度实例
+     * @param nanoTime 任务截止时间
+     * @param period 调度周期
+     */
     ScheduledFutureTask(AbstractScheduledEventExecutor executor,
             Callable<V> callable, long nanoTime, long period) {
-
+        // 调用父类的构造方法，赋值调度事件执行器和可调度实例
         super(executor, callable);
+
+        // 设置任务截止时间和运行周期
         deadlineNanos = nanoTime;
         periodNanos = validatePeriod(period);
     }

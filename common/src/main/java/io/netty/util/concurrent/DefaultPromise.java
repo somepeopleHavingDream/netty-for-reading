@@ -101,7 +101,11 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
     /**
      * Creates a new instance.
      *
+     * 创建一个新的实例。
+     *
      * It is preferable to use {@link EventExecutor#newPromise()} to create a new promise
+     *
+     * 最好使用事件执行器的实例承诺方法去创建一个新的实例
      *
      * @param executor
      *        the {@link EventExecutor} which is used to notify the promise once it is complete.

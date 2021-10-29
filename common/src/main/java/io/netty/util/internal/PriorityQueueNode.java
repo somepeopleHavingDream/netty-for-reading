@@ -31,8 +31,13 @@ public interface PriorityQueueNode {
     /**
      * Get the last value set by {@link #priorityQueueIndex(DefaultPriorityQueue, int)} for the value corresponding to
      * {@code queue}.
+     *
+     * 获得为队列对应的值由优先队列索引所设置的最后一个值。
+     *
      * <p>
      * Throwing exceptions from this method will result in undefined behavior.
+     *
+     * 从此方法抛出的异常将引起未定义的行为。
      */
     int priorityQueueIndex(DefaultPriorityQueue<?> queue);
 

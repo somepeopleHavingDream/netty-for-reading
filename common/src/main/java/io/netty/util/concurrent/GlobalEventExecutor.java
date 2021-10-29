@@ -35,6 +35,9 @@ public final class GlobalEventExecutor extends AbstractScheduledEventExecutor im
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(GlobalEventExecutor.class);
 
+    /**
+     * 调度静默周期间隔
+     */
     private static final long SCHEDULE_QUIET_PERIOD_INTERVAL = TimeUnit.SECONDS.toNanos(1);
 
     /**
@@ -43,6 +46,10 @@ public final class GlobalEventExecutor extends AbstractScheduledEventExecutor im
     public static final GlobalEventExecutor INSTANCE = new GlobalEventExecutor();
 
     final BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<Runnable>();
+
+    /**
+     * 用于全局事件执行器的调度未来任务
+     */
     final ScheduledFutureTask<Void> quietPeriodTask = new ScheduledFutureTask<Void>(
             this, Executors.<Void>callable(new Runnable() {
         @Override
@@ -66,6 +73,7 @@ public final class GlobalEventExecutor extends AbstractScheduledEventExecutor im
      * 全局事件执行器的空构造器
      */
     private GlobalEventExecutor() {
+        // 调度任务队列增加静默周期任务
         scheduledTaskQueue().add(quietPeriodTask);
         threadFactory = ThreadExecutorMap.apply(new DefaultThreadFactory(
                 DefaultThreadFactory.toPoolName(getClass()), false, Thread.NORM_PRIORITY, null), this);

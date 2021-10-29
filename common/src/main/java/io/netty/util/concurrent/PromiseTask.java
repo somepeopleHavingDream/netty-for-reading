@@ -85,8 +85,17 @@ class PromiseTask<V> extends DefaultPromise<V> implements RunnableFuture<V> {
         task = runnable;
     }
 
+    /**
+     * 承诺任务的构造方法
+     *
+     * @param executor 事件执行器
+     * @param callable 可调度实例
+     */
     PromiseTask(EventExecutor executor, Callable<V> callable) {
+        // 调用父类的构造方法，设置事件执行器
         super(executor);
+
+        // 设置当前承诺任务
         task = callable;
     }
 

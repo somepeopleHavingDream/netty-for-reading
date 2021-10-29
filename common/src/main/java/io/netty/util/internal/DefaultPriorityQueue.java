@@ -15,11 +15,7 @@
  */
 package io.netty.util.internal;
 
-import java.util.AbstractQueue;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static io.netty.util.internal.PriorityQueueNode.INDEX_NOT_IN_QUEUE;
 
@@ -105,6 +101,7 @@ public final class DefaultPriorityQueue<T extends PriorityQueueNode> extends Abs
 
     @Override
     public boolean offer(T e) {
+        // 如果入队对象不在此优先级队列中
         if (e.priorityQueueIndex(this) != INDEX_NOT_IN_QUEUE) {
             throw new IllegalArgumentException("e.priorityQueueIndex(): " + e.priorityQueueIndex(this) +
                     " (expected: " + INDEX_NOT_IN_QUEUE + ") + e: " + e);
