@@ -79,6 +79,9 @@ final class ScheduledFutureTask<V> extends PromiseTask<V> implements ScheduledFu
      */
     private final long periodNanos;
 
+    /**
+     * 该调度未来任务在队列中的索引
+     */
     private int queueIndex = INDEX_NOT_IN_QUEUE;
 
     /**

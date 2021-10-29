@@ -41,7 +41,14 @@ public final class DefaultPriorityQueue<T extends PriorityQueueNode> extends Abs
      */
     private final Comparator<T> comparator;
 
+    /**
+     * 存储元素的队列，实际是数组
+     */
     private T[] queue;
+
+    /**
+     * 已在默认优先级队列中元素的数量
+     */
     private int size;
 
     /**
@@ -101,21 +108,27 @@ public final class DefaultPriorityQueue<T extends PriorityQueueNode> extends Abs
 
     @Override
     public boolean offer(T e) {
-        // 如果入队对象不在此优先级队列中
+        // 如果入队对象不在此优先级队列中，则抛出违规参数异常
         if (e.priorityQueueIndex(this) != INDEX_NOT_IN_QUEUE) {
             throw new IllegalArgumentException("e.priorityQueueIndex(): " + e.priorityQueueIndex(this) +
                     " (expected: " + INDEX_NOT_IN_QUEUE + ") + e: " + e);
         }
 
         // Check that the array capacity is enough to hold values by doubling capacity.
+        // 检查数组容量是否足够通过加倍容量去拥有值。
         if (size >= queue.length) {
             // Use a policy which allows for a 0 initial capacity. Same policy as JDK's priority queue, double when
             // "small", then grow by 50% when "large".
+            /*
+                使用允许0初始容量的策略。
+                一些策略，如jdk的优先级队列，小时加倍，大时扩容50%。
+             */
             queue = Arrays.copyOf(queue, queue.length + ((queue.length < 64) ?
                                                          (queue.length + 2) :
                                                          (queue.length >>> 1)));
         }
 
+        // 冒泡操作
         bubbleUp(size++, e);
         return true;
     }
@@ -288,26 +301,39 @@ public final class DefaultPriorityQueue<T extends PriorityQueueNode> extends Abs
         node.priorityQueueIndex(this, k);
     }
 
+    /**
+     * 冒泡操作
+     *
+     * @param k 操作的索引位置
+     * @param node 队列元素
+     */
     private void bubbleUp(int k, T node) {
+        // 当当前操作的位置不是队首，则进行循环操作
         while (k > 0) {
+            // 获得父结点索引
             int iParent = (k - 1) >>> 1;
+            // 获得父结点
             T parent = queue[iParent];
 
             // If the bubbleUp node is less than the parent, then we have found a spot to insert and still maintain
             // min-heap properties.
+            // 如果冒泡的结点小于父结点，那么我们已经找到了一个槽去插入并且维持最小堆属性。
             if (comparator.compare(node, parent) >= 0) {
                 break;
             }
 
             // Bubble the parent down.
+            // 把父结点下沉
             queue[k] = parent;
             parent.priorityQueueIndex(this, k);
 
             // Move k up the tree for the next iteration.
+            // 将k向上移动，以进行下一次迭代。
             k = iParent;
         }
 
         // We have found where node should live and still satisfy the min-heap property, so put it in the queue.
+        // 我们已经发现结点应该在哪存在，并且仍然满足最小堆属性，所以将它放置到队列中。
         queue[k] = node;
         node.priorityQueueIndex(this, k);
     }

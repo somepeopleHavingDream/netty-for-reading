@@ -18,6 +18,9 @@ package io.netty.util.internal;
 /**
  * Provides methods for {@link DefaultPriorityQueue} to maintain internal state. These methods should generally not be
  * used outside the scope of {@link DefaultPriorityQueue}.
+ *
+ * 为默认优先级队列提供方法以维持内部状态。
+ * 这些方法通常不应该在默认优先队列外部被使用。
  */
 public interface PriorityQueueNode {
 
@@ -25,6 +28,8 @@ public interface PriorityQueueNode {
      * This should be used to initialize the storage returned by {@link #priorityQueueIndex(DefaultPriorityQueue)}.
      *
      * 这应该被用来初始化由优先队列索引方法返回的存储。
+     *
+     * 不在队列中的索引。
      */
     int INDEX_NOT_IN_QUEUE = -1;
 
