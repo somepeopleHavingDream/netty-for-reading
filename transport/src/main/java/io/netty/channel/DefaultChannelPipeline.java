@@ -1368,14 +1368,18 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     /**
      * Called once a {@link Throwable} hit the end of the {@link ChannelPipeline} without been handled by the user
      * in {@link ChannelHandler#exceptionCaught(ChannelHandlerContext, Throwable)}.
+     *
+     * 一旦可抛出实例击中到通道流水线的尾部，没有被用户在通道处理者方法里被处理，则调用。
      */
     protected void onUnhandledInboundException(Throwable cause) {
         try {
+            // 打印日志
             logger.warn(
                     "An exceptionCaught() event was fired, and it reached at the tail of the pipeline. " +
                             "It usually means the last handler in the pipeline did not handle the exception.",
                     cause);
         } finally {
+            // 引用计数工具类释放可抛出实例
             ReferenceCountUtil.release(cause);
         }
     }
@@ -1515,6 +1519,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+            // 调用未处理的入境异常
             onUnhandledInboundException(cause);
         }
 

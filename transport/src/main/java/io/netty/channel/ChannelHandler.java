@@ -193,8 +193,12 @@ public interface ChannelHandler {
     /**
      * Gets called if a {@link Throwable} was thrown.
      *
+     * 如果可抛出实例被抛出，则获得调用。
+     *
      * @deprecated if you want to handle this event you should implement {@link ChannelInboundHandler} and
      * implement the method there.
+     *
+     * 如果你想要去处理此事件，你应该实现通道入境处理者，并且在那实现方法。
      */
     @Deprecated
     void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception;

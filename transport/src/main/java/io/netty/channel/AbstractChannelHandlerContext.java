@@ -298,14 +298,27 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
 
     @Override
     public ChannelHandlerContext fireExceptionCaught(final Throwable cause) {
+        // 调用异常捕获
         invokeExceptionCaught(findContextInbound(MASK_EXCEPTION_CAUGHT), cause);
+        // 返回当前通道处理者上下文
         return this;
     }
 
+    /**
+     * 调用异常捕获
+     *
+     * @param next 通道处理者上下文
+     * @param cause 可抛出实例
+     */
     static void invokeExceptionCaught(final AbstractChannelHandlerContext next, final Throwable cause) {
+        // 检查入参可抛出实例不为null
         ObjectUtil.checkNotNull(cause, "cause");
+
+        // 获得入参通道处理者上下文的执行器
         EventExecutor executor = next.executor();
+        // 如果当前线程处于事件循环
         if (executor.inEventLoop()) {
+            // 通道处理者上下文调用异常处理
             next.invokeExceptionCaught(cause);
         } else {
             try {
@@ -324,9 +337,16 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         }
     }
 
+    /**
+     * 调用异常捕捉
+     *
+     * @param cause 可抛出实例
+     */
     private void invokeExceptionCaught(final Throwable cause) {
+        // 如果能调用处理者
         if (invokeHandler()) {
             try {
+                // 获得通道处理者，调用异常捕获方法
                 handler().exceptionCaught(this, cause);
             } catch (Throwable error) {
                 if (logger.isDebugEnabled()) {
@@ -427,7 +447,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
                 // 获得当前通道处理者上下文的通道处理者，使用该通道处理者调用读通道方法
                 ((ChannelInboundHandler) handler()).channelRead(this, msg);
             } catch (Throwable t) {
-                // 以下不细究
+                // 调用异常捕捉
                 invokeExceptionCaught(t);
             }
         } else {
