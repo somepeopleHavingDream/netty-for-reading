@@ -29,7 +29,7 @@ import java.util.concurrent.ThreadFactory;
 public final class ThreadExecutorMap {
 
     /**
-     * 快速线程本地，存储了当前使用的事件执行器（该事件执行器一般为NioEventLoop）
+     * 快速线程本地，存储了当前线程使用的事件执行器（该事件执行器一般为NioEventLoop）
      */
     private static final FastThreadLocal<EventExecutor> mappings = new FastThreadLocal<EventExecutor>();
 
@@ -102,10 +102,15 @@ public final class ThreadExecutorMap {
     /**
      * Decorate the given {@link ThreadFactory} and ensure {@link #currentExecutor()} will return {@code eventExecutor}
      * when called from within the {@link Runnable} during execution.
+     *
+     * 装饰给定的线程工厂，并且确保当在执行期间从可运行实例调用时，当前执行器将返回事件执行器。
      */
     public static ThreadFactory apply(final ThreadFactory threadFactory, final EventExecutor eventExecutor) {
+        // 检查入参线程工厂、事件执行器
         ObjectUtil.checkNotNull(threadFactory, "command");
         ObjectUtil.checkNotNull(eventExecutor, "eventExecutor");
+
+        // 实例化重载了新建线程方法的线程工厂，然后返回
         return new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {

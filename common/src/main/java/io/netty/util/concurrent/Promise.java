@@ -50,6 +50,8 @@ public interface Promise<V> extends Future<V> {
      * Marks this future as a failure and notifies all
      * listeners.
      *
+     * 将此未来标记为失败，并且通知所有监听者。
+     *
      * @return {@code true} if and only if successfully marked this future as
      *         a failure. Otherwise {@code false} because this future is
      *         already marked as either a success or a failure.

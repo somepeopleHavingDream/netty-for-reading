@@ -795,19 +795,35 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
 
     @Override
     public ChannelFuture write(final Object msg, final ChannelPromise promise) {
+        // 做写消息操作
         write(msg, false, promise);
 
+        // 返回承诺
         return promise;
     }
 
+    /**
+     * 调用写方法
+     *
+     * @param msg 消息
+     * @param promise 通道承诺
+     */
     void invokeWrite(Object msg, ChannelPromise promise) {
+        // 如果能调用处理者
         if (invokeHandler()) {
             invokeWrite0(msg, promise);
         } else {
+            // 不细究
             write(msg, promise);
         }
     }
 
+    /**
+     * 调用写方法
+     *
+     * @param msg 消息
+     * @param promise 通道承诺
+     */
     private void invokeWrite0(Object msg, ChannelPromise promise) {
         try {
             ((ChannelOutboundHandler) handler()).write(this, msg, promise);
@@ -864,7 +880,15 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         }
     }
 
+    /**
+     * 写
+     * 
+     * @param msg 需要写入的消息
+     * @param flush 写入后是否做冲刷操作
+     * @param promise 通道承诺
+     */
     private void write(Object msg, boolean flush, ChannelPromise promise) {
+        // 检查入参消息是否不为null
         ObjectUtil.checkNotNull(msg, "msg");
         try {
             // 如果不是一个有效的承诺
@@ -887,15 +911,23 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         // 找到出境上下文
         final AbstractChannelHandlerContext next = findContextOutbound(flush ?
                 (MASK_WRITE | MASK_FLUSH) : MASK_WRITE);
+        // 触摸消息
         final Object m = pipeline.touch(msg, next);
+        // 获得出境上下文的事件执行器
         EventExecutor executor = next.executor();
+        // 如果当前线程处在事件执行器中
         if (executor.inEventLoop()) {
+            // 是否刷新消息
             if (flush) {
                 next.invokeWriteAndFlush(m, promise);
             } else {
+                // 通道处理者上下文调用写方法
                 next.invokeWrite(m, promise);
             }
         } else {
+            /*
+                以下不细究
+             */
             final WriteTask task = WriteTask.newInstance(next, m, promise, flush);
             if (!safeExecute(executor, task, promise, m, !flush)) {
                 // We failed to submit the WriteTask. We need to cancel it so we decrement the pending bytes

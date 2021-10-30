@@ -467,6 +467,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      */
     protected abstract class AbstractUnsafe implements Unsafe {
 
+        /**
+         * 通道出境缓冲
+         */
         private volatile ChannelOutboundBuffer outboundBuffer = new ChannelOutboundBuffer(AbstractChannel.this);
 
         /**
@@ -978,10 +981,16 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         @Override
         public final void write(Object msg, ChannelPromise promise) {
+            // 断言：当前线程处于事件循环中
             assertEventLoop();
 
+            // 获得用于当前通道的通道出境缓冲
             ChannelOutboundBuffer outboundBuffer = this.outboundBuffer;
+            // 如果通道出境缓冲为null
             if (outboundBuffer == null) {
+                /*
+                    以下不细究
+                 */
                 try {
                     // release message now to prevent resource-leak
                     ReferenceCountUtil.release(msg);
@@ -998,20 +1007,28 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             int size;
             try {
+                // 过滤出境消息
                 msg = filterOutboundMessage(msg);
+
+                /*
+                    以下不细究
+                 */
                 size = pipeline.estimatorHandle().size(msg);
                 if (size < 0) {
                     size = 0;
                 }
             } catch (Throwable t) {
                 try {
+                    // 引用计数工具类，释放消息对象
                     ReferenceCountUtil.release(msg);
                 } finally {
+                    // 安全地设置失败
                     safeSetFailure(promise, t);
                 }
                 return;
             }
 
+            // 以下不细究
             outboundBuffer.addMessage(msg, size, promise);
         }
 
@@ -1142,8 +1159,12 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         /**
          * Marks the specified {@code promise} as failure.  If the {@code promise} is done already, log a message.
+         *
+         * 标记指定承诺为失败。
+         * 如果承诺已经完成，则记录消息。
          */
         protected final void safeSetFailure(ChannelPromise promise, Throwable cause) {
+            // 如果入参承诺不属于Void通道承诺实例，并且承诺尝试设置失败不成功，则记录日志
             if (!(promise instanceof VoidChannelPromise) && !promise.tryFailure(cause)) {
                 logger.warn("Failed to mark a promise as failure because it's done already: {}", promise, cause);
             }
@@ -1289,6 +1310,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     /**
      * Invoked when a new message is added to a {@link ChannelOutboundBuffer} of this {@link AbstractChannel}, so that
      * the {@link Channel} implementation converts the message to another. (e.g. heap buffer -> direct buffer)
+     *
+     * 当新消息被添加到通道的通道出境缓冲器时被调用，以便通道实现将消息转换为其他。（比如堆缓冲->直接缓冲）
      */
     protected Object filterOutboundMessage(Object msg) throws Exception {
         return msg;

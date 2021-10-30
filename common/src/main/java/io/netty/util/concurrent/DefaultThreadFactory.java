@@ -100,6 +100,14 @@ public class DefaultThreadFactory implements ThreadFactory {
         }
     }
 
+    /**
+     * 默认线程工厂构造方法
+     *
+     * @param poolName 线程池名
+     * @param daemon 是否守护线程池
+     * @param priority 线程池里的线程优先级
+     * @param threadGroup 线程组
+     */
     public DefaultThreadFactory(String poolName, boolean daemon, int priority, ThreadGroup threadGroup) {
         // 检查线程池名
         ObjectUtil.checkNotNull(poolName, "poolName");

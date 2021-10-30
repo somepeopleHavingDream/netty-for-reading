@@ -71,6 +71,9 @@ public final class ChannelOutboundBuffer {
         }
     };
 
+    /**
+     * 该通道出境缓冲作用的通道
+     */
     private final Channel channel;
 
     // Entry(flushedEntry) --> ... Entry(unflushedEntry) --> ... Entry(tailEntry)
@@ -103,7 +106,13 @@ public final class ChannelOutboundBuffer {
 
     private volatile Runnable fireChannelWritabilityChangedTask;
 
+    /**
+     * 通道出境缓冲的构造方法
+     *
+     * @param channel 通道
+     */
     ChannelOutboundBuffer(AbstractChannel channel) {
+        // 设置通道
         this.channel = channel;
     }
 

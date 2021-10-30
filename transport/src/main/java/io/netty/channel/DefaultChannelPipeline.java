@@ -1464,7 +1464,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     // A special catch-all handler that handles both bytes and messages.
-    // 既处理字节又处理消息的特别的捕捉所有的处理者。
+
+    /**
+     * 既处理字节又处理消息的特别的捕捉所有的处理者。
+     */
     final class TailContext extends AbstractChannelHandlerContext implements ChannelInboundHandler {
 
         TailContext(DefaultChannelPipeline pipeline) {
@@ -1598,6 +1601,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
+            // 不安全实例做写操作
             unsafe.write(msg, promise);
         }
 

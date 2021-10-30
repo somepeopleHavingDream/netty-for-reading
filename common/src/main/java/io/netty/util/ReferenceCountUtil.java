@@ -91,11 +91,18 @@ public final class ReferenceCountUtil {
     /**
      * Try to call {@link ReferenceCounted#release()} if the specified message implements {@link ReferenceCounted}.
      * If the specified message doesn't implement {@link ReferenceCounted}, this method does nothing.
+     *
+     * 如果指定的消息实现了引用计数接口，则尝试调用引用计数的释放方法。
+     * 如果指定的消息没有实现引用计数，此方法不做任何事。
      */
     public static boolean release(Object msg) {
+        // 如果入参消息是引用计数实例
         if (msg instanceof ReferenceCounted) {
+            // 不细究
             return ((ReferenceCounted) msg).release();
         }
+
+        // 返回假
         return false;
     }
 

@@ -265,7 +265,11 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
     @Override
     protected final Object filterOutboundMessage(Object msg) {
+        // 如果入参消息是字节缓冲实例
         if (msg instanceof ByteBuf) {
+            /*
+                以下暂不细究
+             */
             ByteBuf buf = (ByteBuf) msg;
             if (buf.isDirect()) {
                 return msg;
@@ -274,10 +278,12 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             return newDirectBuffer(buf);
         }
 
+        // 如果消息是文件区域实例，则直接返回消息
         if (msg instanceof FileRegion) {
             return msg;
         }
 
+        // 抛出不支持操作异常
         throw new UnsupportedOperationException(
                 "unsupported message type: " + StringUtil.simpleClassName(msg) + EXPECTED_TYPES);
     }

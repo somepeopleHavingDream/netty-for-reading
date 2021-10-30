@@ -62,7 +62,13 @@ public final class GlobalEventExecutor extends AbstractScheduledEventExecutor im
     // can trigger the creation of a thread from arbitrary thread groups; for this reason, the thread factory must not
     // be sticky about its thread group
     // visible for testing
+
+    /**
+     * 因为全局事件执行器是单例的，被提交给它的任务来自于可替换的线程，并且它能够从可替换线程组中触发线程的创造。
+     * 为此线程工厂不能对它的线程组保持粘性。
+     */
     final ThreadFactory threadFactory;
+
     private final TaskRunner taskRunner = new TaskRunner();
     private final AtomicBoolean started = new AtomicBoolean();
     volatile Thread thread;
@@ -70,11 +76,12 @@ public final class GlobalEventExecutor extends AbstractScheduledEventExecutor im
     private final Future<?> terminationFuture = new FailedFuture<Object>(this, new UnsupportedOperationException());
 
     /**
-     * 全局事件执行器的空构造器
+     * 全局事件执行器的空构造方法
      */
     private GlobalEventExecutor() {
         // 调度任务队列增加静默周期任务
         scheduledTaskQueue().add(quietPeriodTask);
+        // 设置线程工厂
         threadFactory = ThreadExecutorMap.apply(new DefaultThreadFactory(
                 DefaultThreadFactory.toPoolName(getClass()), false, Thread.NORM_PRIORITY, null), this);
     }
