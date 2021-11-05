@@ -44,7 +44,7 @@ import java.util.Set;
 public class FastThreadLocal<V> {
 
     /**
-     * 将被移除的变量的变量表索引
+     * 将被移除的变量表索引
      */
     private static final int variablesToRemoveIndex = InternalThreadLocalMap.nextVariableIndex();
 
@@ -193,6 +193,12 @@ public class FastThreadLocal<V> {
         return initialize(threadLocalMap);
     }
 
+    /**
+     * 初始化此快速线程本地
+     *
+     * @param threadLocalMap 线程本地映射
+     * @return 初始值
+     */
     private V initialize(InternalThreadLocalMap threadLocalMap) {
         V v = null;
         try {
@@ -203,7 +209,7 @@ public class FastThreadLocal<V> {
             PlatformDependent.throwException(e);
         }
 
-        // 线程本地映射设置内部索引表变量
+        // 线程本地映射设置内部索引表对应位置的变量
         threadLocalMap.setIndexedVariable(index, v);
         // 将此快速线程本地添加到将要移除的变量表
         addToVariablesToRemove(threadLocalMap, this);
@@ -303,7 +309,7 @@ public class FastThreadLocal<V> {
     /**
      * Returns the initial value for this thread-local variable.
      *
-     * 返回此线程本地变量的初始值。
+     * 返回此线程本地变量的初始值。（一般由子类实现）
      */
     protected V initialValue() throws Exception {
         // 初始值为null

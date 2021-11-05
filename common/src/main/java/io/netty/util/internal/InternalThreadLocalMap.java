@@ -57,7 +57,7 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
     private static final int HANDLER_SHARABLE_CACHE_INITIAL_CAPACITY = 4;
 
     /**
-     * 索引表初始大小
+     * 索引变量表初始大小
      */
     private static final int INDEXED_VARIABLE_TABLE_INITIAL_SIZE = 32;
 
@@ -165,6 +165,7 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
 
         // 如果获得的内部线程本地映射为null，则实例化内部线程本地映射，并往慢线程本地映射中设置内部线程本地映射
         if (ret == null) {
+            // 实例化并赋值内部线程本地映射，并将该内部线程本地映射赋值给慢线程本地映射
             ret = new InternalThreadLocalMap();
             slowThreadLocalMap.set(ret);
         }
@@ -207,17 +208,21 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         return nextIndex.get() - 1;
     }
 
+    /**
+     * 内部线程本地映射的空构造方法
+     */
     private InternalThreadLocalMap() {
         // 实例化并且设置索引变量表
         indexedVariables = newIndexedVariableTable();
     }
 
     /**
-     * 实例化一个索引变量表
+     * 实例化索引变量表
      *
      * @return 索引变量表
      */
     private static Object[] newIndexedVariableTable() {
+        // 实例化Object对象数组，将该数组全部填充为未设置对象
         Object[] array = new Object[INDEXED_VARIABLE_TABLE_INITIAL_SIZE];
         Arrays.fill(array, UNSET);
         return array;
@@ -396,6 +401,7 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
      * @return 该索引对应的索引变量
      */
     public Object indexedVariable(int index) {
+        // 若没找到，则返回未设置值
         Object[] lookup = indexedVariables;
         return index < lookup.length? lookup[index] : UNSET;
     }
