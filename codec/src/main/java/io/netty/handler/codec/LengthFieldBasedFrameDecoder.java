@@ -15,15 +15,13 @@
  */
 package io.netty.handler.codec;
 
-import static io.netty.util.internal.ObjectUtil.checkNotNull;
-import static io.netty.util.internal.ObjectUtil.checkPositive;
-import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
 
 import java.nio.ByteOrder;
 import java.util.List;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
+import static io.netty.util.internal.ObjectUtil.*;
 
 /**
  * A decoder that splits the received {@link ByteBuf}s dynamically by the
@@ -219,6 +217,8 @@ public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
     /**
      * Creates a new instance.
      *
+     * 创建一个新实例。
+     *
      * @param maxFrameLength
      *        the maximum length of the frame.  If the length of the frame is
      *        greater than this value, {@link TooLongFrameException} will be
@@ -244,6 +244,8 @@ public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
 
     /**
      * Creates a new instance.
+     *
+     * 创建一个新实例。
      *
      * @param maxFrameLength
      *        the maximum length of the frame.  If the length of the frame is
@@ -276,6 +278,8 @@ public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
     /**
      * Creates a new instance.
      *
+     * 创建一个新实例。
+     *
      * @param byteOrder
      *        the {@link ByteOrder} of the length field
      * @param maxFrameLength
@@ -301,15 +305,16 @@ public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
     public LengthFieldBasedFrameDecoder(
             ByteOrder byteOrder, int maxFrameLength, int lengthFieldOffset, int lengthFieldLength,
             int lengthAdjustment, int initialBytesToStrip, boolean failFast) {
-
+        // 检查并设置字节序
         this.byteOrder = checkNotNull(byteOrder, "byteOrder");
-
+        // 检查入参最大帧长度
         checkPositive(maxFrameLength, "maxFrameLength");
-
+        // 检查入参长度字段偏移
         checkPositiveOrZero(lengthFieldOffset, "lengthFieldOffset");
-
+        // 检查入参初始跳过的字节数
         checkPositiveOrZero(initialBytesToStrip, "initialBytesToStrip");
 
+        // 检查入参关系
         if (lengthFieldOffset > maxFrameLength - lengthFieldLength) {
             throw new IllegalArgumentException(
                     "maxFrameLength (" + maxFrameLength + ") " +
@@ -318,6 +323,7 @@ public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
                     "lengthFieldLength (" + lengthFieldLength + ").");
         }
 
+        // 设置最大帧长度、长度字段偏移、长度字段长度、长度调整字段、长度字段终端偏移、初始跳过的字节数、是否快速失败
         this.maxFrameLength = maxFrameLength;
         this.lengthFieldOffset = lengthFieldOffset;
         this.lengthFieldLength = lengthFieldLength;

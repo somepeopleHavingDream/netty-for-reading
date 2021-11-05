@@ -16,15 +16,8 @@
 package io.netty.handler.timeout;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
+import io.netty.channel.*;
 import io.netty.channel.Channel.Unsafe;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOutboundBuffer;
-import io.netty.channel.ChannelPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.internal.ObjectUtil;
 
@@ -97,6 +90,10 @@ import java.util.concurrent.TimeUnit;
  * @see WriteTimeoutHandler
  */
 public class IdleStateHandler extends ChannelDuplexHandler {
+
+    /**
+     * 最小时延-纳秒
+     */
     private static final long MIN_TIMEOUT_NANOS = TimeUnit.MILLISECONDS.toNanos(1);
 
     // Not create a new ChannelFutureListener per write operation to reduce GC pressure.
@@ -108,7 +105,11 @@ public class IdleStateHandler extends ChannelDuplexHandler {
         }
     };
 
+    /**
+     * 是否观察输出
+     */
     private final boolean observeOutput;
+
     private final long readerIdleTimeNanos;
     private final long writerIdleTimeNanos;
     private final long allIdleTimeNanos;
@@ -134,6 +135,8 @@ public class IdleStateHandler extends ChannelDuplexHandler {
 
     /**
      * Creates a new instance firing {@link IdleStateEvent}s.
+     *
+     * 创建触发空闲状态事件的新实例。
      *
      * @param readerIdleTimeSeconds
      *        an {@link IdleStateEvent} whose state is {@link IdleState#READER_IDLE}
@@ -169,6 +172,8 @@ public class IdleStateHandler extends ChannelDuplexHandler {
     /**
      * Creates a new instance firing {@link IdleStateEvent}s.
      *
+     * 创建触发空闲状态事件的新实例。
+     *
      * @param observeOutput
      *        whether or not the consumption of {@code bytes} should be taken into
      *        consideration when assessing write idleness. The default is {@code false}.
@@ -191,20 +196,27 @@ public class IdleStateHandler extends ChannelDuplexHandler {
     public IdleStateHandler(boolean observeOutput,
             long readerIdleTime, long writerIdleTime, long allIdleTime,
             TimeUnit unit) {
+        // 检查入参时间单位是否为null
         ObjectUtil.checkNotNull(unit, "unit");
 
+        // 设置是否观察输出
         this.observeOutput = observeOutput;
 
+        // 设置读空闲时间
         if (readerIdleTime <= 0) {
             readerIdleTimeNanos = 0;
         } else {
             readerIdleTimeNanos = Math.max(unit.toNanos(readerIdleTime), MIN_TIMEOUT_NANOS);
         }
+
+        // 设置写空闲时间
         if (writerIdleTime <= 0) {
             writerIdleTimeNanos = 0;
         } else {
             writerIdleTimeNanos = Math.max(unit.toNanos(writerIdleTime), MIN_TIMEOUT_NANOS);
         }
+
+        // 设置所有空闲时间
         if (allIdleTime <= 0) {
             allIdleTimeNanos = 0;
         } else {
