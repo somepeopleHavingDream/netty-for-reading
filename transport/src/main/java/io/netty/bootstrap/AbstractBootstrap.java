@@ -402,7 +402,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             return new DefaultChannelPromise(new FailedChannel(), GlobalEventExecutor.INSTANCE).setFailure(t);
         }
 
-        // boss事件循环者组注册通道，获得注册通道未来，即该注册过程可能未完成（nio事件循环组注册通道）
+        // boss事件循环者组注册通道，获得注册通道未来，即该注册过程可能未完成（nio事件循环组注册通道，异步完成）
         ChannelFuture regFuture = config().group().register(channel);
         if (regFuture.cause() != null) {
             /*

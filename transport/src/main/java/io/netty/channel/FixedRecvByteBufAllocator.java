@@ -20,9 +20,15 @@ import static io.netty.util.internal.ObjectUtil.checkPositive;
 /**
  * The {@link RecvByteBufAllocator} that always yields the same buffer
  * size prediction.  This predictor ignores the feed back from the I/O thread.
+ *
+ * 接收字节缓冲分配器总是产生相同缓冲大小预测。
+ * 该预测器忽略来自输入输出线程的反馈。
  */
 public class FixedRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufAllocator {
 
+    /**
+     * 用于当前固定接收字节缓冲分配器的缓冲区大小
+     */
     private final int bufferSize;
 
     private final class HandleImpl extends MaxMessageHandle {
@@ -41,9 +47,13 @@ public class FixedRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufAllo
     /**
      * Creates a new predictor that always returns the same prediction of
      * the specified buffer size.
+     *
+     * 创建新的预测器，该预测器总是返回指定缓冲大小的相同预测。
      */
     public FixedRecvByteBufAllocator(int bufferSize) {
+        // 检查入参缓冲大小
         checkPositive(bufferSize, "bufferSize");
+        // 设置用于当前固定接收字节缓冲分配器的缓冲区大小
         this.bufferSize = bufferSize;
     }
 
