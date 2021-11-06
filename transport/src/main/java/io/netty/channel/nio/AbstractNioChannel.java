@@ -438,6 +438,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     protected void doBeginRead() throws Exception {
         // Channel.read() or ChannelHandlerContext.read() was called
         // 通道读或通道处理者上下文读被调用
+
         // 获得当前nio通道的选择键
         final SelectionKey selectionKey = this.selectionKey;
         // 如果当前nio通道的选择键是无效的，则直接返回

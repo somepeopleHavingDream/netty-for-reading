@@ -60,8 +60,15 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
      */
     volatile EventLoopGroup group;
 
+    /**
+     * 用于此引导的通道工厂
+     */
     @SuppressWarnings("deprecation")
     private volatile ChannelFactory<? extends C> channelFactory;
+
+    /**
+     * 此引导绑定的套接字地址
+     */
     private volatile SocketAddress localAddress;
 
     // The order in which ChannelOptions are applied is important they may depend on each other for validation
@@ -383,7 +390,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     final ChannelFuture initAndRegister() {
         Channel channel = null;
         try {
-            // 从通道工厂中实例化一个通道（jdk的通道）
+            // 从通道工厂中实例化一个通道（jdk的通道，一般是NioServerSocketChannel）
             channel = channelFactory.newChannel();
             // 初始化通道
             init(channel);

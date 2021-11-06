@@ -151,9 +151,16 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
     private static final byte STATE_CALLING_CHILD_DECODE = 1;
     private static final byte STATE_HANDLER_REMOVED_PENDING = 2;
 
+    /**
+     * 累积的字节缓冲
+     */
     ByteBuf cumulation;
     private Cumulator cumulator = MERGE_CUMULATOR;
     private boolean singleDecode;
+
+    /**
+     * 标记该实例是否是第一个处理字节缓冲的字节到消息解码器
+     */
     private boolean first;
 
     /**
@@ -267,7 +274,9 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        // 如果消息输入字节缓冲实例
         if (msg instanceof ByteBuf) {
+            // 实例化一个编解码输出列表实例
             CodecOutputList out = CodecOutputList.newInstance();
             try {
                 first = cumulation == null;

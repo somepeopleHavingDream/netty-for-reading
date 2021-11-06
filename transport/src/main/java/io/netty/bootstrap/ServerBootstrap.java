@@ -174,9 +174,9 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
     @Override
     void init(Channel channel) {
-        // 设置通道选项（一般是空的，暂不细究）
+        // 设置通道选项
         setChannelOptions(channel, newOptionsArray(), logger);
-        // 设置属性（一般是空的，暂不细究）
+        // 设置属性
         setAttributes(channel, newAttributesArray());
 
         // 获得通道流水线
@@ -259,6 +259,15 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
         private final Runnable enableAutoReadTask;
 
+        /**
+         * 服务端引导接收器构造方法
+         *
+         * @param channel 通道
+         * @param childGroup 子事件循环组
+         * @param childHandler 子处理者
+         * @param childOptions 子选项
+         * @param childAttrs 子属性
+         */
         ServerBootstrapAcceptor(
                 final Channel channel, EventLoopGroup childGroup, ChannelHandler childHandler,
                 Entry<ChannelOption<?>, Object>[] childOptions, Entry<AttributeKey<?>, Object>[] childAttrs) {
@@ -294,7 +303,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         @Override
         @SuppressWarnings("unchecked")
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
-            // 入参消息必定是Nio套接字通道
+            // 入参消息一般是Nio套接字通道
             final Channel child = (Channel) msg;
 
             // 子通道的通道流水线添加子通道处理者

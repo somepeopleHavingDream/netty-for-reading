@@ -29,8 +29,16 @@ import java.lang.reflect.Constructor;
  */
 public class ReflectiveChannelFactory<T extends Channel> implements ChannelFactory<T> {
 
+    /**
+     * 此反射通道工厂用于创建通道的构造器
+     */
     private final Constructor<? extends T> constructor;
 
+    /**
+     * 反射通道工厂的构造方法
+     *
+     * @param clazz 通道类对象
+     */
     public ReflectiveChannelFactory(Class<? extends T> clazz) {
         // 检查类对象不能为null
         ObjectUtil.checkNotNull(clazz, "clazz");
@@ -39,6 +47,7 @@ public class ReflectiveChannelFactory<T extends Channel> implements ChannelFacto
             // 从类对象中获得并设置构造器
             this.constructor = clazz.getConstructor();
         } catch (NoSuchMethodException e) {
+            // 以下不细究
             throw new IllegalArgumentException("Class " + StringUtil.simpleClassName(clazz) +
                     " does not have a public non-arg constructor", e);
         }

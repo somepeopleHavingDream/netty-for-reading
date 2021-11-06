@@ -25,55 +25,118 @@ import static io.netty.util.internal.ObjectUtil.checkNotNull;
 
 /**
  * Special {@link AbstractList} implementation which is used within our codec base classes.
+ *
+ * 特别的抽象列表实现，该实现在我们编解码基类里被使用。
  */
 final class CodecOutputList extends AbstractList<Object> implements RandomAccess {
 
+    /**
+     * 用于此编解码器输出列表的NOOP回收器
+     */
     private static final CodecOutputListRecycler NOOP_RECYCLER = new CodecOutputListRecycler() {
+
         @Override
         public void recycle(CodecOutputList object) {
             // drop on the floor and let the GC handle it.
+            // 丢在地板上，让垃圾收集器处理。
         }
     };
 
+    /**
+     * 用于此编解码输出列表的编解码输出列表池（属于快速线程本地实例）
+     */
     private static final FastThreadLocal<CodecOutputLists> CODEC_OUTPUT_LISTS_POOL =
             new FastThreadLocal<CodecOutputLists>() {
                 @Override
                 protected CodecOutputLists initialValue() throws Exception {
                     // 16 CodecOutputList per Thread are cached.
+                    // 每个线程缓存16个编解码输出列表
                     return new CodecOutputLists(16);
                 }
             };
 
+    /**
+     * 编解码输出列表回收器
+     */
     private interface CodecOutputListRecycler {
+
+        /**
+         * 回收编解码器输出列表做
+         *
+         * @param codecOutputList 编解码输出列表
+         */
         void recycle(CodecOutputList codecOutputList);
     }
 
+    /**
+     * 用于此编解码输出列表的编解码输出列表的工具类
+     */
     private static final class CodecOutputLists implements CodecOutputListRecycler {
+
+        /**
+         * 编解码输出列表数组
+         */
         private final CodecOutputList[] elements;
+
+        /**
+         * 用于当前编解码器输出列表集合的掩码
+         */
         private final int mask;
 
+        /**
+         * 用于当前编解码输出列表集合的当前索引
+         */
         private int currentIdx;
+
+        /**
+         * 用于当前编解码输出列表集合的数量
+         */
         private int count;
 
+        /**
+         * 编解码输出列表工具类的构造方法
+         *
+         * @param numElements 元素个数
+         */
         CodecOutputLists(int numElements) {
+            // 实例化并赋值编解码输出列表数组
             elements = new CodecOutputList[MathUtil.safeFindNextPositivePowerOfTwo(numElements)];
             for (int i = 0; i < elements.length; ++i) {
                 // Size of 16 should be good enough for the majority of all users as an initial capacity.
+                // 对于大多数用户，16的大小，作为初始容量足够了。
                 elements[i] = new CodecOutputList(this, 16);
             }
+
+            // 设置编解码器输出列表集合的长度、当前索引、掩码
             count = elements.length;
             currentIdx = elements.length;
             mask = elements.length - 1;
         }
 
+        /**
+         * 从编解码器输出列表集合中获得或者创建一个编解码器输出列表
+         *
+         * @return 编解码器输出列表
+         */
         public CodecOutputList getOrCreate() {
+            // 如果编解码器输出列表的数量为0
             if (count == 0) {
+                /*
+                    以下不细究
+                 */
+
                 // Return a new CodecOutputList which will not be cached. We use a size of 4 to keep the overhead
                 // low.
+                /*
+                    返回一个新的不被缓存的编解码器输出列表。
+                    我们使用大小4来保证低开销。
+                 */
                 return new CodecOutputList(NOOP_RECYCLER, 4);
             }
+            // 编解码输出列表数量减一
             --count;
 
+            // 返回获得的编解码器输出列表
             int idx = (currentIdx - 1) & mask;
             CodecOutputList list = elements[idx];
             currentIdx = idx;
@@ -90,17 +153,35 @@ final class CodecOutputList extends AbstractList<Object> implements RandomAccess
         }
     }
 
+    /**
+     * 新建一个编解码器输出列表实例
+     *
+     * @return 编解码输出列表实例
+     */
     static CodecOutputList newInstance() {
         return CODEC_OUTPUT_LISTS_POOL.get().getOrCreate();
     }
 
     private final CodecOutputListRecycler recycler;
     private int size;
+
+    /**
+     * 用于此编解码器输出列表的数组
+     */
     private Object[] array;
+
     private boolean insertSinceRecycled;
 
+    /**
+     * 编解码器输出列表的构造方法
+     *
+     * @param recycler 编解码器输出列表回收器
+     * @param size 大小
+     */
     private CodecOutputList(CodecOutputListRecycler recycler, int size) {
+        // 设置编解码器输出列表回收器
         this.recycler = recycler;
+        // 实例出指定大小的对象数组，并赋值
         array = new Object[size];
     }
 

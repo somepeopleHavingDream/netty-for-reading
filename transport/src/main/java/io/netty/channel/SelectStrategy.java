@@ -20,8 +20,13 @@ import io.netty.util.IntSupplier;
 /**
  * Select strategy interface.
  *
+ * 选择策略接口。
+ *
  * Provides the ability to control the behavior of the select loop. For example a blocking select
  * operation can be delayed or skipped entirely if there are events to process immediately.
+ *
+ * 提供控制选择循环行为的能力。
+ * 比如：阻塞选择操作能被延迟或者完整地跳过，如果有马上要处理的事件。
  */
 public interface SelectStrategy {
 

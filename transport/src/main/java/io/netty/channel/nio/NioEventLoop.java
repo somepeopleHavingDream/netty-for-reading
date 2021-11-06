@@ -66,7 +66,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     private static final int SELECTOR_AUTO_REBUILD_THRESHOLD;
 
     /**
-     * 马上选择提供者
+     * 立刻选择提供者
      */
     private final IntSupplier selectNowSupplier = new IntSupplier() {
         @Override
@@ -1072,6 +1072,12 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         return unwrappedSelector;
     }
 
+    /**
+     * 立刻做选择操作
+     *
+     * @return 选择操作的结果
+     * @throws IOException 输入输出异常
+     */
     int selectNow() throws IOException {
         return selector.selectNow();
     }
