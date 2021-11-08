@@ -38,8 +38,19 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     private static final InternalLogger logger =
             InternalLoggerFactory.getInstance(SingleThreadEventExecutor.class);
 
+    /**
+     * 单线程事件执行器-未启动
+     */
     private static final int ST_NOT_STARTED = 1;
+
+    /**
+     * 单线程事件执行器-已启动
+     */
     private static final int ST_STARTED = 2;
+
+    /**
+     * 单线程事件执行器-关闭
+     */
     private static final int ST_SHUTTING_DOWN = 3;
 
     /**
@@ -1139,8 +1150,10 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                     SingleThreadEventExecutor.this.run();
                     success = true;
                 } catch (Throwable t) {
+                    // 抛出异常，则记录日志
                     logger.warn("Unexpected exception from an event executor: ", t);
                 } finally {
+                    // 更改单线程事件执行器的状态，直至完成
                     for (;;) {
                         int oldState = state;
                         if (oldState >= ST_SHUTTING_DOWN || STATE_UPDATER.compareAndSet(
@@ -1150,7 +1163,10 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                     }
 
                     // Check if confirmShutdown() was called at the end of the loop.
+                    // 在循环的最后，检查是否确认关闭方法被调用。
+                    // 如果单线程事件执行器启动成功，并且优雅关闭启动时间为0
                     if (success && gracefulShutdownStartTime == 0) {
+                        // 以下不细究
                         if (logger.isErrorEnabled()) {
                             logger.error("Buggy " + EventExecutor.class.getSimpleName() + " implementation; " +
                                     SingleThreadEventExecutor.class.getSimpleName() + ".confirmShutdown() must " +
@@ -1162,6 +1178,10 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                         // Run all remaining tasks and shutdown hooks. At this point the event loop
                         // is in ST_SHUTTING_DOWN state still accepting tasks which is needed for
                         // graceful shutdown with quietPeriod.
+                        /*
+                            运行所有剩余的任务、关闭挂钩。
+                            此时处于正在关闭状态的事件循环仍然接收被需要的任务，以符合安静期间的优雅关闭。
+                         */
                         for (;;) {
                             if (confirmShutdown()) {
                                 break;
