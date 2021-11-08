@@ -859,11 +859,18 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
 
     /**
      * Confirm that the shutdown if the instance should be done now!
+     *
+     * 如果实例当前应该被做完，确保关闭。
      */
     protected boolean confirmShutdown() {
+        // 如果当前单线程事件执行器未处于正在关闭状态，则直接返回假
         if (!isShuttingDown()) {
             return false;
         }
+
+        /*
+            以下不细究
+         */
 
         if (!inEventLoop()) {
             throw new IllegalStateException("must be invoked from an event loop");
@@ -1180,13 +1187,18 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                         // graceful shutdown with quietPeriod.
                         /*
                             运行所有剩余的任务、关闭挂钩。
-                            此时处于正在关闭状态的事件循环仍然接收被需要的任务，以符合安静期间的优雅关闭。
+                            此时处于正在关闭状态的事件循环仍然接收需要用安静期间优雅关闭的任务。
                          */
                         for (;;) {
+                            // 确认当前单线程事件执行器关闭
                             if (confirmShutdown()) {
                                 break;
                             }
                         }
+
+                        /*
+                            以下不细究
+                         */
 
                         // Now we want to make sure no more tasks can be added from this point. This is
                         // achieved by switching the state. Any new tasks beyond this point will be rejected.
