@@ -521,13 +521,15 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         public final void register(EventLoop eventLoop, final ChannelPromise promise) {
             ObjectUtil.checkNotNull(eventLoop, "eventLoop");
 
-            // 如果已注册，则失败（不细究）
+            // 如果已注册，则失败
             if (isRegistered()) {
+                // 不细究
                 promise.setFailure(new IllegalStateException("registered to an event loop already"));
                 return;
             }
-            // 如果不兼容，则失败（不细究）
+            // 如果不兼容，则失败
             if (!isCompatible(eventLoop)) {
+                // 不细究
                 promise.setFailure(
                         new IllegalStateException("incompatible event loop type: " + eventLoop.getClass().getName()));
                 return;

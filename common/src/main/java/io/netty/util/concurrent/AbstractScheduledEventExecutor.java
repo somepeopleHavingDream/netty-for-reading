@@ -49,7 +49,9 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
      */
    static final Runnable WAKEUP_TASK = new Runnable() {
        @Override
-       public void run() { } // Do nothing
+       public void run() {
+           // 不做任何事
+       } // Do nothing
     };
 
     /**
@@ -65,6 +67,11 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
     protected AbstractScheduledEventExecutor() {
     }
 
+    /**
+     * 抽象可调度事件执行器的构造方法
+     *
+     * @param parent 事件执行器组
+     */
     protected AbstractScheduledEventExecutor(EventExecutorGroup parent) {
         super(parent);
     }

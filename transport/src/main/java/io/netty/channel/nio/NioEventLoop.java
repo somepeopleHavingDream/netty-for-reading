@@ -180,6 +180,17 @@ public final class NioEventLoop extends SingleThreadEventLoop {
      */
     private boolean needsToSelectAgain;
 
+    /**
+     * nio事件循环的构造方法
+     *
+     * @param parent nio事件循环组
+     * @param executor 执行器
+     * @param selectorProvider 选择器提供者
+     * @param strategy 选择策略
+     * @param rejectedExecutionHandler 拒绝的执行处理者
+     * @param taskQueueFactory 任务队列工厂
+     * @param tailTaskQueueFactory 尾任务队列工厂
+     */
     NioEventLoop(NioEventLoopGroup parent, Executor executor, SelectorProvider selectorProvider,
                  SelectStrategy strategy, RejectedExecutionHandler rejectedExecutionHandler,
                  EventLoopTaskQueueFactory taskQueueFactory, EventLoopTaskQueueFactory tailTaskQueueFactory) {

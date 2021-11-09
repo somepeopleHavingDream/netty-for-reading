@@ -44,13 +44,22 @@ public abstract class AbstractEventExecutor extends AbstractExecutorService impl
      */
     static final long DEFAULT_SHUTDOWN_TIMEOUT = 15;
 
+    /**
+     * 事件执行器组
+     */
     private final EventExecutorGroup parent;
+
     private final Collection<EventExecutor> selfCollection = Collections.<EventExecutor>singleton(this);
 
     protected AbstractEventExecutor() {
         this(null);
     }
 
+    /**
+     * 抽象事件执行器的构造方法
+     *
+     * @param parent 事件执行器组
+     */
     protected AbstractEventExecutor(EventExecutorGroup parent) {
         this.parent = parent;
     }

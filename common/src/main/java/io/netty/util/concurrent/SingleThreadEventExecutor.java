@@ -28,10 +28,13 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 /**
  * Abstract base class for {@link OrderedEventExecutor}'s that execute all its submitted tasks in a single thread.
  *
- * 用于有序事件执行器的抽象基类，在单线程中执行所有它的被提交的任务。
+ * 用于有序事件执行器的抽象基类，在单线程中执行所有它的已提交任务。
  */
 public abstract class SingleThreadEventExecutor extends AbstractScheduledEventExecutor implements OrderedEventExecutor {
 
+    /**
+     * 单线程事件执行器的默认最大待办执行器任务数
+     */
     static final int DEFAULT_MAX_PENDING_EXECUTOR_TASKS = Math.max(16,
             SystemPropertyUtil.getInt("io.netty.eventexecutor.maxPendingTasks", Integer.MAX_VALUE));
 
@@ -190,10 +193,22 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         rejectedExecutionHandler = ObjectUtil.checkNotNull(rejectedHandler, "rejectedHandler");
     }
 
+    /**
+     * 单线程事件执行器的构造方法
+     *
+     * @param parent 事件执行器组
+     * @param executor 执行器
+     * @param addTaskWakesUp 是否添加唤醒任务
+     * @param taskQueue 任务队列
+     * @param rejectedHandler 拒绝处理者
+     */
     protected SingleThreadEventExecutor(EventExecutorGroup parent, Executor executor,
                                         boolean addTaskWakesUp, Queue<Runnable> taskQueue,
                                         RejectedExecutionHandler rejectedHandler) {
+        // 调用父类的构造方法
         super(parent);
+
+        // 设置是否添加唤醒任务、最大待办任务数
         this.addTaskWakesUp = addTaskWakesUp;
         this.maxPendingTasks = DEFAULT_MAX_PENDING_EXECUTOR_TASKS;
 
@@ -985,7 +1000,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
             }
         }
 
-        // 如果不是添加任务唤醒，并且是立即的，则当即做唤醒操作
+        // 如果没有做添加任务唤醒，并且是立即的，则当即做唤醒操作
         if (!addTaskWakesUp && immediate) {
             // 做唤醒操作
             wakeup(inEventLoop);

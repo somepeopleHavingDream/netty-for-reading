@@ -388,6 +388,9 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
      * @return 通道未来
      */
     final ChannelFuture initAndRegister() {
+        /*
+            做初始化操作
+         */
         Channel channel = null;
         try {
             // 从通道工厂中实例化一个通道（jdk的通道，一般是NioServerSocketChannel）
@@ -409,6 +412,9 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             return new DefaultChannelPromise(new FailedChannel(), GlobalEventExecutor.INSTANCE).setFailure(t);
         }
 
+        /*
+            做注册操作
+         */
         // boss事件循环者组注册通道，获得注册通道未来，即该注册过程可能未完成（nio事件循环组注册通道，异步完成）
         ChannelFuture regFuture = config().group().register(channel);
         if (regFuture.cause() != null) {

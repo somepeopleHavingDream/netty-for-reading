@@ -183,15 +183,19 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
         SelectStrategyFactory selectStrategyFactory = (SelectStrategyFactory) args[1];
         // 第三位参数是拒绝执行处理者
         RejectedExecutionHandler rejectedExecutionHandler = (RejectedExecutionHandler) args[2];
+
+        // 事件循环任务队列工厂类型的任务队列工厂和尾任务队列工厂
         EventLoopTaskQueueFactory taskQueueFactory = null;
         EventLoopTaskQueueFactory tailTaskQueueFactory = null;
 
         // 如果有第四位参数和第五位参数，则设置第四位第五位参数
         int argsLength = args.length;
         if (argsLength > 3) {
+            // 任务队列工厂
             taskQueueFactory = (EventLoopTaskQueueFactory) args[3];
         }
         if (argsLength > 4) {
+            // 尾任务队列工厂
             tailTaskQueueFactory = (EventLoopTaskQueueFactory) args[4];
         }
 
