@@ -21,6 +21,8 @@ package io.netty.util.concurrent;
  * Besides this, it also extends the {@link EventExecutorGroup} to allow for a generic
  * way to access methods.
  *
+ * 线程执行器是一个特别的事件执行器组，该事件执行器组带有一些便捷的方法以查看线程是否在事件循环中被执行。
+ * 除此之外，它也继承了事件执行器组，以允许对访问方法的通用方式。
  */
 public interface EventExecutor extends EventExecutorGroup {
 
