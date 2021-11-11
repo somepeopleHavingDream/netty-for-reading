@@ -43,7 +43,12 @@ final class PlatformDependent0 {
     private static final long INT_ARRAY_INDEX_SCALE;
     private static final long LONG_ARRAY_BASE_OFFSET;
     private static final long LONG_ARRAY_INDEX_SCALE;
+
+    /**
+     * 直接缓冲构造器
+     */
     private static final Constructor<?> DIRECT_BUFFER_CONSTRUCTOR;
+
     private static final Throwable EXPLICIT_NO_UNSAFE_CAUSE = explicitNoUnsafeCause0();
     private static final Method ALLOCATE_ARRAY_METHOD;
     private static final Method ALIGN_SLICE;
@@ -83,6 +88,9 @@ final class PlatformDependent0 {
     private static final boolean UNALIGNED;
 
     static {
+        /*
+            以下不细究
+         */
         final ByteBuffer direct;
         Field addressField = null;
         Method allocateArrayMethod = null;
@@ -510,6 +518,11 @@ final class PlatformDependent0 {
         UNSAFE.throwException(checkNotNull(cause, "cause"));
     }
 
+    /**
+     * 是否具有直接缓冲没有清理器构造器
+     *
+     * @return 是否具有直接缓冲没有清理器构造器
+     */
     static boolean hasDirectBufferNoCleanerConstructor() {
         return DIRECT_BUFFER_CONSTRUCTOR != null;
     }

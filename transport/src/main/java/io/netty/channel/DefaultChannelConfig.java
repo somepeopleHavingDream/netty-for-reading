@@ -43,6 +43,9 @@ public class DefaultChannelConfig implements ChannelConfig {
 
     protected final Channel channel;
 
+    /**
+     * 字节缓冲分配器
+     */
     private volatile ByteBufAllocator allocator = ByteBufAllocator.DEFAULT;
 
     /**

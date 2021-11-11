@@ -16,8 +16,6 @@
 
 package io.netty.buffer;
 
-import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
-
 import io.netty.util.NettyRuntime;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.FastThreadLocal;
@@ -35,10 +33,23 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
+
+/**
+ * 池化字节缓冲分配器
+ */
 public class PooledByteBufAllocator extends AbstractByteBufAllocator implements ByteBufAllocatorMetricProvider {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PooledByteBufAllocator.class);
+
+    /**
+     * 默认堆竞技场数
+     */
     private static final int DEFAULT_NUM_HEAP_ARENA;
+
+    /**
+     * 默认直接竞技场数
+     */
     private static final int DEFAULT_NUM_DIRECT_ARENA;
 
     private static final int DEFAULT_PAGE_SIZE;
@@ -176,6 +187,9 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         }
     }
 
+    /**
+     * 默认的池化字节缓冲分配器
+     */
     public static final PooledByteBufAllocator DEFAULT =
             new PooledByteBufAllocator(PlatformDependent.directBufferPreferred());
 
@@ -193,6 +207,11 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         this(false);
     }
 
+    /**
+     * 池化字节缓冲分配器的构造方法
+     *
+     * @param preferDirect 是否首选直接内存
+     */
     @SuppressWarnings("deprecation")
     public PooledByteBufAllocator(boolean preferDirect) {
         this(preferDirect, DEFAULT_NUM_HEAP_ARENA, DEFAULT_NUM_DIRECT_ARENA, DEFAULT_PAGE_SIZE, DEFAULT_MAX_ORDER);

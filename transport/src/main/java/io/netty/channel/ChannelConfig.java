@@ -165,6 +165,8 @@ public interface ChannelConfig {
     /**
      * Returns {@link ByteBufAllocator} which is used for the channel
      * to allocate buffers.
+     *
+     * 返回用于通道分配缓冲的字节缓冲分配器。
      */
     ByteBufAllocator getAllocator();
 

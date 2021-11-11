@@ -70,7 +70,12 @@ public final class PlatformDependent {
     private static final boolean CAN_ENABLE_TCP_NODELAY_BY_DEFAULT = !isAndroid();
 
     private static final Throwable UNSAFE_UNAVAILABILITY_CAUSE = unsafeUnavailabilityCause0();
+
+    /**
+     * 是否首选字节缓冲
+     */
     private static final boolean DIRECT_BUFFER_PREFERRED;
+
     private static final long MAX_DIRECT_MEMORY = maxDirectMemory0();
 
     private static final int MPSC_CHUNK_SIZE =  1024;
@@ -95,10 +100,20 @@ public final class PlatformDependent {
     private static final boolean IS_IVKVM_DOT_NET = isIkvmDotNet0();
 
     private static final int ADDRESS_SIZE = addressSize0();
+
+    /**
+     * 是否使用直接缓冲无清理者
+     */
     private static final boolean USE_DIRECT_BUFFER_NO_CLEANER;
+
     private static final AtomicLong DIRECT_MEMORY_COUNTER;
     private static final long DIRECT_MEMORY_LIMIT;
+
+    /**
+     * 线程本地随机提供者
+     */
     private static final ThreadLocalRandomProvider RANDOM_PROVIDER;
+
     private static final Cleaner CLEANER;
     private static final int UNINITIALIZED_ARRAY_ALLOCATION_THRESHOLD;
     // For specifications, see https://www.freedesktop.org/software/systemd/man/os-release.html
@@ -115,6 +130,8 @@ public final class PlatformDependent {
     };
 
     static {
+
+        // 获得并设置随机提供者
         if (javaVersion() >= 7) {
             RANDOM_PROVIDER = new ThreadLocalRandomProvider() {
                 @Override
@@ -124,6 +141,9 @@ public final class PlatformDependent {
                 }
             };
         } else {
+            /*
+                以下不细究
+             */
             RANDOM_PROVIDER = new ThreadLocalRandomProvider() {
                 @Override
                 public Random current() {
@@ -139,14 +159,36 @@ public final class PlatformDependent {
         // * == 0  - Use cleaner, Netty will not enforce max memory, and instead will defer to JDK.
         // * >  0  - Don't use cleaner. This will limit Netty's total direct memory
         //           (note: that JDK's direct memory limit is independent of this).
+
+        /*
+            这里是关于系统属性如何被使用：
+
+            * < 0 - 不使用清理者，并且从java中集成最大直接内存。
+                在这种情况下，“实践中的最大直接内存”将会是2*最大内存而被java开发包所定义。
+            * == 0 - 使用清理者，Netty将不会强制执行最大内存，遵循java开发包。
+            * > 0 - 不使用清理者。这将限制Netty的总的直接内存（注意：java开发包的直接内存限制与此有关）
+         */
+        // 获得最大直接内存
         long maxDirectMemory = SystemPropertyUtil.getLong("io.netty.maxDirectMemory", -1);
 
+        /*
+            任意满足以下任一条件，则执行条件体中的逻辑：
+            1 最大直接内存为0
+            2 没有安全实例
+            3 没有直接缓冲区无清理者构造器
+         */
         if (maxDirectMemory == 0 || !hasUnsafe() || !PlatformDependent0.hasDirectBufferNoCleanerConstructor()) {
+            /*
+                以下不细究
+             */
             USE_DIRECT_BUFFER_NO_CLEANER = false;
             DIRECT_MEMORY_COUNTER = null;
         } else {
+            // 使用直接缓冲无清理者
             USE_DIRECT_BUFFER_NO_CLEANER = true;
+            // 如果最大直接内存小于0
             if (maxDirectMemory < 0) {
+                // 将最大直接内存设置为
                 maxDirectMemory = MAX_DIRECT_MEMORY;
                 if (maxDirectMemory <= 0) {
                     DIRECT_MEMORY_COUNTER = null;
@@ -321,6 +363,8 @@ public final class PlatformDependent {
     /**
      * Return {@code true} if {@code sun.misc.Unsafe} was found on the classpath and can be used for accelerated
      * direct memory access.
+     *
+     * 如果不安全实例在类路径上被找到，并且能被用于加速直接内存访问，则返回真。
      */
     public static boolean hasUnsafe() {
         return UNSAFE_UNAVAILABILITY_CAUSE == null;
@@ -345,6 +389,8 @@ public final class PlatformDependent {
     /**
      * Returns {@code true} if the platform has reliable low-level direct buffer access API and a user has not specified
      * {@code -Dio.netty.noPreferDirect} option.
+     *
+     * 如果平台有可用的低层直接缓冲访问应用编程接口，并且用户没有指定的-Dio.netty.noPreferDirect选项，则返回真。
      */
     public static boolean directBufferPreferred() {
         return DIRECT_BUFFER_PREFERRED;
@@ -1088,12 +1134,22 @@ public final class PlatformDependent {
         return "root".equals(username) || "toor".equals(username);
     }
 
+    /**
+     * 获得不安全实例不可用的原因
+     *
+     * @return 可抛出实例
+     */
     private static Throwable unsafeUnavailabilityCause0() {
+        // 如果是安卓平台
         if (isAndroid()) {
+            /*
+                以下不细究
+             */
             logger.debug("sun.misc.Unsafe: unavailable (Android)");
             return new UnsupportedOperationException("sun.misc.Unsafe: unavailable (Android)");
         }
 
+        // 如果是ikvm电网
         if (isIkvmDotNet()) {
             logger.debug("sun.misc.Unsafe: unavailable (IKVM.NET)");
             return new UnsupportedOperationException("sun.misc.Unsafe: unavailable (IKVM.NET)");
@@ -1130,21 +1186,35 @@ public final class PlatformDependent {
 
     /**
      * Returns {@code true} if the running JVM is <a href="https://www.ikvm.net">IKVM.NET</a>, {@code false} otherwise.
+     *
+     * 如果运行中的Java虚拟机是IKVM.NET，则返回真，否则返回假。
      */
     public static boolean isIkvmDotNet() {
         return IS_IVKVM_DOT_NET;
     }
 
+    /**
+     * 是否是ikvm点网
+     *
+     * @return 是否是ikvm点网
+     */
     private static boolean isIkvmDotNet0() {
+        // 获得虚拟机名称，比较虚拟机名称
         String vmName = SystemPropertyUtil.get("java.vm.name", "").toUpperCase(Locale.US);
         return vmName.equals("IKVM.NET");
     }
 
+    /**
+     * 获得最大直接内存
+     *
+     * @return 最大直接内存
+     */
     private static long maxDirectMemory0() {
         long maxDirectMemory = 0;
 
         ClassLoader systemClassLoader = null;
         try {
+            // 获得系统类加载器
             systemClassLoader = getSystemClassLoader();
 
             // When using IBM J9 / Eclipse OpenJ9 we should not use VM.maxDirectMemory() as it not reflects the
@@ -1566,7 +1636,16 @@ public final class PlatformDependent {
         }
     }
 
+    /**
+     * 线程本地随机提供者
+     */
     private interface ThreadLocalRandomProvider {
+
+        /**
+         * 返回当前的随机器
+         *
+         * @return 随机器
+         */
         Random current();
     }
 

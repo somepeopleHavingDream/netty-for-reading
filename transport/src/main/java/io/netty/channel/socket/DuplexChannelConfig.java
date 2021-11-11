@@ -16,13 +16,7 @@
 package io.netty.channel.socket;
 
 import io.netty.buffer.ByteBufAllocator;
-import io.netty.channel.ChannelConfig;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandler;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.MessageSizeEstimator;
-import io.netty.channel.RecvByteBufAllocator;
-import io.netty.channel.WriteBufferWaterMark;
+import io.netty.channel.*;
 
 /**
  * A {@link ChannelConfig} for a {@link DuplexChannel}.
@@ -44,6 +38,9 @@ public interface DuplexChannelConfig extends ChannelConfig {
      * Returns {@code true} if and only if the channel should not close itself when its remote
      * peer shuts down output to make the connection half-closed.  If {@code false}, the connection
      * is closed automatically when the remote peer shuts down output.
+     *
+     * 当它的远端关闭输出流以使连接半关闭时，当前仅当通道不应该关闭自身时返回真。
+     * 否则为假，当远端关闭输出时连接自动关闭。
      */
     boolean isAllowHalfClosure();
 

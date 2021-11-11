@@ -39,6 +39,9 @@ public class DefaultSocketChannelConfig extends DefaultChannelConfig
      */
     protected final Socket javaSocket;
 
+    /**
+     * 是否允许半关闭
+     */
     private volatile boolean allowHalfClosure;
 
     /**

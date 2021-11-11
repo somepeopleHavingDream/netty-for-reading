@@ -20,13 +20,9 @@ import io.netty.util.ByteProcessor;
 import io.netty.util.CharsetUtil;
 import io.netty.util.IllegalReferenceCountException;
 import io.netty.util.concurrent.FastThreadLocal;
-import io.netty.util.internal.MathUtil;
-import io.netty.util.internal.ObjectPool;
+import io.netty.util.internal.*;
 import io.netty.util.internal.ObjectPool.Handle;
 import io.netty.util.internal.ObjectPool.ObjectCreator;
-import io.netty.util.internal.PlatformDependent;
-import io.netty.util.internal.StringUtil;
-import io.netty.util.internal.SystemPropertyUtil;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
@@ -35,12 +31,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.CharBuffer;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.CoderResult;
-import java.nio.charset.CodingErrorAction;
+import java.nio.charset.*;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -71,18 +62,28 @@ public final class ByteBufUtil {
             (int) CharsetUtil.encoder(CharsetUtil.UTF_8).maxBytesPerChar();
 
     static final int WRITE_CHUNK_SIZE = 8192;
+
+    /**
+     * 用于该字节缓冲工具类的默认字节缓冲分配器
+     */
     static final ByteBufAllocator DEFAULT_ALLOCATOR;
 
     static {
+        // 获得内存分配类型，一般为池化类型
         String allocType = SystemPropertyUtil.get(
                 "io.netty.allocator.type", PlatformDependent.isAndroid() ? "unpooled" : "pooled");
         allocType = allocType.toLowerCase(Locale.US).trim();
 
         ByteBufAllocator alloc;
+        // 如果内存分配类型是非池化类型
         if ("unpooled".equals(allocType)) {
+            /*
+                以下不细究
+             */
             alloc = UnpooledByteBufAllocator.DEFAULT;
             logger.debug("-Dio.netty.allocator.type: {}", allocType);
         } else if ("pooled".equals(allocType)) {
+            // 如果内存分配类型是池化类型
             alloc = PooledByteBufAllocator.DEFAULT;
             logger.debug("-Dio.netty.allocator.type: {}", allocType);
         } else {

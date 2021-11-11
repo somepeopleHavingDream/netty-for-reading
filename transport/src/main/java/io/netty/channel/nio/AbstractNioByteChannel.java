@@ -47,6 +47,10 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             ((AbstractNioUnsafe) unsafe()).flush0();
         }
     };
+
+    /**
+     * 是否输入关闭读取时看到了错误
+     */
     private boolean inputClosedSeenErrorOnRead;
 
     /**
@@ -67,6 +71,11 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
      */
     protected abstract ChannelFuture shutdownInput();
 
+    /**
+     * 是否是输入关闭
+     *
+     * @return 是否是输入关闭
+     */
     protected boolean isInputShutdown0() {
         return false;
     }
@@ -81,11 +90,29 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         return METADATA;
     }
 
+    /**
+     * 是否应该打断读就绪
+     *
+     * @param config 通道配置
+     * @return 是否应该打断读就绪
+     */
     final boolean shouldBreakReadReady(ChannelConfig config) {
+        /*
+            当同时满足以下条件时，应该打断读就绪
+            1 输入关闭
+            2 输入关闭读时看到了错误，或者不允许半关闭
+         */
         return isInputShutdown0() && (inputClosedSeenErrorOnRead || !isAllowHalfClosure(config));
     }
 
+    /**
+     * 是否允许半关闭
+     *
+     * @param config 通道配置
+     * @return 是否允许半关闭
+     */
     private static boolean isAllowHalfClosure(ChannelConfig config) {
+        // 如果配置实例是套接字通道配置实例，并且
         return config instanceof SocketChannelConfig &&
                 ((SocketChannelConfig) config).isAllowHalfClosure();
     }
@@ -129,12 +156,21 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
         @Override
         public final void read() {
+            // 获得通道配置，一般为Nio套接字通道配置
             final ChannelConfig config = config();
+
+            // 如果应该打断读就绪
             if (shouldBreakReadReady(config)) {
+                /*
+                    以下不细究
+                 */
                 clearReadPending();
                 return;
             }
+
+            // 获得通道流水线
             final ChannelPipeline pipeline = pipeline();
+            // 从配置中拿到字节缓冲分配器
             final ByteBufAllocator allocator = config.getAllocator();
             final RecvByteBufAllocator.Handle allocHandle = recvBufAllocHandle();
             allocHandle.reset(config);
