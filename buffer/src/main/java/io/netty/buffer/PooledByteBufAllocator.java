@@ -52,10 +52,27 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
      */
     private static final int DEFAULT_NUM_DIRECT_ARENA;
 
+    /**
+     * 默认页大小
+     */
     private static final int DEFAULT_PAGE_SIZE;
+
+    /**
+     * 默认最大订单。
+     * 每块16M。
+     */
     private static final int DEFAULT_MAX_ORDER; // 8192 << 11 = 16 MiB per chunk
+
+    /**
+     * 默认小缓存大小
+     */
     private static final int DEFAULT_SMALL_CACHE_SIZE;
+
+    /**
+     * 默认正常缓存大小
+     */
     private static final int DEFAULT_NORMAL_CACHE_SIZE;
+
     static final int DEFAULT_MAX_CACHED_BUFFER_CAPACITY;
     private static final int DEFAULT_CACHE_TRIM_INTERVAL;
     private static final long DEFAULT_CACHE_TRIM_INTERVAL_MILLIS;
@@ -63,7 +80,11 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     private static final int DEFAULT_DIRECT_MEMORY_CACHE_ALIGNMENT;
     static final int DEFAULT_MAX_CACHED_BYTEBUFFERS_PER_CHUNK;
 
+    /**
+     * 最小页面大小
+     */
     private static final int MIN_PAGE_SIZE = 4096;
+
     private static final int MAX_CHUNK_SIZE = (int) (((long) Integer.MAX_VALUE + 1) / 2);
 
     private final Runnable trimTask = new Runnable() {
@@ -74,23 +95,33 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     };
 
     static {
+        // 获得默认对齐方式、默认页大小
         int defaultAlignment = SystemPropertyUtil.getInt(
                 "io.netty.allocator.directMemoryCacheAlignment", 0);
         int defaultPageSize = SystemPropertyUtil.getInt("io.netty.allocator.pageSize", 8192);
+
         Throwable pageSizeFallbackCause = null;
         try {
+            // 校验并且计算页偏移
             validateAndCalculatePageShifts(defaultPageSize, defaultAlignment);
         } catch (Throwable t) {
+            /*
+                以下不细究
+             */
             pageSizeFallbackCause = t;
             defaultPageSize = 8192;
             defaultAlignment = 0;
         }
+
+        // 设置默认页大小、默认直接内存缓存对齐量
         DEFAULT_PAGE_SIZE = defaultPageSize;
         DEFAULT_DIRECT_MEMORY_CACHE_ALIGNMENT = defaultAlignment;
 
+        // 获得默认最大订单
         int defaultMaxOrder = SystemPropertyUtil.getInt("io.netty.allocator.maxOrder", 11);
         Throwable maxOrderFallbackCause = null;
         try {
+            // 校验并计算块大小
             validateAndCalculateChunkSize(DEFAULT_PAGE_SIZE, defaultMaxOrder);
         } catch (Throwable t) {
             maxOrderFallbackCause = t;
@@ -223,6 +254,8 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     }
 
     /**
+     * 池化字节缓冲分配器的构造方法
+     *
      * @deprecated use
      * {@link PooledByteBufAllocator#PooledByteBufAllocator(boolean, int, int, int, int, int, int, boolean)}
      */
@@ -233,6 +266,8 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     }
 
     /**
+     * 池内字节缓冲分配器的构造方法
+     *
      * @deprecated use
      * {@link PooledByteBufAllocator#PooledByteBufAllocator(boolean, int, int, int, int, int, int, boolean)}
      */
@@ -352,25 +387,47 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         return new PoolArena[size];
     }
 
+    /**
+     * 校验和计算页偏移
+     *
+     * @param pageSize 页面大小
+     * @param alignment 对齐
+     * @return 校验和计算页偏移
+     */
     private static int validateAndCalculatePageShifts(int pageSize, int alignment) {
+        // 如果页面大小小于最小页面大小，则抛出违规参数异常
         if (pageSize < MIN_PAGE_SIZE) {
             throw new IllegalArgumentException("pageSize: " + pageSize + " (expected: " + MIN_PAGE_SIZE + ')');
         }
 
+        // 如果入参页面大小不是2的幂，则抛出违规参数异常
         if ((pageSize & pageSize - 1) != 0) {
             throw new IllegalArgumentException("pageSize: " + pageSize + " (expected: power of 2)");
         }
 
+        // 如果页面大小小于对齐量，则抛出违规参数异常
         if (pageSize < alignment) {
             throw new IllegalArgumentException("Alignment cannot be greater than page size. " +
                     "Alignment: " + alignment + ", page size: " + pageSize + '.');
         }
 
         // Logarithm base 2. At this point we know that pageSize is a power of two.
+        /*
+            基于2的算法。
+            此时我们知道页面大小是2的幂。
+         */
         return Integer.SIZE - 1 - Integer.numberOfLeadingZeros(pageSize);
     }
 
+    /**
+     * 验证和计算块大小
+     *
+     * @param pageSize 页面大小
+     * @param maxOrder 最大订单量
+     * @return 块大小
+     */
     private static int validateAndCalculateChunkSize(int pageSize, int maxOrder) {
+        // 如果最大订单量超过14，则抛出违规参数异常
         if (maxOrder > 14) {
             throw new IllegalArgumentException("maxOrder: " + maxOrder + " (expected: 0-14)");
         }

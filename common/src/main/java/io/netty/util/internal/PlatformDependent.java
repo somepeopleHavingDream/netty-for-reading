@@ -1221,11 +1221,19 @@ public final class PlatformDependent {
             // correct value.
             // See:
             //  - https://github.com/netty/netty/issues/7654
+            /*
+                当使用ibm j9/ eclipse OpenJ9，我们不应该使用虚拟机的最大直接内存方法，因为它不会反射正确的值。
+                看：
+                https://github.com/netty/netty/issues/7654
+             */
+            // 获得虚拟机名称
             String vmName = SystemPropertyUtil.get("java.vm.name", "").toLowerCase();
             if (!vmName.startsWith("ibm j9") &&
                     // https://github.com/eclipse/openj9/blob/openj9-0.8.0/runtime/include/vendor_version.h#L53
                     !vmName.startsWith("eclipse openj9")) {
                 // Try to get from sun.misc.VM.maxDirectMemory() which should be most accurate.
+                // 尝试从应该更准确的sun.misc.VM.maxDirectMemory()方法中获得。
+                // 获得最大直接内存
                 Class<?> vmClass = Class.forName("sun.misc.VM", true, systemClassLoader);
                 Method m = vmClass.getDeclaredMethod("maxDirectMemory");
                 maxDirectMemory = ((Number) m.invoke(null)).longValue();
@@ -1234,9 +1242,14 @@ public final class PlatformDependent {
             // Ignore
         }
 
+        // 如果最大直接内存大于0，则直接返回该最大直接内存
         if (maxDirectMemory > 0) {
             return maxDirectMemory;
         }
+
+        /*
+            以下不细究
+         */
 
         try {
             // Now try to get the JVM option (-XX:MaxDirectMemorySize) and parse it.
