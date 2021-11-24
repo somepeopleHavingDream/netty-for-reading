@@ -75,6 +75,11 @@ final class CleanerJava9 implements Cleaner {
         INVOKE_CLEANER = method;
     }
 
+    /**
+     * 是否支持
+     *
+     * @return 是否支持
+     */
     static boolean isSupported() {
         return INVOKE_CLEANER != null;
     }

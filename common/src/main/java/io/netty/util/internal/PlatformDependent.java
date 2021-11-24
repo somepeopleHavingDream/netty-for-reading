@@ -72,10 +72,13 @@ public final class PlatformDependent {
     private static final Throwable UNSAFE_UNAVAILABILITY_CAUSE = unsafeUnavailabilityCause0();
 
     /**
-     * 是否首选字节缓冲
+     * 是否首选直接缓冲
      */
     private static final boolean DIRECT_BUFFER_PREFERRED;
 
+    /**
+     * 最大直接内存
+     */
     private static final long MAX_DIRECT_MEMORY = maxDirectMemory0();
 
     private static final int MPSC_CHUNK_SIZE =  1024;
@@ -88,13 +91,27 @@ public final class PlatformDependent {
 
     private static final int BIT_MODE = bitMode0();
     private static final String NORMALIZED_ARCH = normalizeArch(SystemPropertyUtil.get("os.arch", ""));
+
+    /**
+     * 标准化操作系统
+     */
     private static final String NORMALIZED_OS = normalizeOs(SystemPropertyUtil.get("os.name", ""));
 
     // keep in sync with maven's pom.xml via os.detection.classifierWithLikes!
+    /**
+     * 通过操作os.detection.classifierWithLikes参数与专家的项目对象模型保持同步！
+     *
+     * 允许的Linux操作系统的分类器
+     */
     private static final String[] ALLOWED_LINUX_OS_CLASSIFIERS = {"fedora", "suse", "arch"};
+
     private static final Set<String> LINUX_OS_CLASSIFIERS;
 
+    /**
+     * 是否是窗口系统
+     */
     private static final boolean IS_WINDOWS = isWindows0();
+
     private static final boolean IS_OSX = isOsx0();
     private static final boolean IS_J9_JVM = isJ9Jvm0();
     private static final boolean IS_IVKVM_DOT_NET = isIkvmDotNet0();
@@ -106,7 +123,14 @@ public final class PlatformDependent {
      */
     private static final boolean USE_DIRECT_BUFFER_NO_CLEANER;
 
+    /**
+     * 直接内存计数器
+     */
     private static final AtomicLong DIRECT_MEMORY_COUNTER;
+
+    /**
+     * 直接内存限制
+     */
     private static final long DIRECT_MEMORY_LIMIT;
 
     /**
@@ -122,7 +146,11 @@ public final class PlatformDependent {
     private static final String LINUX_ID_LIKE_PREFIX = "ID_LIKE=";
     public static final boolean BIG_ENDIAN_NATIVE_ORDER = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
 
+    /**
+     * 什么都不做的清理器
+     */
     private static final Cleaner NOOP = new Cleaner() {
+
         @Override
         public void freeDirectBuffer(ByteBuffer buffer) {
             // NOOP
@@ -188,32 +216,47 @@ public final class PlatformDependent {
             USE_DIRECT_BUFFER_NO_CLEANER = true;
             // 如果最大直接内存小于0
             if (maxDirectMemory < 0) {
-                // 将最大直接内存设置为
+                // 设置最大直接内存
                 maxDirectMemory = MAX_DIRECT_MEMORY;
+
+                // 初始化直接内存计数器
                 if (maxDirectMemory <= 0) {
+                    // 以下不细究
                     DIRECT_MEMORY_COUNTER = null;
                 } else {
+                    // 初始化直接内存计数器为0
                     DIRECT_MEMORY_COUNTER = new AtomicLong();
                 }
             } else {
+                // 以下不细究
                 DIRECT_MEMORY_COUNTER = new AtomicLong();
             }
         }
+
+        // 设置直接内存限制
         logger.debug("-Dio.netty.maxDirectMemory: {} bytes", maxDirectMemory);
         DIRECT_MEMORY_LIMIT = maxDirectMemory >= 1 ? maxDirectMemory : MAX_DIRECT_MEMORY;
 
+        // 尝试分配未初始化数组大小
         int tryAllocateUninitializedArray =
                 SystemPropertyUtil.getInt("io.netty.uninitializedArrayAllocationThreshold", 1024);
+        // 设置未初始化数组分配阈值
         UNINITIALIZED_ARRAY_ALLOCATION_THRESHOLD = javaVersion() >= 9 && PlatformDependent0.hasAllocateArrayMethod() ?
                 tryAllocateUninitializedArray : -1;
         logger.debug("-Dio.netty.uninitializedArrayAllocationThreshold: {}", UNINITIALIZED_ARRAY_ALLOCATION_THRESHOLD);
 
+        // 设置是否是超级用户
         MAYBE_SUPER_USER = maybeSuperUser0();
 
+        // 设置清理器
         if (!isAndroid()) {
             // only direct to method if we are not running on android.
             // See https://github.com/netty/netty/issues/2604
+            /*
+                如果我们不运行在安卓端，则直接指向方法。
+             */
             if (javaVersion() >= 9) {
+                // 以下不细究
                 CLEANER = CleanerJava9.isSupported() ? new CleanerJava9() : NOOP;
             } else {
                 CLEANER = CleanerJava6.isSupported() ? new CleanerJava6() : NOOP;
@@ -223,6 +266,7 @@ public final class PlatformDependent {
         }
 
         // We should always prefer direct buffers by default if we can use a Cleaner to release direct buffers.
+        // 如果我们能使用清理器去释放直接缓冲，我们应该总是默认偏向直接缓冲。
         DIRECT_BUFFER_PREFERRED = CLEANER != NOOP
                                   && !SystemPropertyUtil.getBoolean("io.netty.noPreferDirect", false);
         if (logger.isDebugEnabled()) {
@@ -232,14 +276,19 @@ public final class PlatformDependent {
         /*
          * We do not want to log this message if unsafe is explicitly disabled. Do not remove the explicit no unsafe
          * guard.
+         *
+         * 我们不想去记录此消息，如果不安全实例显式的不可用。
+         * 不要删除明确的不安全实例。
          */
         if (CLEANER == NOOP && !PlatformDependent0.isExplicitNoUnsafe()) {
+            // 以下不细究
             logger.info(
                     "Your platform does not provide complete low-level API for accessing direct buffers reliably. " +
                     "Unless explicitly requested, heap buffer will always be preferred to avoid potential system " +
                     "instability.");
         }
 
+        // 允许的分类器
         final Set<String> allowedClassifiers = Collections.unmodifiableSet(
                 new HashSet<String>(Arrays.asList(ALLOWED_LINUX_OS_CLASSIFIERS)));
         final Set<String> availableClassifiers = new LinkedHashSet<String>();
@@ -322,6 +371,8 @@ public final class PlatformDependent {
 
     /**
      * Return {@code true} if the JVM is running on Windows
+     *
+     * 如果Java虚拟机运行在窗口系统上，则返回真
      */
     public static boolean isWindows() {
         return IS_WINDOWS;
@@ -1109,7 +1160,13 @@ public final class PlatformDependent {
         return RANDOM_PROVIDER.current();
     }
 
+    /**
+     * 是否是窗口系统
+     *
+     * @return 是否是窗口系统
+     */
     private static boolean isWindows0() {
+        // 如果标准操作系统是windows，则打印日志，并返回
         boolean windows = "windows".equals(NORMALIZED_OS);
         if (windows) {
             logger.debug("Platform: Windows");
@@ -1125,12 +1182,22 @@ public final class PlatformDependent {
         return osx;
     }
 
+    /**
+     * 是否可能是超级用户
+     *
+     * @return 是否可能是超级用户
+     */
     private static boolean maybeSuperUser0() {
+        // 获得用户名
         String username = SystemPropertyUtil.get("user.name");
+        // 如果当前系统是windows系统
         if (isWindows()) {
+            // 比较用户名是否是Administrator
             return "Administrator".equals(username);
         }
+
         // Check for root and toor as some BSDs have a toor user that is basically the same as root.
+        // 检查root和toor，因为一些bsds有toor用户，基本和root用户相同。
         return "root".equals(username) || "toor".equals(username);
     }
 
@@ -1540,6 +1607,12 @@ public final class PlatformDependent {
         return value.trim().replaceAll("[\"']", "");
     }
 
+    /**
+     * 标准化
+     *
+     * @param value 需要标准化的值
+     * @return 标准化之后的值
+     */
     private static String normalize(String value) {
         return value.toLowerCase(Locale.US).replaceAll("[^a-z0-9]+", "");
     }
@@ -1586,42 +1659,61 @@ public final class PlatformDependent {
         return "unknown";
     }
 
+    /**
+     * 规范化
+     *
+     * @param value 需要规范化的值
+     * @return 规范化之后的值
+     */
     private static String normalizeOs(String value) {
         value = normalize(value);
         if (value.startsWith("aix")) {
+            // 不细究
             return "aix";
         }
         if (value.startsWith("hpux")) {
+            // 不细究
             return "hpux";
         }
         if (value.startsWith("os400")) {
+            /*
+                以下不细究
+             */
             // Avoid the names such as os4000
             if (value.length() <= 5 || !Character.isDigit(value.charAt(5))) {
                 return "os400";
             }
         }
         if (value.startsWith("linux")) {
+            // 不细究
             return "linux";
         }
         if (value.startsWith("macosx") || value.startsWith("osx") || value.startsWith("darwin")) {
+            // 不细究
             return "osx";
         }
         if (value.startsWith("freebsd")) {
+            // 不细究
             return "freebsd";
         }
         if (value.startsWith("openbsd")) {
+            // 不细究
             return "openbsd";
         }
         if (value.startsWith("netbsd")) {
+            // 不细究
             return "netbsd";
         }
         if (value.startsWith("solaris") || value.startsWith("sunos")) {
+            // 不细究
             return "sunos";
         }
         if (value.startsWith("windows")) {
+            // 返回windows
             return "windows";
         }
 
+        // 返回未知
         return "unknown";
     }
 

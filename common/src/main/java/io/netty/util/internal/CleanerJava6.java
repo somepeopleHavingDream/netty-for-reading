@@ -29,10 +29,18 @@ import java.security.PrivilegedAction;
  * Allows to free direct {@link ByteBuffer} by using Cleaner. This is encapsulated in an extra class to be able
  * to use {@link PlatformDependent0} on Android without problems.
  *
+ * 允许使用清理器去释放直接的字节缓冲。
+ * 这被封装在额外的类中，以允许没有问题地在安卓平台上使用平台依赖。
+ *
  * For more details see <a href="https://github.com/netty/netty/issues/2604">#2604</a>.
  */
 final class CleanerJava6 implements Cleaner {
+
+    /**
+     * 清理者字段偏移
+     */
     private static final long CLEANER_FIELD_OFFSET;
+
     private static final Method CLEAN_METHOD;
     private static final Field CLEANER_FIELD;
 
@@ -98,6 +106,11 @@ final class CleanerJava6 implements Cleaner {
         CLEAN_METHOD = clean;
     }
 
+    /**
+     * 是否支持
+     *
+     * @return 是否支持
+     */
     static boolean isSupported() {
         return CLEANER_FIELD_OFFSET != -1 || CLEANER_FIELD != null;
     }

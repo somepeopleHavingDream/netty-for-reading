@@ -50,7 +50,12 @@ final class PlatformDependent0 {
     private static final Constructor<?> DIRECT_BUFFER_CONSTRUCTOR;
 
     private static final Throwable EXPLICIT_NO_UNSAFE_CAUSE = explicitNoUnsafeCause0();
+
+    /**
+     * 分配数组的方法
+     */
     private static final Method ALLOCATE_ARRAY_METHOD;
+
     private static final Method ALIGN_SLICE;
 
     /**
@@ -552,6 +557,11 @@ final class PlatformDependent0 {
         }
     }
 
+    /**
+     * 是否有分配的数组方法
+     *
+     * @return 是否有分配的数组方法
+     */
     static boolean hasAllocateArrayMethod() {
         return ALLOCATE_ARRAY_METHOD != null;
     }

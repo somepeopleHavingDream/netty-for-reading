@@ -85,6 +85,9 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
      */
     private static final int MIN_PAGE_SIZE = 4096;
 
+    /**
+     * 最大块大小
+     */
     private static final int MAX_CHUNK_SIZE = (int) (((long) Integer.MAX_VALUE + 1) / 2);
 
     private final Runnable trimTask = new Runnable() {
@@ -124,6 +127,9 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             // 校验并计算块大小
             validateAndCalculateChunkSize(DEFAULT_PAGE_SIZE, defaultMaxOrder);
         } catch (Throwable t) {
+            /*
+                以下不细究
+             */
             maxOrderFallbackCause = t;
             defaultMaxOrder = 11;
         }
@@ -131,6 +137,10 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
         // Determine reasonable default for nHeapArena and nDirectArena.
         // Assuming each arena has 3 chunks, the pool should not consume more than 50% of max memory.
+        /*
+            确定堆竞技场和直接竞技场的合理默认值。
+            假设每个竞技场有3个块，池子不应该消费超过一半的最大内存。
+         */
         final Runtime runtime = Runtime.getRuntime();
 
         /*
@@ -139,15 +149,22 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
          * allocation and de-allocation needs to be synchronized on the PoolArena.
          *
          * See https://github.com/netty/netty/issues/3888.
+         *
+         * 我们默认使用2*可用的处理器以减少竞争，因为我们同样也在nio和epoll里使用2*可用的处理器用以事件循环的数量。
          */
+        // 默认最小竞技场数
         final int defaultMinNumArena = NettyRuntime.availableProcessors() * 2;
+        // 默认块大小
         final int defaultChunkSize = DEFAULT_PAGE_SIZE << DEFAULT_MAX_ORDER;
+
+        // 默认堆竞技场数
         DEFAULT_NUM_HEAP_ARENA = Math.max(0,
                 SystemPropertyUtil.getInt(
                         "io.netty.allocator.numHeapArenas",
                         (int) Math.min(
                                 defaultMinNumArena,
                                 runtime.maxMemory() / defaultChunkSize / 2 / 3)));
+        // 默认直接竞技场数
         DEFAULT_NUM_DIRECT_ARENA = Math.max(0,
                 SystemPropertyUtil.getInt(
                         "io.netty.allocator.numDirectArenas",
@@ -156,19 +173,32 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
                                 PlatformDependent.maxDirectMemory() / defaultChunkSize / 2 / 3)));
 
         // cache sizes
+        // 缓存大小
+        // 默认小缓存大小
         DEFAULT_SMALL_CACHE_SIZE = SystemPropertyUtil.getInt("io.netty.allocator.smallCacheSize", 256);
+        // 默认正常缓存大小
         DEFAULT_NORMAL_CACHE_SIZE = SystemPropertyUtil.getInt("io.netty.allocator.normalCacheSize", 64);
 
         // 32 kb is the default maximum capacity of the cached buffer. Similar to what is explained in
         // 'Scalable memory allocation using jemalloc'
+        /*
+            32kb是缓存缓冲的默认最大容量。
+            类似于使用jemalloc可扩展内存分配的解释。
+         */
+        // 默认最大缓存缓冲容量
         DEFAULT_MAX_CACHED_BUFFER_CAPACITY = SystemPropertyUtil.getInt(
                 "io.netty.allocator.maxCachedBufferCapacity", 32 * 1024);
 
         // the number of threshold of allocations when cached entries will be freed up if not frequently used
+        // 当缓存的条目没被频繁地使用而被释放时，所设置的分配阈值
         DEFAULT_CACHE_TRIM_INTERVAL = SystemPropertyUtil.getInt(
                 "io.netty.allocator.cacheTrimInterval", 8192);
 
+        // 如果设置项中有缓存修建间隔毫秒数
         if (SystemPropertyUtil.contains("io.netty.allocation.cacheTrimIntervalMillis")) {
+            /*
+                以下不细究
+             */
             logger.warn("-Dio.netty.allocation.cacheTrimIntervalMillis is deprecated," +
                     " use -Dio.netty.allocator.cacheTrimIntervalMillis");
 
@@ -181,15 +211,22 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
                         "io.netty.allocation.cacheTrimIntervalMillis", 0);
             }
         } else {
+            // 设置默认缓存修剪间隔毫秒数
             DEFAULT_CACHE_TRIM_INTERVAL_MILLIS = SystemPropertyUtil.getLong(
                     "io.netty.allocator.cacheTrimIntervalMillis", 0);
         }
 
+        // 是否默认为所有线程使用缓存
         DEFAULT_USE_CACHE_FOR_ALL_THREADS = SystemPropertyUtil.getBoolean(
                 "io.netty.allocator.useCacheForAllThreads", true);
 
         // Use 1023 by default as we use an ArrayDeque as backing storage which will then allocate an internal array
         // of 1024 elements. Otherwise we would allocate 2048 and only use 1024 which is wasteful.
+        /*
+            默认使用1023，因为我们使用数组队列作为备份存储，该数组队列随后将分配1024个元素的内部数组。
+            否则，我们将分配2048个，这是浪费。
+         */
+        // 默认每块最大的缓存字节缓冲
         DEFAULT_MAX_CACHED_BYTEBUFFERS_PER_CHUNK = SystemPropertyUtil.getInt(
                 "io.netty.allocator.maxCachedByteBuffersPerChunk", 1023);
 
@@ -433,14 +470,19 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         }
 
         // Ensure the resulting chunkSize does not overflow.
+        // 确保计算出来的块大小不会溢出。
         int chunkSize = pageSize;
         for (int i = maxOrder; i > 0; i --) {
+            // 如果块大小超过最大块大小的一半，则抛出违规参数异常
             if (chunkSize > MAX_CHUNK_SIZE / 2) {
                 throw new IllegalArgumentException(String.format(
                         "pageSize (%d) << maxOrder (%d) must not exceed %d", pageSize, maxOrder, MAX_CHUNK_SIZE));
             }
+            // 块大小扩容一倍
             chunkSize <<= 1;
         }
+
+        // 返回块大小
         return chunkSize;
     }
 
