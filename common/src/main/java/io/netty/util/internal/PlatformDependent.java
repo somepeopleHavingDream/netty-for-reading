@@ -105,6 +105,9 @@ public final class PlatformDependent {
      */
     private static final String[] ALLOWED_LINUX_OS_CLASSIFIERS = {"fedora", "suse", "arch"};
 
+    /**
+     * Linux操作系统分类器
+     */
     private static final Set<String> LINUX_OS_CLASSIFIERS;
 
     /**
@@ -140,10 +143,23 @@ public final class PlatformDependent {
 
     private static final Cleaner CLEANER;
     private static final int UNINITIALIZED_ARRAY_ALLOCATION_THRESHOLD;
+
     // For specifications, see https://www.freedesktop.org/software/systemd/man/os-release.html
+    /**
+     * 有关规范，请查阅https://www.freedesktop.org/software/systemd/man/os-release.html
+     */
     private static final String[] OS_RELEASE_FILES = {"/etc/os-release", "/usr/lib/os-release"};
+
+    /**
+     * Linux Id 前缀
+     */
     private static final String LINUX_ID_PREFIX = "ID=";
+
+    /**
+     * Linux Id Like 前缀
+     */
     private static final String LINUX_ID_LIKE_PREFIX = "ID_LIKE=";
+
     public static final boolean BIG_ENDIAN_NATIVE_ORDER = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
 
     /**
@@ -298,16 +314,29 @@ public final class PlatformDependent {
                 @Override
                 public Boolean run() {
                     try {
+                        // 如果文件存在
                         if (file.exists()) {
+                            /*
+                                以下不细究
+                             */
                             BufferedReader reader = null;
                             try {
+                                // 获得缓冲字符输入流
                                 reader = new BufferedReader(
                                         new InputStreamReader(
                                                 new FileInputStream(file), CharsetUtil.UTF_8));
 
+                                // 读取每一行
                                 String line;
                                 while ((line = reader.readLine()) != null) {
+                                    /*
+                                        以下不细究
+                                     */
+                                    // 如果是以ID=开头的前缀
                                     if (line.startsWith(LINUX_ID_PREFIX)) {
+                                        /*
+                                            以下不细究
+                                         */
                                         String id = normalizeOsReleaseVariableValue(
                                                 line.substring(LINUX_ID_PREFIX.length()));
                                         addClassifier(allowedClassifiers, availableClassifiers, id);
@@ -340,10 +369,13 @@ public final class PlatformDependent {
                 }
             });
 
+            // 如果找到，则退出循环
             if (found) {
                 break;
             }
         }
+
+        // 初始化linux操作系统分类器
         LINUX_OS_CLASSIFIERS = Collections.unmodifiableSet(availableClassifiers);
     }
 

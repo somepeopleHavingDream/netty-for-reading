@@ -16,13 +16,13 @@
 
 package io.netty.buffer;
 
-import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
-
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.ResourceLeakTracker;
 import io.netty.util.internal.MathUtil;
 import io.netty.util.internal.PlatformDependent;
 import io.netty.util.internal.StringUtil;
+
+import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
 
 /**
  * Skeletal {@link ByteBufAllocator} implementation to extend.
@@ -81,7 +81,14 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
         return buf;
     }
 
+    /**
+     * 该字节缓冲分配器是否默认使用直接内存
+     */
     private final boolean directByDefault;
+
+    /**
+     * 用于该字节缓冲分配器的字节缓冲实例
+     */
     private final ByteBuf emptyBuf;
 
     /**
@@ -94,10 +101,13 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
     /**
      * Create new instance
      *
+     * 创建一个新的实例
+     *
      * @param preferDirect {@code true} if {@link #buffer(int)} should try to allocate a direct buffer rather than
      *                     a heap buffer
      */
     protected AbstractByteBufAllocator(boolean preferDirect) {
+        //
         directByDefault = preferDirect && PlatformDependent.hasUnsafe();
         emptyBuf = new EmptyByteBuf(this);
     }

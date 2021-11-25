@@ -43,17 +43,17 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PooledByteBufAllocator.class);
 
     /**
-     * 默认堆竞技场数
+     * 默认堆竞技场数（一般默认数是12）
      */
     private static final int DEFAULT_NUM_HEAP_ARENA;
 
     /**
-     * 默认直接竞技场数
+     * 默认直接竞技场数（一般默认数是12）
      */
     private static final int DEFAULT_NUM_DIRECT_ARENA;
 
     /**
-     * 默认页大小
+     * 默认页大小（8192=8k）
      */
     private static final int DEFAULT_PAGE_SIZE;
 
@@ -64,20 +64,29 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     private static final int DEFAULT_MAX_ORDER; // 8192 << 11 = 16 MiB per chunk
 
     /**
-     * 默认小缓存大小
+     * 默认小缓存大小（256）
      */
     private static final int DEFAULT_SMALL_CACHE_SIZE;
 
     /**
-     * 默认正常缓存大小
+     * 默认正常缓存大小（64）
      */
     private static final int DEFAULT_NORMAL_CACHE_SIZE;
 
     static final int DEFAULT_MAX_CACHED_BUFFER_CAPACITY;
     private static final int DEFAULT_CACHE_TRIM_INTERVAL;
     private static final long DEFAULT_CACHE_TRIM_INTERVAL_MILLIS;
+
+    /**
+     * 是否默认为所有线程设置缓存（true）
+     */
     private static final boolean DEFAULT_USE_CACHE_FOR_ALL_THREADS;
+
+    /**
+     * 0
+     */
     private static final int DEFAULT_DIRECT_MEMORY_CACHE_ALIGNMENT;
+
     static final int DEFAULT_MAX_CACHED_BYTEBUFFERS_PER_CHUNK;
 
     /**
@@ -278,7 +287,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     /**
      * 池化字节缓冲分配器的构造方法
      *
-     * @param preferDirect 是否首选直接内存
+     * @param preferDirect 是否首选直接内存（一般为true）
      */
     @SuppressWarnings("deprecation")
     public PooledByteBufAllocator(boolean preferDirect) {
@@ -351,6 +360,19 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
              useCacheForAllThreads, directMemoryCacheAlignment);
     }
 
+    /**
+     * 池化字节缓冲分配器的构造方法
+     *
+     * @param preferDirect 是否倾向于直接内存
+     * @param nHeapArena 堆竞技场数
+     * @param nDirectArena 直接禁忌常熟
+     * @param pageSize 页大小
+     * @param maxOrder 最大订单
+     * @param smallCacheSize 小缓存大小
+     * @param normalCacheSize 正常缓存大小
+     * @param useCacheForAllThreads 是否为所有线程使用缓存
+     * @param directMemoryCacheAlignment 直接内存缓存对齐
+     */
     public PooledByteBufAllocator(boolean preferDirect, int nHeapArena, int nDirectArena, int pageSize, int maxOrder,
                                   int smallCacheSize, int normalCacheSize,
                                   boolean useCacheForAllThreads, int directMemoryCacheAlignment) {
