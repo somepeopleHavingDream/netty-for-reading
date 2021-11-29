@@ -29,6 +29,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static io.netty.buffer.PoolChunk.isSubpage;
 import static java.lang.Math.max;
 
+/**
+ * 池竞技场
+ *
+ * @param <T>
+ */
 abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
     static final boolean HAS_UNSAFE = PlatformDependent.hasUnsafe();
 
@@ -37,11 +42,26 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         Normal
     }
 
+    /**
+     * 该池竞技场的池化字节缓冲分配器
+     */
     final PooledByteBufAllocator parent;
 
+    /**
+     * 该池竞技场的小子页池数量
+     */
     final int numSmallSubpagePools;
+
+    /**
+     * 该池竞技场的直接内存缓存对齐
+     */
     final int directMemoryCacheAlignment;
+
     private final PoolSubpage<T>[] smallSubpagePools;
+
+    /*
+        有一些作用的池化列表
+     */
 
     private final PoolChunkList<T> q050;
     private final PoolChunkList<T> q025;
@@ -71,18 +91,32 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
     // TODO: Test if adding padding helps under contention
     //private long pad0, pad1, pad2, pad3, pad4, pad5, pad6, pad7;
 
+    /**
+     * 池竞技场的构造方法
+     *
+     * @param parent 池字节缓冲分配器
+     * @param pageSize 页面大小
+     * @param pageShifts 页面偏移
+     * @param chunkSize 块大小
+     * @param cacheAlignment 缓存对齐
+     */
     protected PoolArena(PooledByteBufAllocator parent, int pageSize,
           int pageShifts, int chunkSize, int cacheAlignment) {
+        // 调用父类的构造方法
         super(pageSize, pageShifts, chunkSize, cacheAlignment);
+
+        // 设置池化字节缓冲分配器、直接内存缓存对齐、小子页池数
         this.parent = parent;
         directMemoryCacheAlignment = cacheAlignment;
-
         numSmallSubpagePools = nSubpages;
+
+        // 实例化小子页池
         smallSubpagePools = newSubpagePoolArray(numSmallSubpagePools);
         for (int i = 0; i < smallSubpagePools.length; i ++) {
             smallSubpagePools[i] = newSubpagePoolHead();
         }
 
+        // 使不同的池化列表引用指向不同的池化块列表实例
         q100 = new PoolChunkList<T>(this, null, 100, Integer.MAX_VALUE, chunkSize);
         q075 = new PoolChunkList<T>(this, q100, 75, 100, chunkSize);
         q050 = new PoolChunkList<T>(this, q075, 50, 100, chunkSize);
@@ -90,6 +124,9 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         q000 = new PoolChunkList<T>(this, q025, 1, 50, chunkSize);
         qInit = new PoolChunkList<T>(this, q000, Integer.MIN_VALUE, 25, chunkSize);
 
+        /*
+            将下列池化块列表组装成链表结构
+         */
         q100.prevList(q075);
         q075.prevList(q050);
         q050.prevList(q025);
@@ -97,6 +134,7 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         q000.prevList(null);
         qInit.prevList(qInit);
 
+        // 实例出并初始化池块列表标准集合
         List<PoolChunkListMetric> metrics = new ArrayList<PoolChunkListMetric>(6);
         metrics.add(qInit);
         metrics.add(q000);
@@ -107,6 +145,11 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         chunkListMetrics = Collections.unmodifiableList(metrics);
     }
 
+    /**
+     * 实例化子页池头
+     *
+     * @return 池子页
+     */
     private PoolSubpage<T> newSubpagePoolHead() {
         PoolSubpage<T> head = new PoolSubpage<T>();
         head.prev = head;
@@ -114,6 +157,12 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         return head;
     }
 
+    /**
+     * 实例化子页池数组
+     *
+     * @param size 数组大小
+     * @return 池子页实例
+     */
     @SuppressWarnings("unchecked")
     private PoolSubpage<T>[] newSubpagePoolArray(int size) {
         return new PoolSubpage[size];
@@ -538,8 +587,20 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         }
     }
 
+    /**
+     * 堆竞技场
+     */
     static final class HeapArena extends PoolArena<byte[]> {
 
+        /**
+         * 堆竞技场的构造方法
+         *
+         * @param parent 池化字节缓冲分配器
+         * @param pageSize 页面大小
+         * @param pageShifts 页面偏移
+         * @param chunkSize 块大小
+         * @param directMemoryCacheAlignment 直接内存缓冲偏移
+         */
         HeapArena(PooledByteBufAllocator parent, int pageSize, int pageShifts,
                   int chunkSize, int directMemoryCacheAlignment) {
             super(parent, pageSize, pageShifts, chunkSize,

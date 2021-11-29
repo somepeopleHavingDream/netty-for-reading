@@ -19,12 +19,18 @@ import java.util.Map;
 
 /**
  * A grab-bag of useful utility methods.
+ *
+ * 一揽子有用的实用方法。
  */
 public final class ObjectUtil {
 
     private static final float FLOAT_ZERO = 0.0F;
     private static final double DOUBLE_ZERO = 0.0D;
     private static final long LONG_ZERO = 0L;
+
+    /**
+     * 0
+     */
     private static final int INT_ZERO = 0;
 
     private ObjectUtil() {
@@ -151,6 +157,9 @@ public final class ObjectUtil {
     /**
      * Checks that the given argument is positive or zero. If it is not , throws {@link IllegalArgumentException}.
      * Otherwise, returns the argument.
+     *
+     * 检查给定参数是正或父。
+     * 如果不是，则抛出违规参数异常，否则返回该参数
      */
     public static int checkPositiveOrZero(int i, String name) {
         if (i < INT_ZERO) {

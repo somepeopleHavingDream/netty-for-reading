@@ -82,7 +82,7 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
     }
 
     /**
-     * 该字节缓冲分配器是否默认使用直接内存
+     * 该字节缓冲分配器是否默认使用直接内存（true）
      */
     private final boolean directByDefault;
 
@@ -107,7 +107,7 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
      *                     a heap buffer
      */
     protected AbstractByteBufAllocator(boolean preferDirect) {
-        //
+        // 设置该字节缓冲分配器是否默认使用直接内存、设置空缓冲
         directByDefault = preferDirect && PlatformDependent.hasUnsafe();
         emptyBuf = new EmptyByteBuf(this);
     }

@@ -289,9 +289,13 @@ public final class StringUtil {
 
     /**
      * The shortcut to {@link #simpleClassName(Class) simpleClassName(o.getClass())}.
+     *
+     * 简单类名的快捷方法。
      */
     public static String simpleClassName(Object o) {
+        // 如果入参对象为null，则返回字符串“null_object”
         if (o == null) {
+            // 以下不细究
             return "null_object";
         } else {
             return simpleClassName(o.getClass());
@@ -304,7 +308,7 @@ public final class StringUtil {
      *
      * 从类对象生成一个简化名字。
      * 与Class#getSimpleName()方法相似，
-     * 但它更适用与匿名类
+     * 但它更适用与匿名类。
      */
     public static String simpleClassName(Class<?> clazz) {
         // 检查入参，接着获得类名
@@ -315,6 +319,8 @@ public final class StringUtil {
         if (lastDotIdx > -1) {
             return className.substring(lastDotIdx + 1);
         }
+
+        // 以下不细究
         return className;
     }
 

@@ -15,7 +15,7 @@
  */
 package io.netty.buffer;
 
-import static io.netty.buffer.PoolThreadCache.*;
+import static io.netty.buffer.PoolThreadCache.log2;
 
 /**
  * SizeClasses requires {@code pageShifts} to be defined prior to inclusion,
@@ -95,7 +95,19 @@ abstract class SizeClasses implements SizeClassesMetric {
 
     private static final byte no = 0, yes = 1;
 
+    /**
+     * 尺码等级
+     *
+     * @param pageSize 页大小
+     * @param pageShifts 页偏移
+     * @param chunkSize 块大小
+     * @param directMemoryCacheAlignment 直接内存缓存对齐
+     */
     protected SizeClasses(int pageSize, int pageShifts, int chunkSize, int directMemoryCacheAlignment) {
+        /*
+            以下不细究
+         */
+        // 设置页面大小、页面偏移、块大小、直接内存缓存对齐
         this.pageSize = pageSize;
         this.pageShifts = pageShifts;
         this.chunkSize = chunkSize;
@@ -123,7 +135,12 @@ abstract class SizeClasses implements SizeClassesMetric {
     protected final int directMemoryCacheAlignment;
 
     final int nSizes;
+
+    /**
+     * 子页数量
+     */
     int nSubpages;
+
     int nPSizes;
 
     int smallMaxSizeIdx;

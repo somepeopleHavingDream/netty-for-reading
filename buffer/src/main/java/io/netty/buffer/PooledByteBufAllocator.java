@@ -83,7 +83,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     private static final boolean DEFAULT_USE_CACHE_FOR_ALL_THREADS;
 
     /**
-     * 0
+     * 默认直接内存缓存对齐（0）
      */
     private static final int DEFAULT_DIRECT_MEMORY_CACHE_ALIGNMENT;
 
@@ -270,14 +270,36 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     public static final PooledByteBufAllocator DEFAULT =
             new PooledByteBufAllocator(PlatformDependent.directBufferPreferred());
 
+    /**
+     * 该池化字节缓冲分配器的堆竞技场
+     */
     private final PoolArena<byte[]>[] heapArenas;
+
     private final PoolArena<ByteBuffer>[] directArenas;
+
+    /**
+     * 小缓存大小
+     */
     private final int smallCacheSize;
+
+    /**
+     * 正常缓存大小
+     */
     private final int normalCacheSize;
+
     private final List<PoolArenaMetric> heapArenaMetrics;
     private final List<PoolArenaMetric> directArenaMetrics;
+
+    /**
+     * 用于当前池化字节缓冲分配器的池化线程本地缓存
+     */
     private final PoolThreadLocalCache threadCache;
+
+    /**
+     * 当前池化字节缓冲分配器的块大小
+     */
     private final int chunkSize;
+
     private final PooledByteBufAllocatorMetric metric;
 
     public PooledByteBufAllocator() {
@@ -376,12 +398,18 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     public PooledByteBufAllocator(boolean preferDirect, int nHeapArena, int nDirectArena, int pageSize, int maxOrder,
                                   int smallCacheSize, int normalCacheSize,
                                   boolean useCacheForAllThreads, int directMemoryCacheAlignment) {
+        // 调用父类的构造方法
         super(preferDirect);
+
+        // 设置线程缓存、小缓存大小、正常缓存大小
         threadCache = new PoolThreadLocalCache(useCacheForAllThreads);
         this.smallCacheSize = smallCacheSize;
         this.normalCacheSize = normalCacheSize;
 
         if (directMemoryCacheAlignment != 0) {
+            /*
+                以下不细究
+             */
             if (!PlatformDependent.hasAlignDirectByteBuffer()) {
                 throw new UnsupportedOperationException("Buffer alignment is not supported. " +
                         "Either Unsafe or ByteBuffer.alignSlice() must be available.");
@@ -391,35 +419,50 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             pageSize = (int) PlatformDependent.align(pageSize, directMemoryCacheAlignment);
         }
 
+        // 校验并且计算块大小
         chunkSize = validateAndCalculateChunkSize(pageSize, maxOrder);
 
+        // 检查堆竞技场和直接竞技场、直接内存缓冲对齐的正负性
         checkPositiveOrZero(nHeapArena, "nHeapArena");
         checkPositiveOrZero(nDirectArena, "nDirectArena");
-
         checkPositiveOrZero(directMemoryCacheAlignment, "directMemoryCacheAlignment");
+
         if (directMemoryCacheAlignment > 0 && !isDirectMemoryCacheAlignmentSupported()) {
+            // 以下不细究
             throw new IllegalArgumentException("directMemoryCacheAlignment is not supported");
         }
 
         if ((directMemoryCacheAlignment & -directMemoryCacheAlignment) != directMemoryCacheAlignment) {
+            // 以下不细究
             throw new IllegalArgumentException("directMemoryCacheAlignment: "
                     + directMemoryCacheAlignment + " (expected: power of two)");
         }
 
+        // 校验并且计算页面偏移
         int pageShifts = validateAndCalculatePageShifts(pageSize, directMemoryCacheAlignment);
 
+        // 如果堆竞技场数量大于0
         if (nHeapArena > 0) {
+            // 实例化一个竞技场数组
             heapArenas = newArenaArray(nHeapArena);
+
+            // 池竞技场度量标准
             List<PoolArenaMetric> metrics = new ArrayList<PoolArenaMetric>(heapArenas.length);
             for (int i = 0; i < heapArenas.length; i ++) {
+                // 实例化一个堆竞技场，并赋值到对应数组位置
                 PoolArena.HeapArena arena = new PoolArena.HeapArena(this,
                         pageSize, pageShifts, chunkSize,
                         directMemoryCacheAlignment);
                 heapArenas[i] = arena;
+
+                // 将该堆竞技场添加到池化竞技场标准集合中
                 metrics.add(arena);
             }
             heapArenaMetrics = Collections.unmodifiableList(metrics);
         } else {
+            /*
+                以下不细究
+             */
             heapArenas = null;
             heapArenaMetrics = Collections.emptyList();
         }
@@ -441,6 +484,13 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         metric = new PooledByteBufAllocatorMetric(this);
     }
 
+    /**
+     * 实例化一个竞技场数组
+     *
+     * @param size 数组大小
+     * @param <T> 元素类型
+     * @return 竞技场数组
+     */
     @SuppressWarnings("unchecked")
     private static <T> PoolArena<T>[] newArenaArray(int size) {
         return new PoolArena[size];
@@ -637,9 +687,21 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         threadCache.remove();
     }
 
+    /**
+     * 池化线程本地缓存
+     */
     final class PoolThreadLocalCache extends FastThreadLocal<PoolThreadCache> {
+
+        /**
+         * 是否为所有线程设置缓存
+         */
         private final boolean useCacheForAllThreads;
 
+        /**
+         * 池化线程本地缓存的构造方法
+         *
+         * @param useCacheForAllThreads 是否为所有线程设置缓存
+         */
         PoolThreadLocalCache(boolean useCacheForAllThreads) {
             this.useCacheForAllThreads = useCacheForAllThreads;
         }

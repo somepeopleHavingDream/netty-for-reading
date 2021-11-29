@@ -16,8 +16,6 @@
 
 package io.netty.buffer;
 
-import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
-
 import io.netty.util.ByteProcessor;
 import io.netty.util.internal.EmptyArrays;
 import io.netty.util.internal.ObjectUtil;
@@ -34,8 +32,12 @@ import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
 import java.nio.charset.Charset;
 
+import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
+
 /**
  * An empty {@link ByteBuf} whose capacity and maximum capacity are all {@code 0}.
+ *
+ * 一个空的字节缓冲，它的容量和最大容量都是0。
  */
 public final class EmptyByteBuf extends ByteBuf {
 
@@ -57,14 +59,31 @@ public final class EmptyByteBuf extends ByteBuf {
 
     private final ByteBufAllocator alloc;
     private final ByteOrder order;
+
+    /**
+     * 用于该空字符缓冲的字符串，一般来说是类名
+     */
     private final String str;
+
     private EmptyByteBuf swapped;
 
+    /**
+     * 空字节缓冲的构造方法
+     *
+     * @param alloc 字节缓冲分配器
+     */
     public EmptyByteBuf(ByteBufAllocator alloc) {
         this(alloc, ByteOrder.BIG_ENDIAN);
     }
 
+    /**
+     * 空字节缓冲的构造方法
+     *
+     * @param alloc 字节缓冲分配器
+     * @param order 字节序
+     */
     private EmptyByteBuf(ByteBufAllocator alloc, ByteOrder order) {
+        // 设置用于当前空字节缓冲的字节缓冲分配器和字节序、简单类名
         this.alloc = ObjectUtil.checkNotNull(alloc, "alloc");
         this.order = order;
         str = StringUtil.simpleClassName(this) + (order == ByteOrder.BIG_ENDIAN? "BE" : "LE");
