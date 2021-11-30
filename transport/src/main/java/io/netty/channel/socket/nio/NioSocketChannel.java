@@ -476,6 +476,12 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
          */
         private volatile int maxBytesPerGatheringWrite = Integer.MAX_VALUE;
 
+        /**
+         * nio套接字通道配置的构造方法
+         *
+         * @param channel nio套接字通道
+         * @param javaSocket jdk底层套接字
+         */
         private NioSocketChannelConfig(NioSocketChannel channel, Socket javaSocket) {
             super(channel, javaSocket);
             // 计算每次收集写入的最大字节

@@ -56,8 +56,17 @@ public final class ByteBufUtil {
     };
 
     private static final byte WRITE_UTF_UNKNOWN = (byte) '?';
+
+    /**
+     * 用于该字节缓冲工具类的最大字符缓冲大小（16384）
+     */
     private static final int MAX_CHAR_BUFFER_SIZE;
+
+    /**
+     * 用于该字节缓冲工具类的线程本地缓冲大小（0）
+     */
     private static final int THREAD_LOCAL_BUFFER_SIZE;
+
     private static final int MAX_BYTES_PER_CHAR_UTF8 =
             (int) CharsetUtil.encoder(CharsetUtil.UTF_8).maxBytesPerChar();
 
@@ -87,15 +96,21 @@ public final class ByteBufUtil {
             alloc = PooledByteBufAllocator.DEFAULT;
             logger.debug("-Dio.netty.allocator.type: {}", allocType);
         } else {
+            /*
+                以下不细究
+             */
             alloc = PooledByteBufAllocator.DEFAULT;
             logger.debug("-Dio.netty.allocator.type: pooled (unknown: {})", allocType);
         }
 
+        // 设置默认分配器
         DEFAULT_ALLOCATOR = alloc;
 
+        // 设置线程本地缓冲大小
         THREAD_LOCAL_BUFFER_SIZE = SystemPropertyUtil.getInt("io.netty.threadLocalDirectBufferSize", 0);
         logger.debug("-Dio.netty.threadLocalDirectBufferSize: {}", THREAD_LOCAL_BUFFER_SIZE);
 
+        // 设置字符缓冲大小
         MAX_CHAR_BUFFER_SIZE = SystemPropertyUtil.getInt("io.netty.maxThreadLocalCharBufferSize", 16 * 1024);
         logger.debug("-Dio.netty.maxThreadLocalCharBufferSize: {}", MAX_CHAR_BUFFER_SIZE);
     }

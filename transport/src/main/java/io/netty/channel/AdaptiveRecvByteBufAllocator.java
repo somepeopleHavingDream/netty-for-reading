@@ -35,7 +35,7 @@ import static java.lang.Math.min;
 public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufAllocator {
 
     /**
-     * 默认最小
+     * 该自适应接收字节缓冲分配器的默认最小值
      */
     static final int DEFAULT_MINIMUM = 64;
 
@@ -46,7 +46,7 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
     static final int DEFAULT_INITIAL = 2048;
 
     /**
-     * 默认最大
+     * 该自适应接收字节缓冲分配器的默认最大值
      */
     static final int DEFAULT_MAXIMUM = 65536;
 

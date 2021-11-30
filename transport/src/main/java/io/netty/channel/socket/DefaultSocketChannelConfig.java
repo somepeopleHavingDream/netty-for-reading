@@ -61,7 +61,7 @@ public class DefaultSocketChannelConfig extends DefaultChannelConfig
                 setTcpNoDelay(true);
             } catch (Exception e) {
                 // Ignore.
-                // 忽略
+                // 忽略。
             }
         }
     }

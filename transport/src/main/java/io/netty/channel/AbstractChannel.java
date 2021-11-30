@@ -473,7 +473,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         private volatile ChannelOutboundBuffer outboundBuffer = new ChannelOutboundBuffer(AbstractChannel.this);
 
         /**
-         * 接收字节缓冲分配器处理者
+         * 接收字节缓冲分配器的处理器
          */
         private RecvByteBufAllocator.Handle recvHandle;
 
@@ -492,13 +492,13 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         @Override
         public RecvByteBufAllocator.Handle recvBufAllocHandle() {
-            // 如果当前通道的接收处理为null
+            // 如果当前通道的接收处理器为null
             if (recvHandle == null) {
                 // 从配置中获取接收字节缓冲分配器，用该分配器实例化处理者，并赋值
                 recvHandle = config().getRecvByteBufAllocator().newHandle();
             }
 
-            // 返回接收处理
+            // 返回接收处理器
             return recvHandle;
         }
 

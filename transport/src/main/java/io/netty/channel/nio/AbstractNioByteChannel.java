@@ -32,9 +32,16 @@ import static io.netty.channel.internal.ChannelUtils.WRITE_STATUS_SNDBUF_FULL;
 
 /**
  * {@link AbstractNioChannel} base class for {@link Channel}s that operate on bytes.
+ *
+ * 用于通道操作字节的基类。
  */
 public abstract class AbstractNioByteChannel extends AbstractNioChannel {
+
+    /**
+     * 该nio字节通道的通道元数据
+     */
     private static final ChannelMetadata METADATA = new ChannelMetadata(false, 16);
+
     private static final String EXPECTED_TYPES =
             " (expected: " + StringUtil.simpleClassName(ByteBuf.class) + ", " +
             StringUtil.simpleClassName(FileRegion.class) + ')';
@@ -172,6 +179,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             final ChannelPipeline pipeline = pipeline();
             // 从配置中拿到字节缓冲分配器
             final ByteBufAllocator allocator = config.getAllocator();
+            // 获得接收字节缓冲分配器的处理器
             final RecvByteBufAllocator.Handle allocHandle = recvBufAllocHandle();
             allocHandle.reset(config);
 

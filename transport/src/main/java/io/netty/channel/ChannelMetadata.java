@@ -15,9 +15,9 @@
  */
 package io.netty.channel;
 
-import static io.netty.util.internal.ObjectUtil.checkPositive;
-
 import java.net.SocketAddress;
+
+import static io.netty.util.internal.ObjectUtil.checkPositive;
 
 /**
  * Represents the properties of a {@link Channel} implementation.
@@ -27,6 +27,10 @@ import java.net.SocketAddress;
 public final class ChannelMetadata {
 
     private final boolean hasDisconnect;
+
+    /**
+     * 每次读的默认最大消息数
+     */
     private final int defaultMaxMessagesPerRead;
 
     /**

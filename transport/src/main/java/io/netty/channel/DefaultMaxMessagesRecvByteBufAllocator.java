@@ -30,7 +30,7 @@ import static io.netty.util.internal.ObjectUtil.checkPositive;
 public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessagesRecvByteBufAllocator {
 
     /**
-     * 每次读的最大消息数
+     * 当前最大消息接收字节缓冲分配器的每次读的最大消息数（1或16）
      */
     private volatile int maxMessagesPerRead;
 

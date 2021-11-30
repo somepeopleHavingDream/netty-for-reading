@@ -30,6 +30,9 @@ public interface MaxMessagesRecvByteBufAllocator extends RecvByteBufAllocator {
     /**
      * Sets the maximum number of messages to read per read loop.
      * If this value is greater than 1, an event loop might attempt to read multiple times to procure multiple messages.
+     *
+     * 设置每次读循环要读的最大消息数。
+     * 如果值超过1，一个事件循环可能尝试去多次读取以获取多条消息。
      */
     MaxMessagesRecvByteBufAllocator maxMessagesPerRead(int maxMessagesPerRead);
 }
