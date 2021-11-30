@@ -275,6 +275,9 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
      */
     private final PoolArena<byte[]>[] heapArenas;
 
+    /**
+     * 该池化字节缓冲分配器的直接竞技场
+     */
     private final PoolArena<ByteBuffer>[] directArenas;
 
     /**
@@ -287,7 +290,14 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
      */
     private final int normalCacheSize;
 
+    /**
+     * 该池化字节缓冲分配器的堆竞技场标准
+     */
     private final List<PoolArenaMetric> heapArenaMetrics;
+
+    /**
+     * 该池化字节缓冲器的直接竞技场标准
+     */
     private final List<PoolArenaMetric> directArenaMetrics;
 
     /**
@@ -300,6 +310,9 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
      */
     private final int chunkSize;
 
+    /**
+     * 当前池化字节缓冲分配器的池化字节缓冲分配器标准
+     */
     private final PooledByteBufAllocatorMetric metric;
 
     public PooledByteBufAllocator() {
@@ -387,7 +400,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
      *
      * @param preferDirect 是否倾向于直接内存
      * @param nHeapArena 堆竞技场数
-     * @param nDirectArena 直接禁忌常熟
+     * @param nDirectArena 直接竞技场数
      * @param pageSize 页大小
      * @param maxOrder 最大订单
      * @param smallCacheSize 小缓存大小
@@ -467,10 +480,13 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             heapArenaMetrics = Collections.emptyList();
         }
 
+        // 如果直接竞技场的个数大于0
         if (nDirectArena > 0) {
+            // 实例化直接竞技场数组、构建池化竞技场标准集合
             directArenas = newArenaArray(nDirectArena);
             List<PoolArenaMetric> metrics = new ArrayList<PoolArenaMetric>(directArenas.length);
             for (int i = 0; i < directArenas.length; i ++) {
+                // 实例化一个直接竞技场
                 PoolArena.DirectArena arena = new PoolArena.DirectArena(
                         this, pageSize, pageShifts, chunkSize, directMemoryCacheAlignment);
                 directArenas[i] = arena;
@@ -478,9 +494,14 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             }
             directArenaMetrics = Collections.unmodifiableList(metrics);
         } else {
+            /*
+                以下不细究
+             */
             directArenas = null;
             directArenaMetrics = Collections.emptyList();
         }
+
+        // 实例化并赋值池化字节缓冲分配器标准
         metric = new PooledByteBufAllocatorMetric(this);
     }
 

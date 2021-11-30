@@ -648,8 +648,20 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         }
     }
 
+    /**
+     * 直接竞技场
+     */
     static final class DirectArena extends PoolArena<ByteBuffer> {
 
+        /**
+         * 该直接竞技场的构造方法
+         *
+         * @param parent 父池化字节缓冲分配器
+         * @param pageSize 页数量
+         * @param pageShifts 页偏移
+         * @param chunkSize 块大小
+         * @param directMemoryCacheAlignment 直接内存缓存对齐
+         */
         DirectArena(PooledByteBufAllocator parent, int pageSize, int pageShifts,
                     int chunkSize, int directMemoryCacheAlignment) {
             super(parent, pageSize, pageShifts, chunkSize,
