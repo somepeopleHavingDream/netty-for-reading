@@ -126,6 +126,9 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
          */
         private int index;
 
+        /**
+         * 该处理器的下一个接收缓冲大小
+         */
         private int nextReceiveBufferSize;
 
         /**
@@ -133,6 +136,13 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
          */
         private boolean decreaseNow;
 
+        /**
+         * 处理器实现的构造方法
+         *
+         * @param minIndex 最小索引
+         * @param maxIndex 最大索引
+         * @param initial 初始值
+         */
         HandleImpl(int minIndex, int maxIndex, int initial) {
             // 设置最小索引和最大索引
             this.minIndex = minIndex;

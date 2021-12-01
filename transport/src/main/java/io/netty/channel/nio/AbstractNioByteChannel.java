@@ -181,12 +181,14 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             final ByteBufAllocator allocator = config.getAllocator();
             // 获得接收字节缓冲分配器的处理器
             final RecvByteBufAllocator.Handle allocHandle = recvBufAllocHandle();
+            // 分配处理器按照配置重置
             allocHandle.reset(config);
 
             ByteBuf byteBuf = null;
             boolean close = false;
             try {
                 do {
+                    // 分配处理器分配出一个字节缓冲
                     byteBuf = allocHandle.allocate(allocator);
                     allocHandle.lastBytesRead(doReadBytes(byteBuf));
                     if (allocHandle.lastBytesRead() <= 0) {

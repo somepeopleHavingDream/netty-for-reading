@@ -47,12 +47,16 @@ public interface RecvByteBufAllocator {
         /**
          * Creates a new receive buffer whose capacity is probably large enough to read all inbound data and small
          * enough not to waste its space.
+         *
+         * 创建一个新的接收缓冲，它的容量既足够大到读所有入境数据，也不需要浪费它的空间。
          */
         ByteBuf allocate(ByteBufAllocator alloc);
 
         /**
          * Similar to {@link #allocate(ByteBufAllocator)} except that it does not allocate anything but just tells the
          * capacity.
+         *
+         * 与分配方法类似，除了不分配任何东西而只是告知容量。
          */
         int guess();
 
@@ -63,6 +67,10 @@ public interface RecvByteBufAllocator {
          * This may be used by {@link #continueReading()} to determine if the read operation should complete.
          * </p>
          * This is only ever a hint and may be ignored by the implementation.
+         *
+         * 重置任何已经积累的计数器，并且推荐用于下一次读循环的需要读多少的消息和字节。
+         * 这可能被持续读方法使用，以决定读操作是否应该完成。
+         *
          * @param config The channel configuration which may impact this object's behavior.
          */
         void reset(ChannelConfig config);

@@ -150,6 +150,8 @@ public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessa
 
         /**
          * Only {@link ChannelConfig#getMaxMessagesPerRead()} is used.
+         *
+         * 仅当通道配置的获取每次读的最大消息数被使用。
          */
         @Override
         public void reset(ChannelConfig config) {

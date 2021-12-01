@@ -688,6 +688,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
     @Override
     public boolean isDirectBufferPooled() {
+        // 如果直接竞技场不为null
         return directArenas != null;
     }
 

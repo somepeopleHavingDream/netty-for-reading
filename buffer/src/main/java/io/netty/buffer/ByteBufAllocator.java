@@ -55,6 +55,8 @@ public interface ByteBufAllocator {
 
     /**
      * Allocate a {@link ByteBuf}, preferably a direct buffer which is suitable for I/O.
+     *
+     * 分配一个字节缓冲，最好是适合输入输出的直接缓冲。
      */
     ByteBuf ioBuffer(int initialCapacity);
 
@@ -129,6 +131,8 @@ public interface ByteBufAllocator {
 
     /**
      * Returns {@code true} if direct {@link ByteBuf}'s are pooled
+     *
+     * 如果直接字节缓冲是池化的，则返回真
      */
     boolean isDirectBufferPooled();
 
