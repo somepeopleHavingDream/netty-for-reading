@@ -133,6 +133,9 @@ public abstract class Recycler<T> {
         }
     };
 
+    /**
+     * 回收器的构造方法
+     */
     protected Recycler() {
         this(DEFAULT_MAX_CAPACITY_PER_THREAD);
     }

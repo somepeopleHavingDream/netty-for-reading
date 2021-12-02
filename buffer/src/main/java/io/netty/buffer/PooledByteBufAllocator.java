@@ -598,11 +598,15 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
     @Override
     protected ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity) {
+        // 拿到池化线程缓冲
         PoolThreadCache cache = threadCache.get();
+        // 拿到池线程缓冲中的直接竞技场
         PoolArena<ByteBuffer> directArena = cache.directArena;
 
+        // 分配字节缓冲
         final ByteBuf buf;
         if (directArena != null) {
+            // 直接竞技场分配出字节缓冲
             buf = directArena.allocate(cache, initialCapacity, maxCapacity);
         } else {
             buf = PlatformDependent.hasUnsafe() ?

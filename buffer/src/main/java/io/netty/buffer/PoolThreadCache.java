@@ -51,6 +51,10 @@ final class PoolThreadCache {
     private static final int INTEGER_SIZE_MINUS_ONE = Integer.SIZE - 1;
 
     final PoolArena<byte[]> heapArena;
+
+    /**
+     * 该池化线程缓存的直接竞技场
+     */
     final PoolArena<ByteBuffer> directArena;
 
     // Hold the caches for the different size classes, which are tiny, small and normal.

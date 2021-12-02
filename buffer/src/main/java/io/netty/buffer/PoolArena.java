@@ -35,6 +35,10 @@ import static java.lang.Math.max;
  * @param <T>
  */
 abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
+
+    /**
+     * 该池竞技场是否有不安全实例
+     */
     static final boolean HAS_UNSAFE = PlatformDependent.hasUnsafe();
 
     enum SizeClass {
@@ -170,7 +174,16 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
 
     abstract boolean isDirect();
 
+    /**
+     * 该池化竞技场分配出池化字节缓冲
+     *
+     * @param cache 池化线程缓存
+     * @param reqCapacity 请求的容量
+     * @param maxCapacity 最大的容量
+     * @return 分配出来的池化字节缓冲
+     */
     PooledByteBuf<T> allocate(PoolThreadCache cache, int reqCapacity, int maxCapacity) {
+        // 实例化一个池化字节缓冲
         PooledByteBuf<T> buf = newByteBuf(maxCapacity);
         allocate(cache, buf, reqCapacity);
         return buf;
@@ -506,7 +519,15 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
 
     protected abstract PoolChunk<T> newChunk(int pageSize, int maxPageIdx, int pageShifts, int chunkSize);
     protected abstract PoolChunk<T> newUnpooledChunk(int capacity);
+
+    /**
+     * 实例化一个池化字节缓冲
+     *
+     * @param maxCapacity 最大容量
+     * @return 池化字节缓冲
+     */
     protected abstract PooledByteBuf<T> newByteBuf(int maxCapacity);
+
     protected abstract void memoryCopy(T src, int srcOffset, PooledByteBuf<T> dst, int length);
     protected abstract void destroyChunk(PoolChunk<T> chunk);
 
@@ -716,7 +737,9 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
 
         @Override
         protected PooledByteBuf<ByteBuffer> newByteBuf(int maxCapacity) {
+            // 如果该池化竞技场有不安全实例
             if (HAS_UNSAFE) {
+                // 由池化不安全直接字节缓冲分配出一个池化字节缓冲对象
                 return PooledUnsafeDirectByteBuf.newInstance(maxCapacity);
             } else {
                 return PooledDirectByteBuf.newInstance(maxCapacity);

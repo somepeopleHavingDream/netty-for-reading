@@ -212,7 +212,7 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
 
         // 校验初始容量和最大容量
         validate(initialCapacity, maxCapacity);
-        // 实例化直接内存缓冲
+        // 实例化直接缓冲
         return newDirectBuffer(initialCapacity, maxCapacity);
     }
 
