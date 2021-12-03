@@ -51,11 +51,30 @@ public abstract class Recycler<T> {
     };
     private static final AtomicInteger ID_GENERATOR = new AtomicInteger(Integer.MIN_VALUE);
     private static final int OWN_THREAD_ID = ID_GENERATOR.getAndIncrement();
+
+    /**
+     * 单线程默认初始最大容量。
+     * 默认使用4k实例。
+     */
     private static final int DEFAULT_INITIAL_MAX_CAPACITY_PER_THREAD = 4 * 1024; // Use 4k instances as default.
+
+    /**
+     * 用于此回收器的每线程的默认最大容量（4096）
+     */
     private static final int DEFAULT_MAX_CAPACITY_PER_THREAD;
+
     private static final int INITIAL_CAPACITY;
+
+    /**
+     * 该回收器的最大共享容量因子（2）
+     */
     private static final int MAX_SHARED_CAPACITY_FACTOR;
+
+    /**
+     * 该回收器的单线程最大延迟队列（）
+     */
     private static final int MAX_DELAYED_QUEUES_PER_THREAD;
+
     private static final int LINK_CAPACITY;
     private static final int RATIO;
     private static final int DELAYED_QUEUE_RATIO;
@@ -64,18 +83,25 @@ public abstract class Recycler<T> {
         // In the future, we might have different maxCapacity for different object types.
         // e.g. io.netty.recycler.maxCapacity.writeTask
         //      io.netty.recycler.maxCapacity.outboundBuffer
+        /*
+            在将来，我们对于不同对象类型可能有不同的最大容量。
+            比如：io.netty.recycler.maxCapacity.writeTask
+                io.netty.recycler.maxCapacity.outboundBuffer
+         */
+        // 设置单线程的最大容量
         int maxCapacityPerThread = SystemPropertyUtil.getInt("io.netty.recycler.maxCapacityPerThread",
                 SystemPropertyUtil.getInt("io.netty.recycler.maxCapacity", DEFAULT_INITIAL_MAX_CAPACITY_PER_THREAD));
         if (maxCapacityPerThread < 0) {
             maxCapacityPerThread = DEFAULT_INITIAL_MAX_CAPACITY_PER_THREAD;
         }
-
         DEFAULT_MAX_CAPACITY_PER_THREAD = maxCapacityPerThread;
 
+        // 设置最大共享容量因子
         MAX_SHARED_CAPACITY_FACTOR = max(2,
                 SystemPropertyUtil.getInt("io.netty.recycler.maxSharedCapacityFactor",
                         2));
 
+        // 设置单线程的最大延迟队列
         MAX_DELAYED_QUEUES_PER_THREAD = max(0,
                 SystemPropertyUtil.getInt("io.netty.recycler.maxDelayedQueuesPerThread",
                         // We use the same value as default EventLoop number
@@ -140,6 +166,11 @@ public abstract class Recycler<T> {
         this(DEFAULT_MAX_CAPACITY_PER_THREAD);
     }
 
+    /**
+     * 回收器的构造方法
+     *
+     * @param maxCapacityPerThread 每线程的最大容量
+     */
     protected Recycler(int maxCapacityPerThread) {
         this(maxCapacityPerThread, MAX_SHARED_CAPACITY_FACTOR);
     }
