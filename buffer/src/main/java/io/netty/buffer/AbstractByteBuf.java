@@ -15,12 +15,7 @@
  */
 package io.netty.buffer;
 
-import io.netty.util.AsciiString;
-import io.netty.util.ByteProcessor;
-import io.netty.util.CharsetUtil;
-import io.netty.util.IllegalReferenceCountException;
-import io.netty.util.ResourceLeakDetector;
-import io.netty.util.ResourceLeakDetectorFactory;
+import io.netty.util.*;
 import io.netty.util.internal.ObjectUtil;
 import io.netty.util.internal.PlatformDependent;
 import io.netty.util.internal.StringUtil;
@@ -43,6 +38,8 @@ import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
 
 /**
  * A skeletal implementation of a buffer.
+ *
+ * 缓冲器的骨架实现。
  */
 public abstract class AbstractByteBuf extends ByteBuf {
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractByteBuf.class);
@@ -69,7 +66,12 @@ public abstract class AbstractByteBuf extends ByteBuf {
             ResourceLeakDetectorFactory.instance().newResourceLeakDetector(ByteBuf.class);
 
     int readerIndex;
+
+    /**
+     * 当前字节缓冲的写索引
+     */
     int writerIndex;
+
     private int markedReaderIndex;
     private int markedWriterIndex;
     private int maxCapacity;
@@ -277,14 +279,24 @@ public abstract class AbstractByteBuf extends ByteBuf {
 
     @Override
     public ByteBuf ensureWritable(int minWritableBytes) {
+        // 检查最小可写字节数是否为非负数，则确保是否可写
         ensureWritable0(checkPositiveOrZero(minWritableBytes, "minWritableBytes"));
         return this;
     }
 
+    /**
+     * 确保当前字节缓冲可写
+     *
+     * @param minWritableBytes 最小可写字节数
+     */
     final void ensureWritable0(int minWritableBytes) {
+        // 获得写索引
         final int writerIndex = writerIndex();
+        // 计算出目标容量
         final int targetCapacity = writerIndex + minWritableBytes;
+
         // using non-short-circuit & to reduce branching - this is a hot path and targetCapacity should rarely overflow
+        // 使用非短路路径并且减少分支-这是一个热点路径并且目标容量应该很少溢出
         if (targetCapacity >= 0 & targetCapacity <= capacity()) {
             ensureAccessible();
             return;
@@ -1128,6 +1140,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
 
     @Override
     public int writeBytes(ScatteringByteChannel in, int length) throws IOException {
+        // 确保当前字节缓冲可写
         ensureWritable(length);
         int writtenBytes = setBytes(writerIndex, in, length);
         if (writtenBytes > 0) {

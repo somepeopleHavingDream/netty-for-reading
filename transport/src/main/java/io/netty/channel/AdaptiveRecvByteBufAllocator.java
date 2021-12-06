@@ -168,6 +168,7 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
 
         @Override
         public int guess() {
+            // 返回该自适应接收字节缓冲分配器的下一个接收缓冲大小
             return nextReceiveBufferSize;
         }
 

@@ -51,6 +51,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      * 通道Id
      */
     private final ChannelId id;
+
+    /**
+     * 该通道的不安全实例
+     */
     private final Unsafe unsafe;
 
     /**

@@ -34,7 +34,12 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
     protected long handle;
     protected T memory;
     protected int offset;
+
+    /**
+     * 池化字节缓冲的长度
+     */
     protected int length;
+
     int maxLength;
     PoolThreadCache cache;
     ByteBuffer tmpNioBuf;

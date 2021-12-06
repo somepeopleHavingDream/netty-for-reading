@@ -63,6 +63,9 @@ public abstract class Recycler<T> {
      */
     private static final int DEFAULT_MAX_CAPACITY_PER_THREAD;
 
+    /**
+     * 该回收器的初始容量（256）
+     */
     private static final int INITIAL_CAPACITY;
 
     /**
@@ -71,12 +74,23 @@ public abstract class Recycler<T> {
     private static final int MAX_SHARED_CAPACITY_FACTOR;
 
     /**
-     * 该回收器的单线程最大延迟队列（）
+     * 该回收器的单线程最大延迟队列（核数*2）
      */
     private static final int MAX_DELAYED_QUEUES_PER_THREAD;
 
+    /**
+     * 该回收器的链接容量
+     */
     private static final int LINK_CAPACITY;
+
+    /**
+     * 该回收器的比率（8）
+     */
     private static final int RATIO;
+
+    /**
+     * 该回收器时延队列的比率（8）
+     */
     private static final int DELAYED_QUEUE_RATIO;
 
     static {
@@ -107,18 +121,27 @@ public abstract class Recycler<T> {
                         // We use the same value as default EventLoop number
                         NettyRuntime.availableProcessors() * 2));
 
+        // 安全地找到下一个2的幂次的正数
         LINK_CAPACITY = safeFindNextPositivePowerOfTwo(
                 max(SystemPropertyUtil.getInt("io.netty.recycler.linkCapacity", 16), 16));
 
         // By default we allow one push to a Recycler for each 8th try on handles that were never recycled before.
         // This should help to slowly increase the capacity of the recycler while not be too sensitive to allocation
         // bursts.
+        /*
+            默认地我们允许每8次对之前没有回收的句柄推送到回收器。
+            这允许帮助缓慢地增加回收器的容量，而对突发分配不太敏感。
+         */
         RATIO = max(0, SystemPropertyUtil.getInt("io.netty.recycler.ratio", 8));
         DELAYED_QUEUE_RATIO = max(0, SystemPropertyUtil.getInt("io.netty.recycler.delayedQueue.ratio", RATIO));
 
+        // 设置初始容量
         INITIAL_CAPACITY = min(DEFAULT_MAX_CAPACITY_PER_THREAD, 256);
 
         if (logger.isDebugEnabled()) {
+            /*
+                以下不细究
+             */
             if (DEFAULT_MAX_CAPACITY_PER_THREAD == 0) {
                 logger.debug("-Dio.netty.recycler.maxCapacityPerThread: disabled");
                 logger.debug("-Dio.netty.recycler.maxSharedCapacityFactor: disabled");

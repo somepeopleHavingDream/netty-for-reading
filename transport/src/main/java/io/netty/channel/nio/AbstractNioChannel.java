@@ -117,6 +117,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
 
     @Override
     public NioUnsafe unsafe() {
+        // 调用父类方法，获得不安全实例
         return (NioUnsafe) super.unsafe();
     }
 

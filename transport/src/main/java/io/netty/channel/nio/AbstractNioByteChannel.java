@@ -190,6 +190,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
                 do {
                     // 分配处理器分配出一个字节缓冲
                     byteBuf = allocHandle.allocate(allocator);
+                    // 做读字节操作，并更新分配处理器的最后读取字节数
                     allocHandle.lastBytesRead(doReadBytes(byteBuf));
                     if (allocHandle.lastBytesRead() <= 0) {
                         // nothing was read. release the buffer.
@@ -360,6 +361,8 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
     /**
      * Read bytes into the given {@link ByteBuf} and return the amount.
+     *
+     * 将字节数读进给定的字节缓冲，并且返回读入的数量
      */
     protected abstract int doReadBytes(ByteBuf buf) throws Exception;
 

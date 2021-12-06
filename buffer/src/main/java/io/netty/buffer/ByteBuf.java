@@ -249,6 +249,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
 
     /**
      * Returns the number of bytes (octets) this buffer can contain.
+     *
+     * 返回此缓冲能包含的字节数。
      */
     public abstract int capacity();
 
@@ -412,6 +414,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     /**
      * Returns the number of writable bytes which is equal to
      * {@code (this.capacity - this.writerIndex)}.
+     *
+     * 返回可写入的字节数，该字节数等于容量减去它的写索引。
      */
     public abstract int writableBytes();
 
@@ -2006,6 +2010,9 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
      * {@code writerIndex} by the number of the transferred bytes.
      * If {@code this.writableBytes} is less than {@code length}, {@link #ensureWritable(int)}
      * will be called in an attempt to expand capacity to accommodate.
+     *
+     * 将指定通道的内容传输给以当前写索引开始的此缓冲，并且将写索引增加已传输的字节数。
+     * 如果当前可写的字节数少于长度，确保可写方法将被调用以尝试扩展将要容纳的容量。
      *
      * @param length the maximum number of bytes to transfer
      *

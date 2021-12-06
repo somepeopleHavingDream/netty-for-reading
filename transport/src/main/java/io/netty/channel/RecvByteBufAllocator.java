@@ -102,6 +102,9 @@ public interface RecvByteBufAllocator {
 
         /**
          * Set how many bytes the read operation will (or did) attempt to read.
+         *
+         * 设置读操作将尝试读取多少个字节。
+         *
          * @param bytes How many bytes the read operation will (or did) attempt to read.
          */
         void attemptedBytesRead(int bytes);
