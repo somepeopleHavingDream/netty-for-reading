@@ -45,18 +45,33 @@ public abstract class AbstractByteBuf extends ByteBuf {
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractByteBuf.class);
     private static final String LEGACY_PROP_CHECK_ACCESSIBLE = "io.netty.buffer.bytebuf.checkAccessible";
     private static final String PROP_CHECK_ACCESSIBLE = "io.netty.buffer.checkAccessible";
+
+    /**
+     * 该字节缓冲是否可检查（true）
+     */
     static final boolean checkAccessible; // accessed from CompositeByteBuf
+
     private static final String PROP_CHECK_BOUNDS = "io.netty.buffer.checkBounds";
+
+    /**
+     * 该字节缓冲是否检查边界（true）
+     */
     private static final boolean checkBounds;
 
     static {
+        // 获取当前字节缓冲是否可访问
         if (SystemPropertyUtil.contains(PROP_CHECK_ACCESSIBLE)) {
+            // 以下不细究
             checkAccessible = SystemPropertyUtil.getBoolean(PROP_CHECK_ACCESSIBLE, true);
         } else {
             checkAccessible = SystemPropertyUtil.getBoolean(LEGACY_PROP_CHECK_ACCESSIBLE, true);
         }
+        // 获取是否可检查边界属性
         checkBounds = SystemPropertyUtil.getBoolean(PROP_CHECK_BOUNDS, true);
         if (logger.isDebugEnabled()) {
+            /*
+                以下不细究
+             */
             logger.debug("-D{}: {}", PROP_CHECK_ACCESSIBLE, checkAccessible);
             logger.debug("-D{}: {}", PROP_CHECK_BOUNDS, checkBounds);
         }
@@ -298,9 +313,15 @@ public abstract class AbstractByteBuf extends ByteBuf {
         // using non-short-circuit & to reduce branching - this is a hot path and targetCapacity should rarely overflow
         // 使用非短路路径并且减少分支-这是一个热点路径并且目标容量应该很少溢出
         if (targetCapacity >= 0 & targetCapacity <= capacity()) {
+            // 确保当前字节缓冲可用
             ensureAccessible();
             return;
         }
+
+        /*
+            以下不细究
+         */
+
         if (checkBounds && (targetCapacity < 0 || targetCapacity > maxCapacity)) {
             ensureAccessible();
             throw new IndexOutOfBoundsException(String.format(
@@ -1142,6 +1163,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
     public int writeBytes(ScatteringByteChannel in, int length) throws IOException {
         // 确保当前字节缓冲可写
         ensureWritable(length);
+        // 设置字节，获得写入的字节数
         int writtenBytes = setBytes(writerIndex, in, length);
         if (writtenBytes > 0) {
             writerIndex += writtenBytes;
@@ -1461,6 +1483,8 @@ public abstract class AbstractByteBuf extends ByteBuf {
     /**
      * Should be called by every method that tries to access the buffers content to check
      * if the buffer was released before.
+     *
+     * 应该被每个尝试访问缓冲内容的方法调用，以检查缓冲之前是否被释放。
      */
     protected final void ensureAccessible() {
         if (checkAccessible && !isAccessible()) {

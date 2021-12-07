@@ -111,6 +111,9 @@ public interface RecvByteBufAllocator {
 
         /**
          * Get how many bytes the read operation will (or did) attempt to read.
+         *
+         * 获取读取操作将尝试读取多少个字节。
+         *
          * @return How many bytes the read operation will (or did) attempt to read.
          */
         int attemptedBytesRead();

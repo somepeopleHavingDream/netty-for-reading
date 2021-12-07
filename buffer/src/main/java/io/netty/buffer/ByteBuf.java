@@ -1294,6 +1294,9 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
      * This method does not modify {@code readerIndex} or {@code writerIndex} of
      * this buffer.
      *
+     * 将指定源通道的内容传输到此以指定完全索引开始的缓冲。
+     * 此方法不修改此缓冲的读索引或写索引。
+     *
      * @param length the maximum number of bytes to transfer
      *
      * @return the actual number of bytes read in from the specified channel.
