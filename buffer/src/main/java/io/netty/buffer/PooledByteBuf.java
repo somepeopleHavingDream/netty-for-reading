@@ -202,6 +202,7 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
 
     @Override
     public final ByteBuffer internalNioBuffer(int index, int length) {
+        // 检查索引
         checkIndex(index, length);
         return _internalNioBuffer(index, length, false);
     }
@@ -255,6 +256,7 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
     @Override
     public final int setBytes(int index, ScatteringByteChannel in, int length) throws IOException {
         try {
+            // 获取内部nio缓冲
             return in.read(internalNioBuffer(index, length));
         } catch (ClosedChannelException ignored) {
             return -1;

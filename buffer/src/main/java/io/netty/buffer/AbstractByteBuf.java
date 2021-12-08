@@ -1414,8 +1414,16 @@ public abstract class AbstractByteBuf extends ByteBuf {
         checkIndex(index, 1);
     }
 
+    /**
+     * 检查索引
+     *
+     * @param index 索引下标
+     * @param fieldLength 字段长度
+     */
     protected final void checkIndex(int index, int fieldLength) {
+        // 确保当前字节缓冲可访问
         ensureAccessible();
+        // 检查索引下标
         checkIndex0(index, fieldLength);
     }
 
