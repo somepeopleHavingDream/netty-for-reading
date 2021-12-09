@@ -158,12 +158,19 @@ public abstract class Recycler<T> {
         }
     }
 
+    /**
+     * 用于该回收器的单线程最大容量
+     */
     private final int maxCapacityPerThread;
+
     private final int maxSharedCapacityFactor;
     private final int interval;
     private final int maxDelayedQueuesPerThread;
     private final int delayedQueueInterval;
 
+    /**
+     * 该回收器的线程本地值，用于存储一个栈
+     */
     private final FastThreadLocal<Stack<T>> threadLocal = new FastThreadLocal<Stack<T>>() {
         @Override
         protected Stack<T> initialValue() {
@@ -225,7 +232,9 @@ public abstract class Recycler<T> {
 
     @SuppressWarnings("unchecked")
     public final T get() {
+        // 如果该回收器的单线程的最大容量为0
         if (maxCapacityPerThread == 0) {
+            // 不细究
             return newObject((Handle<T>) NOOP_HANDLE);
         }
         Stack<T> stack = threadLocal.get();

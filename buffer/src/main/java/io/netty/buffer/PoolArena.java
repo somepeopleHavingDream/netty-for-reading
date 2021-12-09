@@ -742,6 +742,7 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
                 // 由池化不安全直接字节缓冲分配出一个池化字节缓冲对象
                 return PooledUnsafeDirectByteBuf.newInstance(maxCapacity);
             } else {
+                // 以下不细究
                 return PooledDirectByteBuf.newInstance(maxCapacity);
             }
         }

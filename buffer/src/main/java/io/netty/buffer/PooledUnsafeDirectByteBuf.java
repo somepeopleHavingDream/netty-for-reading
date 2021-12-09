@@ -46,6 +46,7 @@ final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
      * @return 池化不安全直接字节缓冲
      */
     static PooledUnsafeDirectByteBuf newInstance(int maxCapacity) {
+        // 从回收器中获得池化不安全直接字节缓冲
         PooledUnsafeDirectByteBuf buf = RECYCLER.get();
         buf.reuse(maxCapacity);
         return buf;

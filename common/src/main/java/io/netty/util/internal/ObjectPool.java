@@ -20,6 +20,8 @@ import io.netty.util.Recycler;
 /**
  * Light-weight object pool.
  *
+ * 轻量级对象池。
+ *
  * @param <T> the type of the pooled object
  */
 public abstract class ObjectPool<T> {
@@ -29,6 +31,9 @@ public abstract class ObjectPool<T> {
     /**
      * Get a {@link Object} from the {@link ObjectPool}. The returned {@link Object} may be created via
      * {@link ObjectCreator#newObject(Handle)} if no pooled {@link Object} is ready to be reused.
+     *
+     * 从对象池中获得对象。
+     * 如果没有就绪于重复使用的池化对象，则可通过对象创建器的实例化对象方法创建返回对象。
      */
     public abstract T get();
 
@@ -101,6 +106,7 @@ public abstract class ObjectPool<T> {
 
         @Override
         public T get() {
+            // 回收器获得对象
             return recycler.get();
         }
     }

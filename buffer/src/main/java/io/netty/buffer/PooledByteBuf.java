@@ -32,7 +32,15 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
 
     protected PoolChunk<T> chunk;
     protected long handle;
+
+    /**
+     * 该池化字节缓冲的内存
+     */
     protected T memory;
+
+    /**
+     * 该池化字节缓冲的偏移量（0）
+     */
     protected int offset;
 
     /**
@@ -42,7 +50,12 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
 
     int maxLength;
     PoolThreadCache cache;
+
+    /**
+     * 该池化字节缓冲的临时字节缓冲
+     */
     ByteBuffer tmpNioBuf;
+
     private ByteBufAllocator allocator;
 
     @SuppressWarnings("unchecked")
@@ -155,16 +168,30 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
         return PooledSlicedByteBuf.newInstance(this, this, index, length);
     }
 
+    /**
+     * 获得内部nio缓冲
+     *
+     * @return 字节缓冲
+     */
     protected final ByteBuffer internalNioBuffer() {
+        // 获得临时jdk底层的nio字节缓冲
         ByteBuffer tmpNioBuf = this.tmpNioBuf;
         if (tmpNioBuf == null) {
+            // 实例化内部nio字节缓冲
             this.tmpNioBuf = tmpNioBuf = newInternalNioBuffer(memory);
         } else {
+            // 以下不细究
             tmpNioBuf.clear();
         }
         return tmpNioBuf;
     }
 
+    /**
+     * 实例化内部nio缓冲
+     *
+     * @param memory
+     * @return
+     */
     protected abstract ByteBuffer newInternalNioBuffer(T memory);
 
     @Override
@@ -184,11 +211,26 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
         recyclerHandle.recycle(this);
     }
 
+    /**
+     * 获取jdk底层字节缓冲的索引下标
+     *
+     * @param index 索引下标
+     * @return jdk底层字节缓冲的索引下标
+     */
     protected final int idx(int index) {
         return offset + index;
     }
 
+    /**
+     * 该池化字节缓冲的内部nio字节缓冲
+     *
+     * @param index 索引下标
+     * @param length 长度
+     * @param duplicate 是否复制一份字节缓冲
+     * @return jdk底层的字节缓冲
+     */
     final ByteBuffer _internalNioBuffer(int index, int length, boolean duplicate) {
+        // 获取索引
         index = idx(index);
         ByteBuffer buffer = duplicate ? newInternalNioBuffer(memory) : internalNioBuffer();
         buffer.limit(index + length).position(index);
@@ -204,6 +246,7 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
     public final ByteBuffer internalNioBuffer(int index, int length) {
         // 检查索引
         checkIndex(index, length);
+        // 获得内部nio字节缓冲
         return _internalNioBuffer(index, length, false);
     }
 

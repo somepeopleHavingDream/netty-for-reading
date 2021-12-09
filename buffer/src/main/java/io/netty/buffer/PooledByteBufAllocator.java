@@ -609,6 +609,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             // 直接竞技场分配出字节缓冲
             buf = directArena.allocate(cache, initialCapacity, maxCapacity);
         } else {
+            // 以下不细究
             buf = PlatformDependent.hasUnsafe() ?
                     UnsafeByteBufUtil.newUnsafeDirectByteBuf(this, initialCapacity, maxCapacity) :
                     new UnpooledDirectByteBuf(this, initialCapacity, maxCapacity);

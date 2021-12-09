@@ -63,6 +63,9 @@ public final class MathUtil {
 
     /**
      * Determine if the requested {@code index} and {@code length} will fit within {@code capacity}.
+     *
+     * 决定请求的索引和长度是否符合容量。
+     *
      * @param index The starting index.
      * @param length The length which will be utilized (starting from {@code index}).
      * @param capacity The capacity that {@code index + length} is allowed to be within.
@@ -70,6 +73,7 @@ public final class MathUtil {
      * {@code true} if this would result in an index out of bounds exception.
      */
     public static boolean isOutOfBounds(int index, int length, int capacity) {
+        // 以下不细究
         return (index | length | capacity | (index + length) | (capacity - (index + length))) < 0;
     }
 

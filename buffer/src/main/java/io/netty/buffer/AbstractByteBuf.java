@@ -1427,16 +1427,34 @@ public abstract class AbstractByteBuf extends ByteBuf {
         checkIndex0(index, fieldLength);
     }
 
+    /**
+     * 检查范围边界
+     *
+     * @param indexName 索引名
+     * @param index 索引下标
+     * @param fieldLength 字段长度
+     * @param capacity 容量
+     */
     private static void checkRangeBounds(final String indexName, final int index,
             final int fieldLength, final int capacity) {
+        // 如果下标越界
         if (isOutOfBounds(index, fieldLength, capacity)) {
+            // 以下不细究
             throw new IndexOutOfBoundsException(String.format(
                     "%s: %d, length: %d (expected: range(0, %d))", indexName, index, fieldLength, capacity));
         }
     }
 
+    /**
+     * 检查索引
+     *
+     * @param index 索引下标
+     * @param fieldLength 字段长度
+     */
     final void checkIndex0(int index, int fieldLength) {
+        // 是否检查边界
         if (checkBounds) {
+            // 检查范围边界
             checkRangeBounds("index", index, fieldLength, capacity());
         }
     }
