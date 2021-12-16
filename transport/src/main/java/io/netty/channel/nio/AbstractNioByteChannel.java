@@ -361,8 +361,6 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
     /**
      * Read bytes into the given {@link ByteBuf} and return the amount.
-     *
-     * 将字节数读进给定的字节缓冲，并且返回读入的数量。
      */
     protected abstract int doReadBytes(ByteBuf buf) throws Exception;
 

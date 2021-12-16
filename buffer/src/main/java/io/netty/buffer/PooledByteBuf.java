@@ -33,9 +33,6 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
     protected PoolChunk<T> chunk;
     protected long handle;
 
-    /**
-     * 该池化字节缓冲的内存
-     */
     protected T memory;
 
     /**
@@ -66,6 +63,7 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
 
     void init(PoolChunk<T> chunk, ByteBuffer nioBuffer,
               long handle, int offset, int length, int maxLength, PoolThreadCache cache) {
+        // 初始化
         init0(chunk, nioBuffer, handle, offset, length, maxLength, cache);
     }
 
@@ -168,11 +166,6 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
         return PooledSlicedByteBuf.newInstance(this, this, index, length);
     }
 
-    /**
-     * 获得内部nio缓冲
-     *
-     * @return 字节缓冲
-     */
     protected final ByteBuffer internalNioBuffer() {
         // 获得临时jdk底层的nio字节缓冲
         ByteBuffer tmpNioBuf = this.tmpNioBuf;
@@ -186,12 +179,6 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
         return tmpNioBuf;
     }
 
-    /**
-     * 实例化内部nio缓冲
-     *
-     * @param memory
-     * @return
-     */
     protected abstract ByteBuffer newInternalNioBuffer(T memory);
 
     @Override

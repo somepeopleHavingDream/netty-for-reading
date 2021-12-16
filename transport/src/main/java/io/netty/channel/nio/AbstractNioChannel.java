@@ -227,8 +227,6 @@ public abstract class AbstractNioChannel extends AbstractChannel {
 
         /**
          * Read from underlying {@link SelectableChannel}
-         *
-         * 从底层的可选通道中读
          */
         void read();
 

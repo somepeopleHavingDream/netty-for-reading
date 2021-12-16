@@ -264,66 +264,31 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         }
     }
 
-    /**
-     * 默认的池化字节缓冲分配器
-     */
     public static final PooledByteBufAllocator DEFAULT =
             new PooledByteBufAllocator(PlatformDependent.directBufferPreferred());
 
-    /**
-     * 该池化字节缓冲分配器的堆竞技场
-     */
     private final PoolArena<byte[]>[] heapArenas;
 
-    /**
-     * 该池化字节缓冲分配器的直接竞技场
-     */
     private final PoolArena<ByteBuffer>[] directArenas;
 
-    /**
-     * 小缓存大小
-     */
     private final int smallCacheSize;
 
-    /**
-     * 正常缓存大小
-     */
     private final int normalCacheSize;
 
-    /**
-     * 该池化字节缓冲分配器的堆竞技场标准
-     */
     private final List<PoolArenaMetric> heapArenaMetrics;
 
-    /**
-     * 该池化字节缓冲器的直接竞技场标准
-     */
     private final List<PoolArenaMetric> directArenaMetrics;
 
-    /**
-     * 用于当前池化字节缓冲分配器的池化线程本地缓存
-     */
     private final PoolThreadLocalCache threadCache;
 
-    /**
-     * 当前池化字节缓冲分配器的块大小
-     */
     private final int chunkSize;
 
-    /**
-     * 当前池化字节缓冲分配器的池化字节缓冲分配器标准
-     */
     private final PooledByteBufAllocatorMetric metric;
 
     public PooledByteBufAllocator() {
         this(false);
     }
 
-    /**
-     * 池化字节缓冲分配器的构造方法
-     *
-     * @param preferDirect 是否首选直接内存（一般为true）
-     */
     @SuppressWarnings("deprecation")
     public PooledByteBufAllocator(boolean preferDirect) {
         this(preferDirect, DEFAULT_NUM_HEAP_ARENA, DEFAULT_NUM_DIRECT_ARENA, DEFAULT_PAGE_SIZE, DEFAULT_MAX_ORDER);
@@ -334,12 +299,6 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         this(false, nHeapArena, nDirectArena, pageSize, maxOrder);
     }
 
-    /**
-     * 池化字节缓冲分配器的构造方法
-     *
-     * @deprecated use
-     * {@link PooledByteBufAllocator#PooledByteBufAllocator(boolean, int, int, int, int, int, int, boolean)}
-     */
     @Deprecated
     public PooledByteBufAllocator(boolean preferDirect, int nHeapArena, int nDirectArena, int pageSize, int maxOrder) {
         this(preferDirect, nHeapArena, nDirectArena, pageSize, maxOrder,

@@ -39,12 +39,6 @@ final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
         }
     });
 
-    /**
-     * 根据入参传入的最大容量，实例出一个池化不安全直接字节缓冲
-     *
-     * @param maxCapacity 最大容量
-     * @return 池化不安全直接字节缓冲
-     */
     static PooledUnsafeDirectByteBuf newInstance(int maxCapacity) {
         // 从回收器中获得池化不安全直接字节缓冲
         PooledUnsafeDirectByteBuf buf = RECYCLER.get();
@@ -77,6 +71,7 @@ final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
 
     @Override
     protected ByteBuffer newInternalNioBuffer(ByteBuffer memory) {
+        // 复制出一份jdk字节缓冲
         return memory.duplicate();
     }
 

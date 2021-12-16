@@ -92,14 +92,8 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
         return buf;
     }
 
-    /**
-     * 该字节缓冲分配器是否默认使用直接内存（true）
-     */
     private final boolean directByDefault;
 
-    /**
-     * 用于该字节缓冲分配器的字节缓冲实例
-     */
     private final ByteBuf emptyBuf;
 
     /**
@@ -111,8 +105,6 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
 
     /**
      * Create new instance
-     *
-     * 创建一个新的实例
      *
      * @param preferDirect {@code true} if {@link #buffer(int)} should try to allocate a direct buffer rather than
      *                     a heap buffer
@@ -200,6 +192,7 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
 
     @Override
     public ByteBuf directBuffer(int initialCapacity) {
+        // 直接缓冲
         return directBuffer(initialCapacity, DEFAULT_MAX_CAPACITY);
     }
 
@@ -207,6 +200,7 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
     public ByteBuf directBuffer(int initialCapacity, int maxCapacity) {
         // 如果初始容量和最大容量都为0，则返回空字符缓冲
         if (initialCapacity == 0 && maxCapacity == 0) {
+            // 不细究
             return emptyBuf;
         }
 
@@ -276,8 +270,6 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
 
     /**
      * Create a direct {@link ByteBuf} with the given initialCapacity and maxCapacity.
-     *
-     * 创建一个给定初始容量和最大容量的直接字节缓冲。
      */
     protected abstract ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity);
 

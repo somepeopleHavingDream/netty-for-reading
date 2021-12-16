@@ -1294,9 +1294,6 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
      * This method does not modify {@code readerIndex} or {@code writerIndex} of
      * this buffer.
      *
-     * 将指定源通道的内容传输到此以指定完全索引开始的缓冲。
-     * 此方法不修改此缓冲的读索引或写索引。
-     *
      * @param length the maximum number of bytes to transfer
      *
      * @return the actual number of bytes read in from the specified channel.
@@ -2013,9 +2010,6 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
      * {@code writerIndex} by the number of the transferred bytes.
      * If {@code this.writableBytes} is less than {@code length}, {@link #ensureWritable(int)}
      * will be called in an attempt to expand capacity to accommodate.
-     *
-     * 将指定通道的内容传输给以当前写索引开始的此缓冲，并且将写索引增加已传输的字节数。
-     * 如果当前可写的字节数少于长度，确保可写方法将被调用以尝试扩展将要容纳的容量。
      *
      * @param length the maximum number of bytes to transfer
      *

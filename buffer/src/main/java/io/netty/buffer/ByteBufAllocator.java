@@ -55,8 +55,6 @@ public interface ByteBufAllocator {
 
     /**
      * Allocate a {@link ByteBuf}, preferably a direct buffer which is suitable for I/O.
-     *
-     * 分配一个字节缓冲，最好是适合输入输出的直接缓冲。
      */
     ByteBuf ioBuffer(int initialCapacity);
 

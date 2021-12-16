@@ -174,14 +174,6 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
 
     abstract boolean isDirect();
 
-    /**
-     * 该池化竞技场分配出池化字节缓冲
-     *
-     * @param cache 池化线程缓存
-     * @param reqCapacity 请求的容量
-     * @param maxCapacity 最大的容量
-     * @return 分配出来的池化字节缓冲
-     */
     PooledByteBuf<T> allocate(PoolThreadCache cache, int reqCapacity, int maxCapacity) {
         // 实例化一个池化字节缓冲
         PooledByteBuf<T> buf = newByteBuf(maxCapacity);
@@ -520,12 +512,6 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
     protected abstract PoolChunk<T> newChunk(int pageSize, int maxPageIdx, int pageShifts, int chunkSize);
     protected abstract PoolChunk<T> newUnpooledChunk(int capacity);
 
-    /**
-     * 实例化一个池化字节缓冲
-     *
-     * @param maxCapacity 最大容量
-     * @return 池化字节缓冲
-     */
     protected abstract PooledByteBuf<T> newByteBuf(int maxCapacity);
 
     protected abstract void memoryCopy(T src, int srcOffset, PooledByteBuf<T> dst, int length);
