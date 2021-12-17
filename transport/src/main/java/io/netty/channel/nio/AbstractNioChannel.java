@@ -34,32 +34,18 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Abstract base class for {@link Channel} implementations which use a Selector based approach.
- *
- * 用于通道实现的抽象基类，该类使用基于选择器的方法。
  */
 public abstract class AbstractNioChannel extends AbstractChannel {
 
     private static final InternalLogger logger =
             InternalLoggerFactory.getInstance(AbstractNioChannel.class);
 
-    /**
-     * 当前可选通道，jdk底层通道
-     */
     private final SelectableChannel ch;
 
-    /**
-     * 读感兴趣操作
-     */
     protected final int readInterestOp;
 
-    /**
-     * 选择键
-     */
     volatile SelectionKey selectionKey;
 
-    /**
-     * 当前通道是否读待办
-     */
     boolean readPending;
 
     private final Runnable clearReadPendingRunnable = new Runnable() {
@@ -220,8 +206,6 @@ public abstract class AbstractNioChannel extends AbstractChannel {
 
         /**
          * Finish connect
-         *
-         * 结束连接
          */
         void finishConnect();
 

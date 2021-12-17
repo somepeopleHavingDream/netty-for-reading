@@ -35,46 +35,26 @@ import java.util.concurrent.RejectedExecutionException;
 
 /**
  * A skeletal {@link Channel} implementation.
- *
- * 骨骼通道实现。
  */
 public abstract class AbstractChannel extends DefaultAttributeMap implements Channel {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractChannel.class);
 
-    /**
-     * 父通道
-     */
     private final Channel parent;
 
-    /**
-     * 通道Id
-     */
     private final ChannelId id;
 
-    /**
-     * 该通道的不安全实例
-     */
     private final Unsafe unsafe;
 
-    /**
-     * 用于当前通道的默认通道流水线
-     */
     private final DefaultChannelPipeline pipeline;
 
     private final VoidChannelPromise unsafeVoidPromise = new VoidChannelPromise(this, false);
 
-    /**
-     * 用于此通道的关闭未来
-     */
     private final CloseFuture closeFuture = new CloseFuture(this);
 
     private volatile SocketAddress localAddress;
     private volatile SocketAddress remoteAddress;
 
-    /**
-     * 用于当前通道的事件循环
-     */
     private volatile EventLoop eventLoop;
 
     private volatile boolean registered;
@@ -87,8 +67,6 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     /**
      * Creates a new instance.
-     *
-     * 创建一个新实例。
      *
      * @param parent
      *        the parent of this channel. {@code null} if there's no parent.
@@ -1125,8 +1103,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         @Override
         public final ChannelPromise voidPromise() {
+            // 断言
             assertEventLoop();
 
+            // 返回不安全void承诺
             return unsafeVoidPromise;
         }
 
@@ -1151,9 +1131,6 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         /**
          * Marks the specified {@code promise} as success.  If the {@code promise} is done already, log a message.
-         *
-         * 将指定的承诺标记为成功。
-         * 如果承诺已经完成，记录信息。
          */
         protected final void safeSetSuccess(ChannelPromise promise) {
             // 如果通道承诺不是Void通道承诺，并且通道承诺不是成功的，则记录日志

@@ -53,9 +53,6 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
     private static final int INDEX_INCREMENT = 4;
     private static final int INDEX_DECREMENT = 1;
 
-    /**
-     * 大小表
-     */
     private static final int[] SIZE_TABLE;
 
     static {
@@ -114,35 +111,16 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
         }
     }
 
-    /**
-     * 处理实现
-     */
     private final class HandleImpl extends MaxMessageHandle {
         private final int minIndex;
         private final int maxIndex;
 
-        /**
-         * 在大小表中的索引
-         */
         private int index;
 
-        /**
-         * 该处理器的下一个接收缓冲大小
-         */
         private int nextReceiveBufferSize;
 
-        /**
-         * 是否现在减少
-         */
         private boolean decreaseNow;
 
-        /**
-         * 处理器实现的构造方法
-         *
-         * @param minIndex 最小索引
-         * @param maxIndex 最大索引
-         * @param initial 初始值
-         */
         HandleImpl(int minIndex, int maxIndex, int initial) {
             // 设置最小索引和最大索引
             this.minIndex = minIndex;
@@ -160,9 +138,14 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
             // This helps adjust more quickly when large amounts of data is pending and can avoid going back to
             // the selector to check for more data. Going back to the selector can add significant latency for large
             // data transfers.
+
+            // 如果此次读取的字节数与分配器尝试读取的字节数相同
             if (bytes == attemptedBytesRead()) {
+                // 记录此次读取的字节数
                 record(bytes);
             }
+
+            // 调用父类的最后阅读字节数方法
             super.lastBytesRead(bytes);
         }
 
@@ -172,19 +155,12 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
             return nextReceiveBufferSize;
         }
 
-        /**
-         * 记录实际读取的字节数
-         *
-         * @param actualReadBytes 实际读取的字节数
-         */
         private void record(int actualReadBytes) {
             // 经过一些条件判断，做一些标记
             if (actualReadBytes <= SIZE_TABLE[max(0, index - INDEX_DECREMENT)]) {
-                // 如果现在减少
+                // 如果读取的字节数正在减少
                 if (decreaseNow) {
-                    /*
-                        以下不细究
-                     */
+                    // 重新设置索引、下一次接收字节缓冲大小、当前读取字节是否正在减少
                     index = max(index - INDEX_DECREMENT, minIndex);
                     nextReceiveBufferSize = SIZE_TABLE[index];
                     decreaseNow = false;

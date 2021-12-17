@@ -32,14 +32,9 @@ import static io.netty.channel.internal.ChannelUtils.WRITE_STATUS_SNDBUF_FULL;
 
 /**
  * {@link AbstractNioChannel} base class for {@link Channel}s that operate on bytes.
- *
- * 用于通道操作字节的基类。
  */
 public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
-    /**
-     * 该nio字节通道的通道元数据
-     */
     private static final ChannelMetadata METADATA = new ChannelMetadata(false, 16);
 
     private static final String EXPECTED_TYPES =
@@ -55,15 +50,10 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         }
     };
 
-    /**
-     * 是否输入关闭读取时看到了错误
-     */
     private boolean inputClosedSeenErrorOnRead;
 
     /**
      * Create a new instance
-     *
-     * 创建一个新实例
      *
      * @param parent            the parent {@link Channel} by which this instance was created. May be {@code null}
      * @param ch                the underlying {@link SelectableChannel} on which it operates
@@ -78,12 +68,8 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
      */
     protected abstract ChannelFuture shutdownInput();
 
-    /**
-     * 是否是输入关闭
-     *
-     * @return 是否是输入关闭
-     */
     protected boolean isInputShutdown0() {
+        // 固定为假
         return false;
     }
 
@@ -97,12 +83,6 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         return METADATA;
     }
 
-    /**
-     * 是否应该打断读就绪
-     *
-     * @param config 通道配置
-     * @return 是否应该打断读就绪
-     */
     final boolean shouldBreakReadReady(ChannelConfig config) {
         /*
             当同时满足以下条件时，应该打断读就绪
@@ -112,12 +92,6 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         return isInputShutdown0() && (inputClosedSeenErrorOnRead || !isAllowHalfClosure(config));
     }
 
-    /**
-     * 是否允许半关闭
-     *
-     * @param config 通道配置
-     * @return 是否允许半关闭
-     */
     private static boolean isAllowHalfClosure(ChannelConfig config) {
         // 如果配置实例是套接字通道配置实例，并且
         return config instanceof SocketChannelConfig &&
@@ -128,13 +102,20 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
         private void closeOnRead(ChannelPipeline pipeline) {
             if (!isInputShutdown0()) {
+                // 如果允许半关闭
                 if (isAllowHalfClosure(config())) {
+                    /*
+                        以下不细究
+                     */
                     shutdownInput();
                     pipeline.fireUserEventTriggered(ChannelInputShutdownEvent.INSTANCE);
                 } else {
                     close(voidPromise());
                 }
             } else {
+                /*
+                    以下不细究
+                 */
                 inputClosedSeenErrorOnRead = true;
                 pipeline.fireUserEventTriggered(ChannelInputShutdownReadComplete.INSTANCE);
             }
@@ -192,28 +173,44 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
                     byteBuf = allocHandle.allocate(allocator);
                     // 做读字节操作，并更新分配处理器的最后读取字节数
                     allocHandle.lastBytesRead(doReadBytes(byteBuf));
+
+                    // 如果分配处理器最后读取的字节数小于等于0
                     if (allocHandle.lastBytesRead() <= 0) {
                         // nothing was read. release the buffer.
+                        // 释放字节缓冲
                         byteBuf.release();
+                        // 字节缓冲引用置null
                         byteBuf = null;
+                        // 根据分配处理器上次读取的字节数，更新通道关闭标记
                         close = allocHandle.lastBytesRead() < 0;
                         if (close) {
                             // There is nothing left to read as we received an EOF.
+                            // 如果通道需要关闭，则将读待办标记置假
                             readPending = false;
                         }
                         break;
                     }
 
+                    // 分配处理器增加已读消息数
                     allocHandle.incMessagesRead(1);
+                    // 更新读待办标记为假
                     readPending = false;
+                    // 像通道流水线触发通道读方法
                     pipeline.fireChannelRead(byteBuf);
+                    // 清空字节缓冲
                     byteBuf = null;
+
+                    // 当分配处理器需要只需读时，则再次循环
                 } while (allocHandle.continueReading());
 
+                // 分配处理器完成读操作
                 allocHandle.readComplete();
+                // 向通道流水线触发通道读完成操作
                 pipeline.fireChannelReadComplete();
 
+                // 如果需要关闭当前通道
                 if (close) {
+                    // 关闭
                     closeOnRead(pipeline);
                 }
             } catch (Throwable t) {

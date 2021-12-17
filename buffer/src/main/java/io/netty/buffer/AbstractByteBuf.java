@@ -82,9 +82,6 @@ public abstract class AbstractByteBuf extends ByteBuf {
 
     int readerIndex;
 
-    /**
-     * 当前字节缓冲的写索引
-     */
     int writerIndex;
 
     private int markedReaderIndex;
@@ -1166,8 +1163,11 @@ public abstract class AbstractByteBuf extends ByteBuf {
         // 设置字节，获得写入的字节数
         int writtenBytes = setBytes(writerIndex, in, length);
         if (writtenBytes > 0) {
+            // 如果从输入流中读入了一些字节，则更新当前字节缓冲的写索引
             writerIndex += writtenBytes;
         }
+
+        // 返回写入到当前缓冲的字节数
         return writtenBytes;
     }
 

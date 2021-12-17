@@ -96,50 +96,23 @@ public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessa
 
     /**
      * Focuses on enforcing the maximum messages per read condition for {@link #continueReading()}.
-     *
-     * 专注于在每次用于持续读方法的读条件下，强制执行最大消息数。
      */
     public abstract class MaxMessageHandle implements ExtendedHandle {
 
-        /**
-         * 通道配置
-         */
         private ChannelConfig config;
 
-        /**
-         * 每次读的最大消息数
-         */
         private int maxMessagePerRead;
 
-        /**
-         * 读取的总消息数
-         */
         private int totalMessages;
 
-        /**
-         * 读取的总字节数
-         */
         private int totalBytesRead;
 
-        /**
-         * 尝试读取的字节数
-         */
         private int attemptedBytesRead;
 
-
-        /**
-         * 最近读取的字节数
-         */
         private int lastBytesRead;
 
-        /**
-         * 是否尊重可能更多的数据
-         */
         private final boolean respectMaybeMoreData = DefaultMaxMessagesRecvByteBufAllocator.this.respectMaybeMoreData;
 
-        /**
-         * 默认的可能更多的提供者
-         */
         private final UncheckedBooleanSupplier defaultMaybeMoreSupplier = new UncheckedBooleanSupplier() {
             @Override
             public boolean get() {
@@ -150,8 +123,6 @@ public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessa
 
         /**
          * Only {@link ChannelConfig#getMaxMessagesPerRead()} is used.
-         *
-         * 仅当通道配置的获取每次读的最大消息数被使用。
          */
         @Override
         public void reset(ChannelConfig config) {
@@ -159,6 +130,7 @@ public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessa
             this.config = config;
             // 获取并设置每次读的最大消息数
             maxMessagePerRead = maxMessagesPerRead();
+            // 将总消息数和总读取字节数重置为0
             totalMessages = totalBytesRead = 0;
         }
 
@@ -176,8 +148,10 @@ public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessa
 
         @Override
         public void lastBytesRead(int bytes) {
+            // 更新最后读取的字节数
             lastBytesRead = bytes;
             if (bytes > 0) {
+                // 如果读取的字节数大于0，则更新读取的总字节数
                 totalBytesRead += bytes;
             }
         }
@@ -189,6 +163,7 @@ public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessa
 
         @Override
         public boolean continueReading() {
+            // 是否需要继续读
             return continueReading(defaultMaybeMoreSupplier);
         }
 
@@ -213,6 +188,7 @@ public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessa
 
         @Override
         public int attemptedBytesRead() {
+            // 返回该最大消息接收字节缓冲分配器尝试读取的字节数
             return attemptedBytesRead;
         }
 
@@ -221,11 +197,6 @@ public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessa
             attemptedBytesRead = bytes;
         }
 
-        /**
-         * 总共读了多少个字节
-         *
-         * @return 总共读了多少个字节
-         */
         protected final int totalBytesRead() {
             // 如果读取的总字节数小于0，则返回整型的最大值，否则直接返回原值
             return totalBytesRead < 0 ? Integer.MAX_VALUE : totalBytesRead;

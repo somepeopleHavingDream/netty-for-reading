@@ -170,12 +170,14 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
         // 获得临时jdk底层的nio字节缓冲
         ByteBuffer tmpNioBuf = this.tmpNioBuf;
         if (tmpNioBuf == null) {
-            // 实例化内部nio字节缓冲
+            // 如果临时jdk底层的nio字节缓冲为null，则实例化内部nio字节缓冲
             this.tmpNioBuf = tmpNioBuf = newInternalNioBuffer(memory);
         } else {
-            // 以下不细究
+            // 否则，清除临时字节缓冲
             tmpNioBuf.clear();
         }
+
+        // 返回临时jdk底层nio字节缓冲
         return tmpNioBuf;
     }
 
@@ -198,29 +200,18 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
         recyclerHandle.recycle(this);
     }
 
-    /**
-     * 获取jdk底层字节缓冲的索引下标
-     *
-     * @param index 索引下标
-     * @return jdk底层字节缓冲的索引下标
-     */
     protected final int idx(int index) {
         return offset + index;
     }
 
-    /**
-     * 该池化字节缓冲的内部nio字节缓冲
-     *
-     * @param index 索引下标
-     * @param length 长度
-     * @param duplicate 是否复制一份字节缓冲
-     * @return jdk底层的字节缓冲
-     */
     final ByteBuffer _internalNioBuffer(int index, int length, boolean duplicate) {
         // 获取索引
         index = idx(index);
+        // 获得jdk底层字节缓冲
         ByteBuffer buffer = duplicate ? newInternalNioBuffer(memory) : internalNioBuffer();
+        // 设置jdk底层字节缓冲的各个属性
         buffer.limit(index + length).position(index);
+        // 返回jdk底层字节缓冲
         return buffer;
     }
 

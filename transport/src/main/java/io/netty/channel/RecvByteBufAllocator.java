@@ -53,8 +53,6 @@ public interface RecvByteBufAllocator {
         /**
          * Similar to {@link #allocate(ByteBufAllocator)} except that it does not allocate anything but just tells the
          * capacity.
-         *
-         * 与分配方法类似，除了不分配任何东西而只是告知容量。
          */
         int guess();
 
@@ -66,17 +64,12 @@ public interface RecvByteBufAllocator {
          * </p>
          * This is only ever a hint and may be ignored by the implementation.
          *
-         * 重置任何已经积累的计数器，并且推荐用于下一次读循环的需要读多少的消息和字节。
-         * 这可能被持续读方法使用，以决定读操作是否应该完成。
-         *
          * @param config The channel configuration which may impact this object's behavior.
          */
         void reset(ChannelConfig config);
 
         /**
          * Increment the number of messages that have been read for the current read loop.
-         *
-         * 增加当前读循环已经读取的消息数。
          *
          * @param numMessages The amount to increment by.
          */
@@ -101,16 +94,12 @@ public interface RecvByteBufAllocator {
         /**
          * Set how many bytes the read operation will (or did) attempt to read.
          *
-         * 设置读操作将尝试读取多少个字节。
-         *
          * @param bytes How many bytes the read operation will (or did) attempt to read.
          */
         void attemptedBytesRead(int bytes);
 
         /**
          * Get how many bytes the read operation will (or did) attempt to read.
-         *
-         * 获取读取操作将尝试读取多少个字节。
          *
          * @return How many bytes the read operation will (or did) attempt to read.
          */
@@ -119,16 +108,12 @@ public interface RecvByteBufAllocator {
         /**
          * Determine if the current read loop should continue.
          *
-         * 决定是否当前读循环应该继续。
-         *
          * @return {@code true} if the read loop should continue reading. {@code false} if the read loop is complete.
          */
         boolean continueReading();
 
         /**
          * The read has completed.
-         *
-         * 读已经完成。
          */
         void readComplete();
     }
