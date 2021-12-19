@@ -64,35 +64,45 @@ public abstract class Recycler<T> {
         // In the future, we might have different maxCapacity for different object types.
         // e.g. io.netty.recycler.maxCapacity.writeTask
         //      io.netty.recycler.maxCapacity.outboundBuffer
+        // 获得并设置每个线程的最大容量
         int maxCapacityPerThread = SystemPropertyUtil.getInt("io.netty.recycler.maxCapacityPerThread",
                 SystemPropertyUtil.getInt("io.netty.recycler.maxCapacity", DEFAULT_INITIAL_MAX_CAPACITY_PER_THREAD));
         if (maxCapacityPerThread < 0) {
             maxCapacityPerThread = DEFAULT_INITIAL_MAX_CAPACITY_PER_THREAD;
         }
-
         DEFAULT_MAX_CAPACITY_PER_THREAD = maxCapacityPerThread;
 
+        // 设置最大共享容量因子
         MAX_SHARED_CAPACITY_FACTOR = max(2,
                 SystemPropertyUtil.getInt("io.netty.recycler.maxSharedCapacityFactor",
                         2));
 
+        // 设置每个线程的最大时延队列
         MAX_DELAYED_QUEUES_PER_THREAD = max(0,
                 SystemPropertyUtil.getInt("io.netty.recycler.maxDelayedQueuesPerThread",
                         // We use the same value as default EventLoop number
                         NettyRuntime.availableProcessors() * 2));
 
+        // 设置链接容量
         LINK_CAPACITY = safeFindNextPositivePowerOfTwo(
                 max(SystemPropertyUtil.getInt("io.netty.recycler.linkCapacity", 16), 16));
 
         // By default we allow one push to a Recycler for each 8th try on handles that were never recycled before.
         // This should help to slowly increase the capacity of the recycler while not be too sensitive to allocation
         // bursts.
+        // 设置当前回收器比率
         RATIO = max(0, SystemPropertyUtil.getInt("io.netty.recycler.ratio", 8));
+        // 设置时延队列比率
         DELAYED_QUEUE_RATIO = max(0, SystemPropertyUtil.getInt("io.netty.recycler.delayedQueue.ratio", RATIO));
 
+        // 设置当前回收器的初始容量
         INITIAL_CAPACITY = min(DEFAULT_MAX_CAPACITY_PER_THREAD, 256);
 
+        // 打印日志
         if (logger.isDebugEnabled()) {
+            /*
+                以下不细究
+             */
             if (DEFAULT_MAX_CAPACITY_PER_THREAD == 0) {
                 logger.debug("-Dio.netty.recycler.maxCapacityPerThread: disabled");
                 logger.debug("-Dio.netty.recycler.maxSharedCapacityFactor: disabled");
@@ -118,6 +128,7 @@ public abstract class Recycler<T> {
     private final FastThreadLocal<Stack<T>> threadLocal = new FastThreadLocal<Stack<T>>() {
         @Override
         protected Stack<T> initialValue() {
+            // 实例化，并返回回收器内部的栈结构
             return new Stack<T>(Recycler.this, Thread.currentThread(), maxCapacityPerThread, maxSharedCapacityFactor,
                     interval, maxDelayedQueuesPerThread, delayedQueueInterval);
         }
@@ -134,27 +145,34 @@ public abstract class Recycler<T> {
     };
 
     protected Recycler() {
+        // 以每个线程的默认容量构造回收器
         this(DEFAULT_MAX_CAPACITY_PER_THREAD);
     }
 
     protected Recycler(int maxCapacityPerThread) {
+        // 传入单线程最大容量和最大共享容量因子，构造回收器
         this(maxCapacityPerThread, MAX_SHARED_CAPACITY_FACTOR);
     }
 
     protected Recycler(int maxCapacityPerThread, int maxSharedCapacityFactor) {
+        // 入参为：单线程最大容量、最大共享容量因子、比率、单线程最大延迟队列数
         this(maxCapacityPerThread, maxSharedCapacityFactor, RATIO, MAX_DELAYED_QUEUES_PER_THREAD);
     }
 
     protected Recycler(int maxCapacityPerThread, int maxSharedCapacityFactor,
                        int ratio, int maxDelayedQueuesPerThread) {
+        // 入参为：单线程最大容量、最大共享容量因子、比率、单线程最大延迟队列数、时延队列比率
         this(maxCapacityPerThread, maxSharedCapacityFactor, ratio, maxDelayedQueuesPerThread,
                 DELAYED_QUEUE_RATIO);
     }
 
     protected Recycler(int maxCapacityPerThread, int maxSharedCapacityFactor,
                        int ratio, int maxDelayedQueuesPerThread, int delayedQueueRatio) {
+        // 设置间隔
         interval = max(0, ratio);
+        // 设置时延队列间隔
         delayedQueueInterval = max(0, delayedQueueRatio);
+        // 设置单线程最大容量、最大共享容量因子、单线程最大时延队列
         if (maxCapacityPerThread <= 0) {
             this.maxCapacityPerThread = 0;
             this.maxSharedCapacityFactor = 1;
@@ -168,15 +186,25 @@ public abstract class Recycler<T> {
 
     @SuppressWarnings("unchecked")
     public final T get() {
+        // 如果单线程的最大容量为0
         if (maxCapacityPerThread == 0) {
+            // 不细究
             return newObject((Handle<T>) NOOP_HANDLE);
         }
+
+        // 从线程本地变量中获得栈实例
         Stack<T> stack = threadLocal.get();
+        // 从栈中取出默认处理器
         DefaultHandle<T> handle = stack.pop();
+        // 如果处理器为null
         if (handle == null) {
+            // 实例化一个处理器
             handle = stack.newHandle();
+            // 实例化对象并未处理器的值赋值
             handle.value = newObject(handle);
         }
+
+        // 返回处理器的值
         return (T) handle.value;
     }
 
@@ -228,20 +256,27 @@ public abstract class Recycler<T> {
         Object value;
 
         DefaultHandle(Stack<?> stack) {
+            // 赋值当前默认处理器的栈成员变量
             this.stack = stack;
         }
 
         @Override
         public void recycle(Object object) {
+            // 如果需要回收的对象不是当前处理器的对象，则抛出违规参数异常
             if (object != value) {
+                // 不细究
                 throw new IllegalArgumentException("object does not belong to handle");
             }
 
+            // 获得当前默认处理器的栈
             Stack<?> stack = this.stack;
+            // 如果最后的回收Id不同于回收Id，或者栈为null，则抛出违规状态异常
             if (lastRecycledId != recycleId || stack == null) {
+                // 不细究
                 throw new IllegalStateException("recycled already");
             }
 
+            // 将当前处理器推送至栈
             stack.push(this);
         }
 
@@ -531,6 +566,7 @@ public abstract class Recycler<T> {
 
         Stack(Recycler<T> parent, Thread thread, int maxCapacity, int maxSharedCapacityFactor,
               int interval, int maxDelayedQueues, int delayedQueueInterval) {
+            // 设置一系列参数
             this.parent = parent;
             threadRef = new WeakReference<Thread>(thread);
             this.maxCapacity = maxCapacity;
@@ -565,28 +601,44 @@ public abstract class Recycler<T> {
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
         DefaultHandle<T> pop() {
+            // 获得当前回收器的栈元素个数
             int size = this.size;
+            // 如果当前栈内没有元素
             if (size == 0) {
+                // 如果没能清除一些元素
                 if (!scavenge()) {
+                    // 返回null
                     return null;
                 }
+                /*
+                    以下不细究
+                 */
                 size = this.size;
                 if (size <= 0) {
                     // double check, avoid races
                     return null;
                 }
             }
+
+            // 栈元素个数减1
             size --;
+            // 取出栈尾元素，将栈尾元素引用至null
             DefaultHandle ret = elements[size];
             elements[size] = null;
+
             // As we already set the element[size] to null we also need to store the updated size before we do
             // any validation. Otherwise we may see a null value when later try to pop again without a new element
             // added before.
+            // 重新设置当前栈元素个数
             this.size = size;
 
+            // 如果默认处理器的最后回收Id不等于当前回收Id，则抛出违规状态异常
             if (ret.lastRecycledId != ret.recycleId) {
+                // 不细究
                 throw new IllegalStateException("recycled multiple times");
             }
+
+            // 重置回收Id和最后一次回收Id，并返回栈尾的默认处理器
             ret.recycleId = 0;
             ret.lastRecycledId = 0;
             return ret;
@@ -594,29 +646,42 @@ public abstract class Recycler<T> {
 
         private boolean scavenge() {
             // continue an existing scavenge, if any
+            // 如果可以清除一些
             if (scavengeSome()) {
+                // 不细究
                 return true;
             }
 
             // reset our scavenge cursor
+            // 重置当前栈的当前游标和上一个位置的游标
             prev = null;
             cursor = head;
+
+            // 返回假
             return false;
         }
 
         private boolean scavengeSome() {
             WeakOrderQueue prev;
             WeakOrderQueue cursor = this.cursor;
+
+            // 如果当前游标为null
             if (cursor == null) {
+                // 设置当前游标和上一个游标的引用
                 prev = null;
                 cursor = head;
                 if (cursor == null) {
+                    // 说明当前栈没有任何元素，因此也就不能清空任何元素，故返回假
                     return false;
                 }
             } else {
+                // 不细究
                 prev = this.prev;
             }
 
+            /*
+                以下不细究
+             */
             boolean success = false;
             do {
                 if (cursor.transfer(this)) {
@@ -657,11 +722,17 @@ public abstract class Recycler<T> {
         }
 
         void push(DefaultHandle<?> item) {
+            // 获得当前线程
             Thread currentThread = Thread.currentThread();
+            // 如果当前线程和当前回收器实例的线程引用相同
             if (threadRef.get() == currentThread) {
                 // The current Thread is the thread that belongs to the Stack, we can try to push the object now.
+                // 推送入参默认处理器至栈中
                 pushNow(item);
             } else {
+                /*
+                    以下不细究
+                 */
                 // The current Thread is not the one that belongs to the Stack
                 // (or the Thread that belonged to the Stack was collected already), we need to signal that the push
                 // happens later.
@@ -670,21 +741,33 @@ public abstract class Recycler<T> {
         }
 
         private void pushNow(DefaultHandle<?> item) {
+            // 如果入参默认处理器的回收Id不为0，或者设置入参默认处理器的最后回收Id失败，则抛出违规参数异常
             if (item.recycleId != 0 || !item.compareAndSetLastRecycledId(0, OWN_THREAD_ID)) {
+                // 不细究
                 throw new IllegalStateException("recycled already");
             }
+            // 设置入参默认处理器的回收Id
             item.recycleId = OWN_THREAD_ID;
 
+            // 获得当前栈元素个数
             int size = this.size;
+            // 如果当前栈元素个数超过最大容量，或者丢弃入参默认处理器成功，则直接返回
             if (size >= maxCapacity || dropHandle(item)) {
+                /*
+                    以下不细究
+                 */
                 // Hit the maximum capacity or should drop - drop the possibly youngest object.
                 return;
             }
+            // 如果当前栈容量已满
             if (size == elements.length) {
+                // 不细究
                 elements = Arrays.copyOf(elements, min(size << 1, maxCapacity));
             }
 
+            // 将入参默认处理器放置于当前栈的末尾
             elements[size] = item;
+            // 更新当前栈容量，当前栈容量加1
             this.size = size + 1;
         }
 
@@ -727,19 +810,30 @@ public abstract class Recycler<T> {
         }
 
         boolean dropHandle(DefaultHandle<?> handle) {
+            // 如果入参处理器没有被回收
             if (!handle.hasBeenRecycled) {
+                // 如果当前栈的处理器回收次数小于间隔数
                 if (handleRecycleCount < interval) {
+                    /*
+                        以下不细究
+                     */
                     handleRecycleCount++;
                     // Drop the object.
                     return true;
                 }
+
+                // 设置当前栈的处理器回收次数为0
                 handleRecycleCount = 0;
+                // 将入参处理器标记为已回收
                 handle.hasBeenRecycled = true;
             }
+
+            // 返回假
             return false;
         }
 
         DefaultHandle<T> newHandle() {
+            // 实例化一个默认处理器
             return new DefaultHandle<T>(this);
         }
     }

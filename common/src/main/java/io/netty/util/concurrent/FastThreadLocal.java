@@ -43,9 +43,6 @@ import java.util.Set;
  */
 public class FastThreadLocal<V> {
 
-    /**
-     * 将被移除的变量的变量表索引
-     */
     private static final int variablesToRemoveIndex = InternalThreadLocalMap.nextVariableIndex();
 
     /**
@@ -99,16 +96,16 @@ public class FastThreadLocal<V> {
 
     @SuppressWarnings("unchecked")
     private static void addToVariablesToRemove(InternalThreadLocalMap threadLocalMap, FastThreadLocal<?> variable) {
-        // 获得当前线程本地将要移除位置的索引变量
+        // 获得线程本地映射将要移除位置的索引变量
         Object v = threadLocalMap.indexedVariable(variablesToRemoveIndex);
 
         // 将被移除的快速线程本地集合
         Set<FastThreadLocal<?>> variablesToRemove;
-        // 如果该值为初始对象或者为null
+        // 如果该值为未初始对象或者为null
         if (v == InternalThreadLocalMap.UNSET || v == null) {
             // 实例化一个将被移除的变量集合
             variablesToRemove = Collections.newSetFromMap(new IdentityHashMap<FastThreadLocal<?>, Boolean>());
-            // 设置索引变量
+            // 设置将被移除的变量集合在索引变量表中的值
             threadLocalMap.setIndexedVariable(variablesToRemoveIndex, variablesToRemove);
         } else {
             // 强转为快速线程本地集合，并赋值为将被移除的快速线程本地集合
@@ -133,9 +130,6 @@ public class FastThreadLocal<V> {
         variablesToRemove.remove(variable);
     }
 
-    /**
-     * 此快速线程本地在内部线程本地映射的索引表中的下标（该下标值绝对在索引表的范围内）
-     */
     private final int index;
 
     public FastThreadLocal() {
@@ -145,8 +139,6 @@ public class FastThreadLocal<V> {
 
     /**
      * Returns the current value for the current thread
-     *
-     * 返回当前线程的当前值
      */
     @SuppressWarnings("unchecked")
     public final V get() {
@@ -155,8 +147,9 @@ public class FastThreadLocal<V> {
 
         // 从内部线程本地映射的索引表中，获得对应值
         Object v = threadLocalMap.indexedVariable(index);
-        // 如果该值已经被设置，则直接返回
+        // 如果该值存在
         if (v != InternalThreadLocalMap.UNSET) {
+            // 直接返回
             return (V) v;
         }
 
@@ -214,8 +207,6 @@ public class FastThreadLocal<V> {
 
     /**
      * Set the value for the current thread.
-     *
-     * 为当前线程设置值。
      */
     public final void set(V value) {
         // 如果入参值是有效的
@@ -302,11 +293,9 @@ public class FastThreadLocal<V> {
 
     /**
      * Returns the initial value for this thread-local variable.
-     *
-     * 返回此线程本地变量的初始值。
      */
     protected V initialValue() throws Exception {
-        // 初始值为null
+        // 默认实现，初始值为null，一般由子类覆写
         return null;
     }
 
