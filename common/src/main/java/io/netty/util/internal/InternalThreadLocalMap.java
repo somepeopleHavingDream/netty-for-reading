@@ -36,50 +36,28 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(InternalThreadLocalMap.class);
 
-    /**
-     * 慢线程本地映射（用了jdk的线程本地实现，该线程本地存储内部线程本地映射）
-     */
     private static final ThreadLocal<InternalThreadLocalMap> slowThreadLocalMap =
             new ThreadLocal<InternalThreadLocalMap>();
 
-    /**
-     * 下一个索引值
-     */
     private static final AtomicInteger nextIndex = new AtomicInteger();
 
     private static final int DEFAULT_ARRAY_LIST_INITIAL_CAPACITY = 8;
     private static final int STRING_BUILDER_INITIAL_SIZE;
     private static final int STRING_BUILDER_MAX_SIZE;
 
-    /**
-     * 共享处理者缓存的初始容量
-     */
     private static final int HANDLER_SHARABLE_CACHE_INITIAL_CAPACITY = 4;
 
-    /**
-     * 索引变量表初始大小
-     */
     private static final int INDEXED_VARIABLE_TABLE_INITIAL_SIZE = 32;
 
-    /**
-     * 该对象用于初始化
-     */
     public static final Object UNSET = new Object();
 
     /**
      * Used by {@link FastThreadLocal}
-     *
-     * 由快速线程本地使用
-     * 索引变量表
      */
     private Object[] indexedVariables;
 
     // Core thread-locals
-    // 核心线程本地
 
-    /**
-     * 未来监听者栈深度
-     */
     private int futureListenerStackDepth;
 
     private int localChannelReaderStackDepth;
@@ -119,17 +97,15 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         return slowThreadLocalMap.get();
     }
 
-    /**
-     * 获得内部线程本地映射
-     *
-     * @return 内部线程本地映射
-     */
     public static InternalThreadLocalMap get() {
         // 获得当前线程
         Thread thread = Thread.currentThread();
 
         // 根据线程的类型，采用不同的获取内部线程本地映射的方式
         if (thread instanceof FastThreadLocalThread) {
+            /*
+                以下不细究
+             */
             // 快速获取
             return fastGet((FastThreadLocalThread) thread);
         } else {
@@ -138,12 +114,6 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         }
     }
 
-    /**
-     * 快速获取内部线程本地映射
-     *
-     * @param thread 快速线程本地线程
-     * @return 内部线程本地映射
-     */
     private static InternalThreadLocalMap fastGet(FastThreadLocalThread thread) {
         // 获得内部线程本地映射
         InternalThreadLocalMap threadLocalMap = thread.threadLocalMap();
@@ -154,18 +124,13 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         return threadLocalMap;
     }
 
-    /**
-     * 慢获取内部线程本地映射（此过程涉及到jdk底层的线程本地变量）
-     *
-     * @return 内部线程本地映射
-     */
     private static InternalThreadLocalMap slowGet() {
         // 获得内部线程本地映射
         InternalThreadLocalMap ret = slowThreadLocalMap.get();
 
-        // 如果获得的内部线程本地映射为null，则实例化内部线程本地映射，并往慢线程本地映射中设置内部线程本地映射
+        // 如果获得的内部线程本地映射为null
         if (ret == null) {
-            // 实例化并赋值内部线程本地映射，并将该内部线程本地映射赋值给慢线程本地映射
+            // 实例化内部线程本地映射，并往慢线程本地映射中设置内部线程本地映射
             ret = new InternalThreadLocalMap();
             slowThreadLocalMap.set(ret);
         }
@@ -187,12 +152,8 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         slowThreadLocalMap.remove();
     }
 
-    /**
-     * 返回下一个变量索引
-     *
-     * @return 下一个变量索引
-     */
     public static int nextVariableIndex() {
+        // 获得下一个索引值
         int index = nextIndex.getAndIncrement();
         if (index < 0) {
             /*
@@ -201,6 +162,8 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
             nextIndex.decrementAndGet();
             throw new IllegalStateException("too many thread-local indexed variables");
         }
+
+        // 返回索引
         return index;
     }
 
@@ -208,21 +171,17 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         return nextIndex.get() - 1;
     }
 
-    /**
-     * 内部线程本地映射的空构造方法
-     */
     private InternalThreadLocalMap() {
         // 实例化并且设置索引变量表
         indexedVariables = newIndexedVariableTable();
     }
 
     /**
-     * 实例化索引变量表
+     * 实例化一个索引变量表
      *
      * @return 索引变量表
      */
     private static Object[] newIndexedVariableTable() {
-        // 实例化Object对象数组，将该数组全部填充为未设置对象
         Object[] array = new Object[INDEXED_VARIABLE_TABLE_INITIAL_SIZE];
         Arrays.fill(array, UNSET);
         return array;
@@ -394,22 +353,15 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         this.localChannelReaderStackDepth = localChannelReaderStackDepth;
     }
 
-    /**
-     * 该索引对应的索引变量
-     *
-     * @param index 索引
-     * @return 该索引对应的索引变量
-     */
     public Object indexedVariable(int index) {
-        // 若没找到，则返回未设置值
+        // 获得索引变量表
         Object[] lookup = indexedVariables;
+        // 从索引变量表中取得元素，如果该索引下标不存在，则返回未设置元素
         return index < lookup.length? lookup[index] : UNSET;
     }
 
     /**
      * @return {@code true} if and only if a new thread-local variable has been created
-     *
-     * 当且仅当已创建新的线程本地变量时返回真
      */
     public boolean setIndexedVariable(int index, Object value) {
         // 获得当前内部线程本地映射的索引变量表
