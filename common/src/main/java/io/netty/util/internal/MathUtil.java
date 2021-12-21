@@ -25,13 +25,8 @@ public final class MathUtil {
     /**
      * Fast method of finding the next power of 2 greater than or equal to the supplied value.
      *
-     * 找到大于或等于给定值的下一个2的幂的快速方法。
-     *
      * <p>If the value is {@code <= 0} then 1 will be returned.
      * This method is not suitable for {@link Integer#MIN_VALUE} or numbers greater than 2^30.
-     *
-     * 如果值小于等于0，将返回1。
-     * 此方法不适用于整型的最小值或者大于2的30次方的数。
      *
      * @param value from which to search for next power of 2
      * @return The next power of 2 or the value itself if it is a power of 2
@@ -45,9 +40,6 @@ public final class MathUtil {
      * Fast method of finding the next power of 2 greater than or equal to the supplied value.
      * <p>This method will do runtime bounds checking and call {@link #findNextPositivePowerOfTwo(int)} if within a
      * valid range.
-     *
-     * 找到大于或等于给定值的下一个2的幂的快速方法。
-     * 此方法将做运行时边界检查，并且调用找到下一个正的二的幂，如果在有效范围内的话。
      *
      * @param value from which to search for next power of 2
      * @return The next power of 2 or the value itself if it is a power of 2.
@@ -63,8 +55,6 @@ public final class MathUtil {
 
     /**
      * Determine if the requested {@code index} and {@code length} will fit within {@code capacity}.
-     *
-     * 决定请求的索引和长度是否符合容量。
      *
      * @param index The starting index.
      * @param length The length which will be utilized (starting from {@code index}).

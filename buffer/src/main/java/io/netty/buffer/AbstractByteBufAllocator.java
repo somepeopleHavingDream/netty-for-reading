@@ -133,9 +133,13 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
 
     @Override
     public ByteBuf buffer(int initialCapacity, int maxCapacity) {
+        // 如果默认使用直接内存
         if (directByDefault) {
+            // 返回直接缓冲
             return directBuffer(initialCapacity, maxCapacity);
         }
+
+        // 不细究
         return heapBuffer(initialCapacity, maxCapacity);
     }
 

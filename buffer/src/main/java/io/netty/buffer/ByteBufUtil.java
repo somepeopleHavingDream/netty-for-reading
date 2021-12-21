@@ -57,14 +57,8 @@ public final class ByteBufUtil {
 
     private static final byte WRITE_UTF_UNKNOWN = (byte) '?';
 
-    /**
-     * 用于该字节缓冲工具类的最大字符缓冲大小（16384）
-     */
     private static final int MAX_CHAR_BUFFER_SIZE;
 
-    /**
-     * 用于该字节缓冲工具类的线程本地缓冲大小（0）
-     */
     private static final int THREAD_LOCAL_BUFFER_SIZE;
 
     private static final int MAX_BYTES_PER_CHAR_UTF8 =
@@ -72,9 +66,6 @@ public final class ByteBufUtil {
 
     static final int WRITE_CHUNK_SIZE = 8192;
 
-    /**
-     * 用于该字节缓冲工具类的默认字节缓冲分配器
-     */
     static final ByteBufAllocator DEFAULT_ALLOCATOR;
 
     static {

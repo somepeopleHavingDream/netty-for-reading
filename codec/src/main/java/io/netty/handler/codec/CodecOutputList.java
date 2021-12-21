@@ -30,9 +30,6 @@ import static io.netty.util.internal.ObjectUtil.checkNotNull;
  */
 final class CodecOutputList extends AbstractList<Object> implements RandomAccess {
 
-    /**
-     * 用于此编解码器输出列表的NOOP回收器
-     */
     private static final CodecOutputListRecycler NOOP_RECYCLER = new CodecOutputListRecycler() {
 
         @Override
@@ -42,9 +39,6 @@ final class CodecOutputList extends AbstractList<Object> implements RandomAccess
         }
     };
 
-    /**
-     * 用于此编解码输出列表的编解码输出列表池（属于快速线程本地实例）
-     */
     private static final FastThreadLocal<CodecOutputLists> CODEC_OUTPUT_LISTS_POOL =
             new FastThreadLocal<CodecOutputLists>() {
                 @Override
@@ -55,49 +49,21 @@ final class CodecOutputList extends AbstractList<Object> implements RandomAccess
                 }
             };
 
-    /**
-     * 编解码输出列表回收器
-     */
     private interface CodecOutputListRecycler {
 
-        /**
-         * 回收编解码器输出列表做
-         *
-         * @param codecOutputList 编解码输出列表
-         */
         void recycle(CodecOutputList codecOutputList);
     }
 
-    /**
-     * 用于此编解码输出列表的编解码输出列表的工具类
-     */
     private static final class CodecOutputLists implements CodecOutputListRecycler {
 
-        /**
-         * 编解码输出列表数组
-         */
         private final CodecOutputList[] elements;
 
-        /**
-         * 用于当前编解码器输出列表集合的掩码
-         */
         private final int mask;
 
-        /**
-         * 用于当前编解码输出列表集合的当前索引
-         */
         private int currentIdx;
 
-        /**
-         * 用于当前编解码输出列表集合的数量
-         */
         private int count;
 
-        /**
-         * 编解码输出列表工具类的构造方法
-         *
-         * @param numElements 元素个数
-         */
         CodecOutputLists(int numElements) {
             // 实例化并赋值编解码输出列表数组
             elements = new CodecOutputList[MathUtil.safeFindNextPositivePowerOfTwo(numElements)];
@@ -113,11 +79,6 @@ final class CodecOutputList extends AbstractList<Object> implements RandomAccess
             mask = elements.length - 1;
         }
 
-        /**
-         * 从编解码器输出列表集合中获得或者创建一个编解码器输出列表
-         *
-         * @return 编解码器输出列表
-         */
         public CodecOutputList getOrCreate() {
             // 如果编解码器输出列表的数量为0
             if (count == 0) {
@@ -153,31 +114,18 @@ final class CodecOutputList extends AbstractList<Object> implements RandomAccess
         }
     }
 
-    /**
-     * 新建一个编解码器输出列表实例
-     *
-     * @return 编解码输出列表实例
-     */
     static CodecOutputList newInstance() {
+        // 从编解码输出列表池中获得编解码输出列表
         return CODEC_OUTPUT_LISTS_POOL.get().getOrCreate();
     }
 
     private final CodecOutputListRecycler recycler;
     private int size;
 
-    /**
-     * 用于此编解码器输出列表的数组
-     */
     private Object[] array;
 
     private boolean insertSinceRecycled;
 
-    /**
-     * 编解码器输出列表的构造方法
-     *
-     * @param recycler 编解码器输出列表回收器
-     * @param size 大小
-     */
     private CodecOutputList(CodecOutputListRecycler recycler, int size) {
         // 设置编解码器输出列表回收器
         this.recycler = recycler;

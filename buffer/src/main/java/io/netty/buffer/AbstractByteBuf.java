@@ -169,6 +169,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
 
     @Override
     public boolean isReadable() {
+        // 如果写下标大于读下标，则该字节缓冲是可读的
         return writerIndex > readerIndex;
     }
 
@@ -366,9 +367,15 @@ public abstract class AbstractByteBuf extends ByteBuf {
 
     @Override
     public ByteBuf order(ByteOrder endianness) {
+        // 如果入参字节序与当前字节缓冲的字节序相同
         if (endianness == order()) {
+            // 返回当前字节缓冲
             return this;
         }
+
+        /*
+            以下不细究
+         */
         ObjectUtil.checkNotNull(endianness, "endianness");
         return newSwappedByteBuf();
     }

@@ -71,14 +71,8 @@ public final class PlatformDependent {
 
     private static final Throwable UNSAFE_UNAVAILABILITY_CAUSE = unsafeUnavailabilityCause0();
 
-    /**
-     * 是否首选直接缓冲
-     */
     private static final boolean DIRECT_BUFFER_PREFERRED;
 
-    /**
-     * 最大直接内存
-     */
     private static final long MAX_DIRECT_MEMORY = maxDirectMemory0();
 
     private static final int MPSC_CHUNK_SIZE =  1024;
@@ -92,27 +86,13 @@ public final class PlatformDependent {
     private static final int BIT_MODE = bitMode0();
     private static final String NORMALIZED_ARCH = normalizeArch(SystemPropertyUtil.get("os.arch", ""));
 
-    /**
-     * 标准化操作系统
-     */
     private static final String NORMALIZED_OS = normalizeOs(SystemPropertyUtil.get("os.name", ""));
 
     // keep in sync with maven's pom.xml via os.detection.classifierWithLikes!
-    /**
-     * 通过操作os.detection.classifierWithLikes参数与专家的项目对象模型保持同步！
-     *
-     * 允许的Linux操作系统的分类器
-     */
     private static final String[] ALLOWED_LINUX_OS_CLASSIFIERS = {"fedora", "suse", "arch"};
 
-    /**
-     * Linux操作系统分类器
-     */
     private static final Set<String> LINUX_OS_CLASSIFIERS;
 
-    /**
-     * 是否是窗口系统
-     */
     private static final boolean IS_WINDOWS = isWindows0();
 
     private static final boolean IS_OSX = isOsx0();
@@ -121,50 +101,26 @@ public final class PlatformDependent {
 
     private static final int ADDRESS_SIZE = addressSize0();
 
-    /**
-     * 是否使用直接缓冲无清理者
-     */
     private static final boolean USE_DIRECT_BUFFER_NO_CLEANER;
 
-    /**
-     * 直接内存计数器
-     */
     private static final AtomicLong DIRECT_MEMORY_COUNTER;
 
-    /**
-     * 直接内存限制
-     */
     private static final long DIRECT_MEMORY_LIMIT;
 
-    /**
-     * 线程本地随机提供者
-     */
     private static final ThreadLocalRandomProvider RANDOM_PROVIDER;
 
     private static final Cleaner CLEANER;
     private static final int UNINITIALIZED_ARRAY_ALLOCATION_THRESHOLD;
 
     // For specifications, see https://www.freedesktop.org/software/systemd/man/os-release.html
-    /**
-     * 有关规范，请查阅https://www.freedesktop.org/software/systemd/man/os-release.html
-     */
     private static final String[] OS_RELEASE_FILES = {"/etc/os-release", "/usr/lib/os-release"};
 
-    /**
-     * Linux Id 前缀
-     */
     private static final String LINUX_ID_PREFIX = "ID=";
 
-    /**
-     * Linux Id Like 前缀
-     */
     private static final String LINUX_ID_LIKE_PREFIX = "ID_LIKE=";
 
     public static final boolean BIG_ENDIAN_NATIVE_ORDER = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
 
-    /**
-     * 什么都不做的清理器
-     */
     private static final Cleaner NOOP = new Cleaner() {
 
         @Override
@@ -174,7 +130,6 @@ public final class PlatformDependent {
     };
 
     static {
-
         // 获得并设置随机提供者
         if (javaVersion() >= 7) {
             RANDOM_PROVIDER = new ThreadLocalRandomProvider() {
@@ -384,6 +339,7 @@ public final class PlatformDependent {
     }
 
     public static boolean hasDirectBufferNoCleanerConstructor() {
+        // 返回是否有直接缓冲无清理器构造器
         return PlatformDependent0.hasDirectBufferNoCleanerConstructor();
     }
 
@@ -394,8 +350,6 @@ public final class PlatformDependent {
 
     /**
      * Returns {@code true} if and only if the current platform is Android
-     *
-     * 当且仅当当前平台为安卓时返回真
      */
     public static boolean isAndroid() {
         return PlatformDependent0.isAndroid();
@@ -427,8 +381,6 @@ public final class PlatformDependent {
 
     /**
      * Return the version of Java under which this library is used.
-     *
-     * 返回此库使用的java版本。
      */
     public static int javaVersion() {
         return PlatformDependent0.javaVersion();
@@ -436,8 +388,6 @@ public final class PlatformDependent {
 
     /**
      * Returns {@code true} if and only if it is fine to enable TCP_NODELAY socket option by default.
-     *
-     * 当且仅当能默认打开tcp_nodelay选项的时候，返回真。
      */
     public static boolean canEnableTcpNoDelayByDefault() {
         return CAN_ENABLE_TCP_NODELAY_BY_DEFAULT;
@@ -446,10 +396,9 @@ public final class PlatformDependent {
     /**
      * Return {@code true} if {@code sun.misc.Unsafe} was found on the classpath and can be used for accelerated
      * direct memory access.
-     *
-     * 如果不安全实例在类路径上被找到，并且能被用于加速直接内存访问，则返回真。
      */
     public static boolean hasUnsafe() {
+        // 如果平台依赖的不安全实例不可使用的原因不存在，则说明存在不安全实例
         return UNSAFE_UNAVAILABILITY_CAUSE == null;
     }
 
@@ -472,8 +421,6 @@ public final class PlatformDependent {
     /**
      * Returns {@code true} if the platform has reliable low-level direct buffer access API and a user has not specified
      * {@code -Dio.netty.noPreferDirect} option.
-     *
-     * 如果平台有可用的低层直接缓冲访问应用编程接口，并且用户没有指定的-Dio.netty.noPreferDirect选项，则返回真。
      */
     public static boolean directBufferPreferred() {
         return DIRECT_BUFFER_PREFERRED;
@@ -933,6 +880,7 @@ public final class PlatformDependent {
     }
 
     public static boolean useDirectBufferNoCleaner() {
+        // 返回是否使用直接缓冲无清理器
         return USE_DIRECT_BUFFER_NO_CLEANER;
     }
 
@@ -1233,11 +1181,6 @@ public final class PlatformDependent {
         return "root".equals(username) || "toor".equals(username);
     }
 
-    /**
-     * 获得不安全实例不可用的原因
-     *
-     * @return 可抛出实例
-     */
     private static Throwable unsafeUnavailabilityCause0() {
         // 如果是安卓平台
         if (isAndroid()) {

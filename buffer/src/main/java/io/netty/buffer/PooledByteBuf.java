@@ -142,6 +142,7 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
 
     @Override
     public final ByteOrder order() {
+        // 池化字节缓冲的字节序是大端字节序
         return ByteOrder.BIG_ENDIAN;
     }
 
@@ -245,6 +246,7 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
 
     @Override
     public final boolean isContiguous() {
+        // 返回真
         return true;
     }
 

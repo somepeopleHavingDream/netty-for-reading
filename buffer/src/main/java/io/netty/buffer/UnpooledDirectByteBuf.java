@@ -597,6 +597,7 @@ public class UnpooledDirectByteBuf extends AbstractReferenceCountedByteBuf {
 
     @Override
     public final boolean isContiguous() {
+        // 返回真
         return true;
     }
 

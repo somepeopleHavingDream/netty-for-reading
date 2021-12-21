@@ -120,6 +120,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
 
     @Override
     public ByteBufAllocator alloc() {
+        // 获得通道配置，从配置中获得分配器
         return channel().config().getAllocator();
     }
 

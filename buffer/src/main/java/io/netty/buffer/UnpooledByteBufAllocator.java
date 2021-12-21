@@ -43,6 +43,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
      *                     a heap buffer
      */
     public UnpooledByteBufAllocator(boolean preferDirect) {
+        // 入参：是否偏向于直接内存、禁止泄露侦测器检测
         this(preferDirect, false);
     }
 
@@ -56,6 +57,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
      *                            direct buffers when not explicit released.
      */
     public UnpooledByteBufAllocator(boolean preferDirect, boolean disableLeakDetector) {
+        // 入参：是否偏向于直接内存、禁止泄露侦测器检测、使用直接缓冲无清理器
         this(preferDirect, disableLeakDetector, PlatformDependent.useDirectBufferNoCleaner());
     }
 
@@ -71,7 +73,10 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
      *                            to allocate direct memory.
      */
     public UnpooledByteBufAllocator(boolean preferDirect, boolean disableLeakDetector, boolean tryNoCleaner) {
+        // 调用父类的构造方法
         super(preferDirect);
+
+        // 设置是否禁用泄露检测器、是否无清理器
         this.disableLeakDetector = disableLeakDetector;
         noCleaner = tryNoCleaner && PlatformDependent.hasUnsafe()
                 && PlatformDependent.hasDirectBufferNoCleanerConstructor();

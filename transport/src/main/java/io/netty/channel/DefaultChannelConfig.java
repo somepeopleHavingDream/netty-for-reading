@@ -43,14 +43,8 @@ public class DefaultChannelConfig implements ChannelConfig {
 
     protected final Channel channel;
 
-    /**
-     * 字节缓冲分配器
-     */
     private volatile ByteBufAllocator allocator = ByteBufAllocator.DEFAULT;
 
-    /**
-     * 该默认通道配置的接收字节缓冲分配器
-     */
     private volatile RecvByteBufAllocator rcvBufAllocator;
 
     private volatile MessageSizeEstimator msgSizeEstimator = DEFAULT_MSG_SIZE_ESTIMATOR;
@@ -59,9 +53,6 @@ public class DefaultChannelConfig implements ChannelConfig {
     private volatile int writeSpinCount = 16;
     private volatile int maxMessagesPerWrite = Integer.MAX_VALUE;
 
-    /**
-     * 通道是否自动读
-     */
     @SuppressWarnings("FieldMayBeFinal")
     private volatile int autoRead = 1;
 
