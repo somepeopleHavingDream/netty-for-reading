@@ -60,6 +60,7 @@ public abstract class ReferenceCountUpdater<T extends ReferenceCounted> {
     }
 
     private static int realRefCnt(int rawCnt) {
+        // 不细究
         return rawCnt != 2 && rawCnt != 4 && (rawCnt & 1) != 0 ? 0 : rawCnt >>> 1;
     }
 
@@ -81,7 +82,7 @@ public abstract class ReferenceCountUpdater<T extends ReferenceCounted> {
     }
 
     public final int refCnt(T instance) {
-        // 获取真实的更新器
+        // 获取实际的更新器，通过该更新器从入参实例中拿到指定属性的值，从而返回实际的引用计数
         return realRefCnt(updater().get(instance));
     }
 

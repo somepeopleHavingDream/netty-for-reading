@@ -470,7 +470,9 @@ abstract class AbstractUnpooledSlicedByteBuf extends AbstractDerivedByteBuf {
     }
 
     static void checkSliceOutOfBounds(int index, int length, ByteBuf buffer) {
+        // 如果入参越界
         if (isOutOfBounds(index, length, buffer.capacity())) {
+            // 不细究
             throw new IndexOutOfBoundsException(buffer + ".slice(" + index + ", " + length + ')');
         }
     }

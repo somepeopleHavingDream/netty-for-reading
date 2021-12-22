@@ -83,7 +83,9 @@ public abstract class AbstractByteBuf extends ByteBuf {
     private int maxCapacity;
 
     protected AbstractByteBuf(int maxCapacity) {
+        // 检查入参最大容量是否为负数
         checkPositiveOrZero(maxCapacity, "maxCapacity");
+        // 设置最大容量
         this.maxCapacity = maxCapacity;
     }
 
@@ -1001,7 +1003,9 @@ public abstract class AbstractByteBuf extends ByteBuf {
     public ByteBuf skipBytes(int length) {
         // 检查可读字符数
         checkReadableBytes(length);
+        // 更新读下标
         readerIndex += length;
+        // 返回当前字节缓冲
         return this;
     }
 
@@ -1488,6 +1492,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
      * than the specified value.
      */
     protected final void checkReadableBytes(int minimumReadableBytes) {
+        // 先检查入参值是否为负数，再检查可读字节数
         checkReadableBytes0(checkPositiveOrZero(minimumReadableBytes, "minimumReadableBytes"));
     }
 
@@ -1502,7 +1507,9 @@ public abstract class AbstractByteBuf extends ByteBuf {
     private void checkReadableBytes0(int minimumReadableBytes) {
         // 确保当前字节缓冲可访问
         ensureAccessible();
+        // 如果需要检查边界，并且读下标大于写下标与最下可读数的差值，则抛出下标越界异常
         if (checkBounds && readerIndex > writerIndex - minimumReadableBytes) {
+            // 不细究
             throw new IndexOutOfBoundsException(String.format(
                     "readerIndex(%d) + length(%d) exceeds writerIndex(%d): %s",
                     readerIndex, minimumReadableBytes, writerIndex, this));
@@ -1516,6 +1523,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
     protected final void ensureAccessible() {
         // 如果当前字节缓冲可检查访问性，并且当前字节缓冲不是可访问的
         if (checkAccessible && !isAccessible()) {
+            // 不细究
             throw new IllegalReferenceCountException(0);
         }
     }

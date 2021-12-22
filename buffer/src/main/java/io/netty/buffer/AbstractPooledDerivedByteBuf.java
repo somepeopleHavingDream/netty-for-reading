@@ -38,7 +38,9 @@ abstract class AbstractPooledDerivedByteBuf extends AbstractReferenceCountedByte
 
     @SuppressWarnings("unchecked")
     AbstractPooledDerivedByteBuf(Handle<? extends AbstractPooledDerivedByteBuf> recyclerHandle) {
+        // 调用父类的构造方法
         super(0);
+        // 设置回收处理器
         this.recyclerHandle = (Handle<AbstractPooledDerivedByteBuf>) recyclerHandle;
     }
 

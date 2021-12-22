@@ -47,6 +47,7 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
     private volatile int refCnt = updater.initialValue();
 
     protected AbstractReferenceCountedByteBuf(int maxCapacity) {
+        // 传入最大容量，调用父类的构造方法
         super(maxCapacity);
     }
 
@@ -59,7 +60,7 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
 
     @Override
     public int refCnt() {
-        // 更新器对当前字节缓冲做引用计数
+        // 通过更新器获得对当前字节缓冲引用数
         return updater.refCnt(this);
     }
 

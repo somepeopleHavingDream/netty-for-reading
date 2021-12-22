@@ -164,6 +164,7 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
 
     @Override
     public final ByteBuf retainedSlice(int index, int length) {
+        // 通过池化分片字节缓冲，实例化出一个字节缓冲
         return PooledSlicedByteBuf.newInstance(this, this, index, length);
     }
 

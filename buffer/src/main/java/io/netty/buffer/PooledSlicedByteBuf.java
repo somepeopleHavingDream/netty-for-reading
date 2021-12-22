@@ -37,19 +37,24 @@ final class PooledSlicedByteBuf extends AbstractPooledDerivedByteBuf {
             new ObjectCreator<PooledSlicedByteBuf>() {
         @Override
         public PooledSlicedByteBuf newObject(Handle<PooledSlicedByteBuf> handle) {
+            // 该对象创建器实例化对象，实例化池化切片字节缓冲
             return new PooledSlicedByteBuf(handle);
         }
     });
 
     static PooledSlicedByteBuf newInstance(AbstractByteBuf unwrapped, ByteBuf wrapped,
                                            int index, int length) {
+        // 检查分片是否越界
         checkSliceOutOfBounds(index, length, unwrapped);
+        // 新建一个实例
         return newInstance0(unwrapped, wrapped, index, length);
     }
 
     private static PooledSlicedByteBuf newInstance0(AbstractByteBuf unwrapped, ByteBuf wrapped,
                                                     int adjustment, int length) {
+        // 从回收器中获得池化切片字节缓冲
         final PooledSlicedByteBuf slice = RECYCLER.get();
+        // 初始化分片参数
         slice.init(unwrapped, wrapped, 0, length, length);
         slice.discardMarks();
         slice.adjustment = adjustment;
@@ -60,6 +65,7 @@ final class PooledSlicedByteBuf extends AbstractPooledDerivedByteBuf {
     int adjustment;
 
     private PooledSlicedByteBuf(Handle<PooledSlicedByteBuf> handle) {
+        // 调用父类的构造方法
         super(handle);
     }
 

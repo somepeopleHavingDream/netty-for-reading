@@ -31,9 +31,6 @@ public abstract class ObjectPool<T> {
     /**
      * Get a {@link Object} from the {@link ObjectPool}. The returned {@link Object} may be created via
      * {@link ObjectCreator#newObject(Handle)} if no pooled {@link Object} is ready to be reused.
-     *
-     * 从对象池中获得对象。
-     * 如果没有就绪于重复使用的池化对象，则可通过对象创建器的实例化对象方法创建返回对象。
      */
     public abstract T get();
 
@@ -69,36 +66,23 @@ public abstract class ObjectPool<T> {
     /**
      * Creates a new {@link ObjectPool} which will use the given {@link ObjectCreator} to create the {@link Object}
      * that should be pooled.
-     *
-     * 创建一个新的对象池，该对象池使用给定的对象创建器去创建应被池化的对象。
      */
     public static <T> ObjectPool<T> newPool(final ObjectCreator<T> creator) {
         // 实例化并返回回收器对象池
         return new RecyclerObjectPool<T>(ObjectUtil.checkNotNull(creator, "creator"));
     }
 
-    /**
-     * 回收器对象池
-     *
-     * @param <T>
-     */
     private static final class RecyclerObjectPool<T> extends ObjectPool<T> {
 
-        /**
-         * 用于该回收器对象池的回收器
-         */
         private final Recycler<T> recycler;
 
-        /**
-         * 回收器对象池的构造方法
-         *
-         * @param creator 对象创建器
-         */
         RecyclerObjectPool(final ObjectCreator<T> creator) {
-            // 实例化并设置回收器
+             // 实例化并设置回收器
              recycler = new Recycler<T>() {
+
                 @Override
                 protected T newObject(Handle<T> handle) {
+                    // 对象创建者实例化一个对象
                     return creator.newObject(handle);
                 }
             };

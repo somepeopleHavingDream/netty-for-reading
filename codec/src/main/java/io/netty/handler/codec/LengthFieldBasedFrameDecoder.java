@@ -458,8 +458,11 @@ public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
         in.skipBytes(initialBytesToStrip);
 
         // extract frame
+        // 获得输入字节缓冲的读下标
         int readerIndex = in.readerIndex();
+        // 计算出实际的帧长度
         int actualFrameLength = frameLengthInt - initialBytesToStrip;
+        // 提取出帧
         ByteBuf frame = extractFrame(ctx, in, readerIndex, actualFrameLength);
         in.readerIndex(readerIndex + actualFrameLength);
         return frame;
@@ -540,6 +543,7 @@ public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
      * Extract the sub-region of the specified buffer.
      */
     protected ByteBuf extractFrame(ChannelHandlerContext ctx, ByteBuf buffer, int index, int length) {
+        // 从入参字节缓冲中获取切片
         return buffer.retainedSlice(index, length);
     }
 
