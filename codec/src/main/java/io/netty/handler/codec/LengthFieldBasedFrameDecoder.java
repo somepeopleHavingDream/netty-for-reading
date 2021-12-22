@@ -432,20 +432,29 @@ public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
 
         // 如果帧长度超过最大帧长度
         if (frameLength > maxFrameLength) {
+            /*
+                不细究
+             */
             // 调用超出帧长方法
             exceededFrameLength(in, frameLength);
             return null;
         }
 
         // never overflows because it's less than maxFrameLength
+        // 将帧长转换为整型值
         int frameLengthInt = (int) frameLength;
+        // 如果输入缓冲的可读字节数小于帧长
         if (in.readableBytes() < frameLengthInt) {
+            // 不细究
             return null;
         }
 
+        // 如果要跳过的初始字节数大于帧长
         if (initialBytesToStrip > frameLengthInt) {
+            // 不细究
             failOnFrameLengthLessThanInitialBytesToStrip(in, frameLength, initialBytesToStrip);
         }
+        // 输入缓冲跳过初始字节数
         in.skipBytes(initialBytesToStrip);
 
         // extract frame

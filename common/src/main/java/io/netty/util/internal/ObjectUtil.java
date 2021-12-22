@@ -157,14 +157,15 @@ public final class ObjectUtil {
     /**
      * Checks that the given argument is positive or zero. If it is not , throws {@link IllegalArgumentException}.
      * Otherwise, returns the argument.
-     *
-     * 检查给定参数是正或父。
-     * 如果不是，则抛出违规参数异常，否则返回该参数
      */
     public static int checkPositiveOrZero(int i, String name) {
+        // 如果入参整型值小于0，则抛出违规参数异常
         if (i < INT_ZERO) {
+            // 不细究
             throw new IllegalArgumentException(name + " : " + i + " (expected: >= 0)");
         }
+
+        // 返回入参整型值
         return i;
     }
 

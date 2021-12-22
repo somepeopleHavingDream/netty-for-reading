@@ -46,16 +46,10 @@ public abstract class AbstractByteBuf extends ByteBuf {
     private static final String LEGACY_PROP_CHECK_ACCESSIBLE = "io.netty.buffer.bytebuf.checkAccessible";
     private static final String PROP_CHECK_ACCESSIBLE = "io.netty.buffer.checkAccessible";
 
-    /**
-     * 该字节缓冲是否可检查（true）
-     */
     static final boolean checkAccessible; // accessed from CompositeByteBuf
 
     private static final String PROP_CHECK_BOUNDS = "io.netty.buffer.checkBounds";
 
-    /**
-     * 该字节缓冲是否检查边界（true）
-     */
     private static final boolean checkBounds;
 
     static {
@@ -1005,6 +999,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
 
     @Override
     public ByteBuf skipBytes(int length) {
+        // 检查可读字符数
         checkReadableBytes(length);
         readerIndex += length;
         return this;
@@ -1505,6 +1500,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
     }
 
     private void checkReadableBytes0(int minimumReadableBytes) {
+        // 确保当前字节缓冲可访问
         ensureAccessible();
         if (checkBounds && readerIndex > writerIndex - minimumReadableBytes) {
             throw new IndexOutOfBoundsException(String.format(
@@ -1516,10 +1512,9 @@ public abstract class AbstractByteBuf extends ByteBuf {
     /**
      * Should be called by every method that tries to access the buffers content to check
      * if the buffer was released before.
-     *
-     * 应该被每个尝试访问缓冲内容的方法调用，以检查缓冲之前是否被释放。
      */
     protected final void ensureAccessible() {
+        // 如果当前字节缓冲可检查访问性，并且当前字节缓冲不是可访问的
         if (checkAccessible && !isAccessible()) {
             throw new IllegalReferenceCountException(0);
         }
