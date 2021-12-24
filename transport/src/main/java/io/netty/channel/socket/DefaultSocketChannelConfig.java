@@ -28,29 +28,21 @@ import static io.netty.channel.ChannelOption.*;
 
 /**
  * The default {@link SocketChannelConfig} implementation.
- *
- * 默认的套接字通道配置实现。
  */
 public class DefaultSocketChannelConfig extends DefaultChannelConfig
                                         implements SocketChannelConfig {
 
-    /**
-     * 用于当前套接字通道配置的java套接字
-     */
     protected final Socket javaSocket;
 
-    /**
-     * 是否允许半关闭
-     */
     private volatile boolean allowHalfClosure;
 
     /**
      * Creates a new instance.
-     *
-     * 创建一个新的实例。
      */
     public DefaultSocketChannelConfig(SocketChannel channel, Socket javaSocket) {
+        // 调用父类的构造方法
         super(channel);
+        // 设置底层jdk套接字
         this.javaSocket = ObjectUtil.checkNotNull(javaSocket, "javaSocket");
 
         // Enable TCP_NODELAY by default if possible.

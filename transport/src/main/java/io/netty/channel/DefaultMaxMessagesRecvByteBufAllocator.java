@@ -136,7 +136,7 @@ public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessa
 
         @Override
         public ByteBuf allocate(ByteBufAllocator alloc) {
-            // 先大致猜测要分配的输入输出缓冲大小
+            // 先大致猜测要分配的输入输出缓冲大小，再向分配器申请该大小的字节缓冲
             return alloc.ioBuffer(guess());
         }
 

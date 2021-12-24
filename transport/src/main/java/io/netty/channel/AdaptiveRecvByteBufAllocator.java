@@ -204,18 +204,14 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
      * Creates a new predictor with the default parameters.  With the default
      * parameters, the expected buffer size starts from {@code 1024}, does not
      * go down below {@code 64}, and does not go up above {@code 65536}.
-     *
-     * 用默认参数创建一个新的预测器。
-     * 用默认参数，期盼的缓冲区大小从1024开始，不会低于64，也不会高于65536。
      */
     public AdaptiveRecvByteBufAllocator() {
+        // 入参：默认最小数，默认初始值，默认最大值
         this(DEFAULT_MINIMUM, DEFAULT_INITIAL, DEFAULT_MAXIMUM);
     }
 
     /**
      * Creates a new predictor with the specified parameters.
-     *
-     * 用给定参数创建新的预测器。
      *
      * @param minimum  the inclusive lower bound of the expected buffer size
      * @param initial  the initial buffer size when no feed back was received
@@ -225,13 +221,15 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
         // 检查入参
         checkPositive(minimum, "minimum");
         if (initial < minimum) {
+            // 不细究
             throw new IllegalArgumentException("initial: " + initial);
         }
         if (maximum < initial) {
+            // 不细究
             throw new IllegalArgumentException("maximum: " + maximum);
         }
 
-        // 设置最小索引
+        // 设置最小值小标
         int minIndex = getSizeTableIndex(minimum);
         if (SIZE_TABLE[minIndex] < minimum) {
             this.minIndex = minIndex + 1;
@@ -239,7 +237,7 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
             this.minIndex = minIndex;
         }
 
-        // 设置最大索引
+        // 设置最大值下标
         int maxIndex = getSizeTableIndex(maximum);
         if (SIZE_TABLE[maxIndex] > maximum) {
             this.maxIndex = maxIndex - 1;

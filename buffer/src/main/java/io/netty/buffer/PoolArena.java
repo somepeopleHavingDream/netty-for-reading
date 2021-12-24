@@ -29,16 +29,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static io.netty.buffer.PoolChunk.isSubpage;
 import static java.lang.Math.max;
 
-/**
- * 池竞技场
- *
- * @param <T>
- */
 abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
 
-    /**
-     * 该池竞技场是否有不安全实例
-     */
     static final boolean HAS_UNSAFE = PlatformDependent.hasUnsafe();
 
     enum SizeClass {
@@ -95,15 +87,6 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
     // TODO: Test if adding padding helps under contention
     //private long pad0, pad1, pad2, pad3, pad4, pad5, pad6, pad7;
 
-    /**
-     * 池竞技场的构造方法
-     *
-     * @param parent 池字节缓冲分配器
-     * @param pageSize 页面大小
-     * @param pageShifts 页面偏移
-     * @param chunkSize 块大小
-     * @param cacheAlignment 缓存对齐
-     */
     protected PoolArena(PooledByteBufAllocator parent, int pageSize,
           int pageShifts, int chunkSize, int cacheAlignment) {
         // 调用父类的构造方法
@@ -594,20 +577,8 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         }
     }
 
-    /**
-     * 堆竞技场
-     */
     static final class HeapArena extends PoolArena<byte[]> {
 
-        /**
-         * 堆竞技场的构造方法
-         *
-         * @param parent 池化字节缓冲分配器
-         * @param pageSize 页面大小
-         * @param pageShifts 页面偏移
-         * @param chunkSize 块大小
-         * @param directMemoryCacheAlignment 直接内存缓冲偏移
-         */
         HeapArena(PooledByteBufAllocator parent, int pageSize, int pageShifts,
                   int chunkSize, int directMemoryCacheAlignment) {
             super(parent, pageSize, pageShifts, chunkSize,

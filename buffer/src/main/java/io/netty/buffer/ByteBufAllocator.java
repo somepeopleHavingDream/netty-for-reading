@@ -123,8 +123,6 @@ public interface ByteBufAllocator {
 
     /**
      * Returns {@code true} if direct {@link ByteBuf}'s are pooled
-     *
-     * 如果直接字节缓冲是池化的，则返回真
      */
     boolean isDirectBufferPooled();
 

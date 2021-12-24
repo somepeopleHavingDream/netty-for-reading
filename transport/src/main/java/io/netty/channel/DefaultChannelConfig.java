@@ -60,22 +60,11 @@ public class DefaultChannelConfig implements ChannelConfig {
     private volatile WriteBufferWaterMark writeBufferWaterMark = WriteBufferWaterMark.DEFAULT;
     private volatile boolean pinEventExecutor = true;
 
-    /**
-     * 默认通道配置
-     *
-     * @param channel 通道
-     */
     public DefaultChannelConfig(Channel channel) {
         // 实例化一个自适应接收字节缓冲分配器，将该分配器用于该默认通道配置
         this(channel, new AdaptiveRecvByteBufAllocator());
     }
 
-    /**
-     * 默认通道配置的构造方法
-     *
-     * @param channel 通道
-     * @param allocator 接收字节缓冲分配器
-     */
     protected DefaultChannelConfig(Channel channel, RecvByteBufAllocator allocator) {
         // 设置该默认通道配置的接收字节缓冲分配器
         setRecvByteBufAllocator(allocator, channel.metadata());

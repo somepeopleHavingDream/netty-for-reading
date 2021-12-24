@@ -98,8 +98,6 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
 
     /**
      * Returns the configuration of this channel.
-     *
-     * 返回通道的配置。
      */
     ChannelConfig config();
 

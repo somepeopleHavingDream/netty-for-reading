@@ -26,19 +26,11 @@ import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
 
 /**
  * Skeletal {@link ByteBufAllocator} implementation to extend.
- *
- * 需要扩展的骨骼字节缓冲分配器实现。
  */
 public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
 
-    /**
-     * 该字节缓冲分配器的默认初始容量
-     */
     static final int DEFAULT_INITIAL_CAPACITY = 256;
 
-    /**
-     * 该字节缓冲分配器的默认最大容量
-     */
     static final int DEFAULT_MAX_CAPACITY = Integer.MAX_VALUE;
 
     static final int DEFAULT_MAX_COMPONENTS = 16;
@@ -110,8 +102,9 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
      *                     a heap buffer
      */
     protected AbstractByteBufAllocator(boolean preferDirect) {
-        // 设置该字节缓冲分配器是否默认使用直接内存、设置空缓冲
+        // 如果入参偏向于直接内存，并且平台支持不安全实例，则默认申请直接内存
         directByDefault = preferDirect && PlatformDependent.hasUnsafe();
+        // 实例化一个空字节缓冲
         emptyBuf = new EmptyByteBuf(this);
     }
 
@@ -155,7 +148,7 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
     public ByteBuf ioBuffer(int initialCapacity) {
         // 如果平台依赖有不安全实例或者当前字节缓冲分配器是池化直接缓冲
         if (PlatformDependent.hasUnsafe() || isDirectBufferPooled()) {
-            // 分配指定容量的直接缓冲出来
+            // 分配指定容量的直接缓冲
             return directBuffer(initialCapacity);
         }
         // 以下不细究
@@ -196,13 +189,13 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
 
     @Override
     public ByteBuf directBuffer(int initialCapacity) {
-        // 直接缓冲
+        // 分配直接缓冲
         return directBuffer(initialCapacity, DEFAULT_MAX_CAPACITY);
     }
 
     @Override
     public ByteBuf directBuffer(int initialCapacity, int maxCapacity) {
-        // 如果初始容量和最大容量都为0，则返回空字符缓冲
+        // 如果初始容量和最大容量都为0，则返回空缓冲
         if (initialCapacity == 0 && maxCapacity == 0) {
             // 不细究
             return emptyBuf;
@@ -250,17 +243,12 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
         return toLeakAwareBuffer(new CompositeByteBuf(this, true, maxNumComponents));
     }
 
-    /**
-     * 校验初始容量和最大容量
-     *
-     * @param initialCapacity 初始容量
-     * @param maxCapacity 最大容量
-     */
     private static void validate(int initialCapacity, int maxCapacity) {
         // 检查初始容量是否为正数或者为0
         checkPositiveOrZero(initialCapacity, "initialCapacity");
         // 如果初始容量超过最大容量，则抛出违规参数异常
         if (initialCapacity > maxCapacity) {
+            // 不细究
             throw new IllegalArgumentException(String.format(
                     "initialCapacity: %d (expected: not greater than maxCapacity(%d)",
                     initialCapacity, maxCapacity));

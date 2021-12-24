@@ -65,9 +65,6 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         }
     }
 
-    /**
-     * 用于当前nio套接字通道的套接字通道配置
-     */
     private final SocketChannelConfig config;
 
     /**
@@ -94,12 +91,11 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
     /**
      * Create a new instance
      *
-     * 创建一个新实例
-     *
      * @param parent    the {@link Channel} which created this instance or {@code null} if it was created by the user
      * @param socket    the {@link SocketChannel} which will be used
      */
     public NioSocketChannel(Channel parent, SocketChannel socket) {
+        // 调用父类的构造方法
         super(parent, socket);
         // 实例化并设置nio套接字通道配置
         config = new NioSocketChannelConfig(this, socket.socket());
@@ -469,23 +465,12 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         }
     }
 
-    /**
-     * nio套接字通道配置
-     */
     private final class NioSocketChannelConfig extends DefaultSocketChannelConfig {
 
-        /**
-         * 每次收集写入的最大字节数
-         */
         private volatile int maxBytesPerGatheringWrite = Integer.MAX_VALUE;
 
-        /**
-         * nio套接字通道配置的构造方法
-         *
-         * @param channel nio套接字通道
-         * @param javaSocket jdk底层套接字
-         */
         private NioSocketChannelConfig(NioSocketChannel channel, Socket javaSocket) {
+            // 调用父类的构造方法
             super(channel, javaSocket);
             // 计算每次收集写入的最大字节
             calculateMaxBytesPerGatheringWrite();
@@ -535,9 +520,6 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
             return maxBytesPerGatheringWrite;
         }
 
-        /**
-         * 计算每次收集写入的最大字节
-         */
         private void calculateMaxBytesPerGatheringWrite() {
             // Multiply by 2 to give some extra space in case the OS can process write data faster than we can provide.
             // 乘以2，以给一些额外的空间，防止操作系统能够更快地处理比我们能提供的写数据。

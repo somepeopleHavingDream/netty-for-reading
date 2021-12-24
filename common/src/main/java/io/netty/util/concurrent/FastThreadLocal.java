@@ -145,8 +145,6 @@ public class FastThreadLocal<V> {
 
     /**
      * Returns the current value for the current thread
-     *
-     * 返回当前线程的当前值
      */
     @SuppressWarnings("unchecked")
     public final V get() {
