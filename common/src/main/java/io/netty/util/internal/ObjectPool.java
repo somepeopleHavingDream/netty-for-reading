@@ -50,8 +50,6 @@ public abstract class ObjectPool<T> {
      * Creates a new Object which references the given {@link Handle} and calls {@link Handle#recycle(Object)} once
      * it can be re-used.
      *
-     * 创建一个引用给定处理器的新对象，并且一旦能重复使用就调用处理的回收方法。
-     *
      * @param <T> the type of the pooled object
      */
     public interface ObjectCreator<T> {
@@ -68,7 +66,7 @@ public abstract class ObjectPool<T> {
      * that should be pooled.
      */
     public static <T> ObjectPool<T> newPool(final ObjectCreator<T> creator) {
-        // 实例化并返回回收器对象池
+        // 实例化并返回回收器对象池，传入对象创建者
         return new RecyclerObjectPool<T>(ObjectUtil.checkNotNull(creator, "creator"));
     }
 

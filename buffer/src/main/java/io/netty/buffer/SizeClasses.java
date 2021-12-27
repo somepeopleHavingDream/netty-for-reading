@@ -79,6 +79,9 @@ import static io.netty.buffer.PoolThreadCache.log2;
  *   ( 76,    24,       22,        1,       yes,            no,        no)
  */
 abstract class SizeClasses implements SizeClassesMetric {
+    /*
+        此类不细究
+     */
 
     static final int LOG2_QUANTUM = 4;
 
@@ -96,7 +99,6 @@ abstract class SizeClasses implements SizeClassesMetric {
     private static final byte no = 0, yes = 1;
 
     protected SizeClasses(int pageSize, int pageShifts, int chunkSize, int directMemoryCacheAlignment) {
-        // 设置页面大小、页面偏移、块大小、直接内存缓存对齐
         this.pageSize = pageSize;
         this.pageShifts = pageShifts;
         this.chunkSize = chunkSize;
@@ -125,9 +127,6 @@ abstract class SizeClasses implements SizeClassesMetric {
 
     final int nSizes;
 
-    /**
-     * 子页数量
-     */
     int nSubpages;
 
     int nPSizes;

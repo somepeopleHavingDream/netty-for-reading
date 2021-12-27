@@ -109,6 +109,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
     }
 
     protected final void maxCapacity(int maxCapacity) {
+        // 设值当前字节缓冲的最大容量
         this.maxCapacity = maxCapacity;
     }
 

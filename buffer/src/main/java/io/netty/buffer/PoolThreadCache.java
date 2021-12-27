@@ -78,38 +78,55 @@ final class PoolThreadCache {
 
         // 如果直接竞技场不是null
         if (directArena != null) {
-            // 创建并赋值子页缓存
+            // 创建并赋值小子页直接缓存
             smallSubPageDirectCaches = createSubPageCaches(
                     smallCacheSize, directArena.numSmallSubpagePools);
-
+            // 创建并赋值正常直接缓存
             normalDirectCaches = createNormalCaches(
                     normalCacheSize, maxCachedBufferCapacity, directArena);
 
+            // 更新直接竞技场的线程缓存数
             directArena.numThreadCaches.getAndIncrement();
         } else {
+            /*
+                不细究
+             */
             // No directArea is configured so just null out all caches
             smallSubPageDirectCaches = null;
             normalDirectCaches = null;
         }
+
+        // 如果堆竞技场不是null
         if (heapArena != null) {
             // Create the caches for the heap allocations
+            // 创建子页缓存，并赋值给小子页堆缓存
             smallSubPageHeapCaches = createSubPageCaches(
                     smallCacheSize, heapArena.numSmallSubpagePools);
-
+            // 创建正常缓存，并赋值给正常堆缓存
             normalHeapCaches = createNormalCaches(
                     normalCacheSize, maxCachedBufferCapacity, heapArena);
 
+            // 更新堆竞技场的线程缓存数
             heapArena.numThreadCaches.getAndIncrement();
         } else {
+            /*
+                不细究
+             */
             // No heapArea is configured so just null out all caches
             smallSubPageHeapCaches = null;
             normalHeapCaches = null;
         }
 
         // Only check if there are caches in use.
+        /*
+            如果同时满足如下条件：
+            1 小子页直接缓存不为null或小子页堆缓存不为null或正常直接缓存不为null或正常堆缓存不为null
+            2 释放交换分配阈值小于1
+         */
         if ((smallSubPageDirectCaches != null || normalDirectCaches != null
                 || smallSubPageHeapCaches != null || normalHeapCaches != null)
                 && freeSweepAllocationThreshold < 1) {
+            // 不细究
             throw new IllegalArgumentException("freeSweepAllocationThreshold: "
                     + freeSweepAllocationThreshold + " (expected: > 0)");
         }
@@ -119,14 +136,20 @@ final class PoolThreadCache {
             int cacheSize, int numCaches) {
         // 如果缓存大小大于0，并且缓存数量大于0
         if (cacheSize > 0 && numCaches > 0) {
+            // 实例化一个内存区域缓存数组
             @SuppressWarnings("unchecked")
             MemoryRegionCache<T>[] cache = new MemoryRegionCache[numCaches];
+            // 初始化内存区域缓存数组
             for (int i = 0; i < cache.length; i++) {
                 // TODO: maybe use cacheSize / cache.length
+                // 实例化出子页内存区域缓存
                 cache[i] = new SubPageMemoryRegionCache<T>(cacheSize);
             }
+
+            // 返回实例化之后的内存区域缓存数组
             return cache;
         } else {
+            // 不细究
             return null;
         }
     }
@@ -134,16 +157,22 @@ final class PoolThreadCache {
     @SuppressWarnings("unchecked")
     private static <T> MemoryRegionCache<T>[] createNormalCaches(
             int cacheSize, int maxCachedBufferCapacity, PoolArena<T> area) {
+        // 如果入参缓存大小大于0，并且入参最大缓存缓冲容量大于0
         if (cacheSize > 0 && maxCachedBufferCapacity > 0) {
+            // 取池竞技场的块大小和入参最大缓存缓冲容量中的最小值
             int max = Math.min(area.chunkSize, maxCachedBufferCapacity);
             // Create as many normal caches as we support based on how many sizeIdx we have and what the upper
             // bound is that we want to cache in general.
             List<MemoryRegionCache<T>> cache = new ArrayList<MemoryRegionCache<T>>() ;
             for (int idx = area.numSmallSubpagePools; idx < area.nSizes && area.sizeIdx2size(idx) <= max ; idx++) {
+                // 实例化正常内存区域缓存，并该缓存添加到内存区域缓存列表中
                 cache.add(new NormalMemoryRegionCache<T>(cacheSize));
             }
+
+            // 转换成数组返回
             return cache.toArray(new MemoryRegionCache[0]);
         } else {
+            // 不细究
             return null;
         }
     }
@@ -313,7 +342,9 @@ final class PoolThreadCache {
      * Cache used for buffers which are backed by TINY or SMALL size.
      */
     private static final class SubPageMemoryRegionCache<T> extends MemoryRegionCache<T> {
+
         SubPageMemoryRegionCache(int size) {
+            // 传参：大小、大小等级：小
             super(size, SizeClass.Small);
         }
 
@@ -348,8 +379,11 @@ final class PoolThreadCache {
         private int allocations;
 
         MemoryRegionCache(int size, SizeClass sizeClass) {
+            // 设值大小为入参大小的2的幂
             this.size = MathUtil.safeFindNextPositivePowerOfTwo(size);
+            // 实例化固定大小的多生产者单消费者队列
             queue = PlatformDependent.newFixedMpscQueue(this.size);
+            // 设置当前内存区域缓存的大小等级
             this.sizeClass = sizeClass;
         }
 

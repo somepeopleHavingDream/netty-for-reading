@@ -28,13 +28,12 @@ import java.nio.ByteBuffer;
 
 final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
 
-    /**
-     * 该池化不安全直接字节缓冲的回收器
-     */
     private static final ObjectPool<PooledUnsafeDirectByteBuf> RECYCLER = ObjectPool.newPool(
             new ObjectCreator<PooledUnsafeDirectByteBuf>() {
+
         @Override
         public PooledUnsafeDirectByteBuf newObject(Handle<PooledUnsafeDirectByteBuf> handle) {
+            // 实例化并返回池化不安全直接字节缓冲
             return new PooledUnsafeDirectByteBuf(handle, 0);
         }
     });
@@ -42,6 +41,7 @@ final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
     static PooledUnsafeDirectByteBuf newInstance(int maxCapacity) {
         // 从回收器中获得池化不安全直接字节缓冲
         PooledUnsafeDirectByteBuf buf = RECYCLER.get();
+        // 重用字节缓冲
         buf.reuse(maxCapacity);
         return buf;
     }
@@ -49,6 +49,7 @@ final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
     private long memoryAddress;
 
     private PooledUnsafeDirectByteBuf(Handle<PooledUnsafeDirectByteBuf> recyclerHandle, int maxCapacity) {
+        // 入参：回收处理器、最大容量
         super(recyclerHandle, maxCapacity);
     }
 

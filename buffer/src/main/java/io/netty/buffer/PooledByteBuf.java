@@ -48,16 +48,15 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
     int maxLength;
     PoolThreadCache cache;
 
-    /**
-     * 该池化字节缓冲的临时字节缓冲
-     */
     ByteBuffer tmpNioBuf;
 
     private ByteBufAllocator allocator;
 
     @SuppressWarnings("unchecked")
     protected PooledByteBuf(Handle<? extends PooledByteBuf<T>> recyclerHandle, int maxCapacity) {
+        // 传参：最大容量
         super(maxCapacity);
+        // 设置回收处理器
         this.recyclerHandle = (Handle<PooledByteBuf<T>>) recyclerHandle;
     }
 
@@ -91,6 +90,7 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
      * Method must be called before reuse this {@link PooledByteBufAllocator}
      */
     final void reuse(int maxCapacity) {
+        // 设置最大容量
         maxCapacity(maxCapacity);
         resetRefCnt();
         setIndex0(0, 0);

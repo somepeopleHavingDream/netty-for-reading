@@ -508,7 +508,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         // 分配字节缓冲
         final ByteBuf buf;
         if (directArena != null) {
-            // 直接竞技场分配出字节缓冲
+            // 由直接竞技场分配出字节缓冲
             buf = directArena.allocate(cache, initialCapacity, maxCapacity);
         } else {
             // 以下不细究
@@ -628,9 +628,9 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
         @Override
         protected synchronized PoolThreadCache initialValue() {
-            // 获得最少使用的堆竞技场
+            // 获得该池化字节缓冲分配器最少使用的堆竞技场
             final PoolArena<byte[]> heapArena = leastUsedArena(heapArenas);
-            // 获得最少使用的堆竞技场
+            // 获得该池化字节缓冲分配器最少使用的直接竞技场
             final PoolArena<ByteBuffer> directArena = leastUsedArena(directArenas);
 
             // 获得当前线程
@@ -642,15 +642,23 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
                         heapArena, directArena, smallCacheSize, normalCacheSize,
                         DEFAULT_MAX_CACHED_BUFFER_CAPACITY, DEFAULT_CACHE_TRIM_INTERVAL);
 
+                // 如果默认缓存修剪间隔毫秒时间大于0
                 if (DEFAULT_CACHE_TRIM_INTERVAL_MILLIS > 0) {
+                    /*
+                        不细究
+                     */
                     final EventExecutor executor = ThreadExecutorMap.currentExecutor();
                     if (executor != null) {
                         executor.scheduleAtFixedRate(trimTask, DEFAULT_CACHE_TRIM_INTERVAL_MILLIS,
                                 DEFAULT_CACHE_TRIM_INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
                     }
                 }
+
+                // 返回池化线程缓存
                 return cache;
             }
+
+            // 不细究
             // No caching so just use 0 as sizes.
             return new PoolThreadCache(heapArena, directArena, 0, 0, 0, 0);
         }
