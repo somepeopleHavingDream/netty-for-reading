@@ -38,26 +38,13 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         Normal
     }
 
-    /**
-     * 该池竞技场的池化字节缓冲分配器
-     */
     final PooledByteBufAllocator parent;
 
-    /**
-     * 该池竞技场的小子页池数量
-     */
     final int numSmallSubpagePools;
 
-    /**
-     * 该池竞技场的直接内存缓存对齐
-     */
     final int directMemoryCacheAlignment;
 
     private final PoolSubpage<T>[] smallSubpagePools;
-
-    /*
-        有一些作用的池化列表
-     */
 
     private final PoolChunkList<T> q050;
     private final PoolChunkList<T> q025;
@@ -144,12 +131,6 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         return head;
     }
 
-    /**
-     * 实例化子页池数组
-     *
-     * @param size 数组大小
-     * @return 池子页实例
-     */
     @SuppressWarnings("unchecked")
     private PoolSubpage<T>[] newSubpagePoolArray(int size) {
         return new PoolSubpage[size];
@@ -581,6 +562,7 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
 
         HeapArena(PooledByteBufAllocator parent, int pageSize, int pageShifts,
                   int chunkSize, int directMemoryCacheAlignment) {
+            // 传参：父池化字节缓冲分配器、页大小、页偏移、块大小、直接内存缓冲对齐量
             super(parent, pageSize, pageShifts, chunkSize,
                   directMemoryCacheAlignment);
         }

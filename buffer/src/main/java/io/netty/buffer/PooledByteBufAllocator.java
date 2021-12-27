@@ -628,11 +628,16 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
         @Override
         protected synchronized PoolThreadCache initialValue() {
+            // 获得最少使用的堆竞技场
             final PoolArena<byte[]> heapArena = leastUsedArena(heapArenas);
+            // 获得最少使用的堆竞技场
             final PoolArena<ByteBuffer> directArena = leastUsedArena(directArenas);
 
+            // 获得当前线程
             final Thread current = Thread.currentThread();
+            // 如果当前池化线程缓存支持对所有线程使用缓存，或者当前线程是快速线程本地线程实例
             if (useCacheForAllThreads || current instanceof FastThreadLocalThread) {
+                // 实例出一个池化线程缓存
                 final PoolThreadCache cache = new PoolThreadCache(
                         heapArena, directArena, smallCacheSize, normalCacheSize,
                         DEFAULT_MAX_CACHED_BUFFER_CAPACITY, DEFAULT_CACHE_TRIM_INTERVAL);
@@ -656,10 +661,13 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         }
 
         private <T> PoolArena<T> leastUsedArena(PoolArena<T>[] arenas) {
+            // 如果入参的堆竞技场为null或数量为0，则直接返回
             if (arenas == null || arenas.length == 0) {
+                // 不细究
                 return null;
             }
 
+            // 找到该池竞技场数组中线程缓存数最小的池竞技场
             PoolArena<T> minArena = arenas[0];
             for (int i = 1; i < arenas.length; i++) {
                 PoolArena<T> arena = arenas[i];
@@ -668,6 +676,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
                 }
             }
 
+            // 返回最小线程缓存数的池竞技场
             return minArena;
         }
     }

@@ -45,16 +45,10 @@ final class PoolThreadCache {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PoolThreadCache.class);
 
-    /**
-     * 整数大小减一
-     */
     private static final int INTEGER_SIZE_MINUS_ONE = Integer.SIZE - 1;
 
     final PoolArena<byte[]> heapArena;
 
-    /**
-     * 该池化线程缓存的直接竞技场
-     */
     final PoolArena<ByteBuffer> directArena;
 
     // Hold the caches for the different size classes, which are tiny, small and normal.
@@ -74,11 +68,17 @@ final class PoolThreadCache {
     PoolThreadCache(PoolArena<byte[]> heapArena, PoolArena<ByteBuffer> directArena,
                     int smallCacheSize, int normalCacheSize, int maxCachedBufferCapacity,
                     int freeSweepAllocationThreshold) {
+        // 检查入参最大缓存缓冲容量是否为负数
         checkPositiveOrZero(maxCachedBufferCapacity, "maxCachedBufferCapacity");
+
+        // 设置自由交换分配阈值、堆竞技场、直接竞技场
         this.freeSweepAllocationThreshold = freeSweepAllocationThreshold;
         this.heapArena = heapArena;
         this.directArena = directArena;
+
+        // 如果直接竞技场不是null
         if (directArena != null) {
+            // 创建并赋值子页缓存
             smallSubPageDirectCaches = createSubPageCaches(
                     smallCacheSize, directArena.numSmallSubpagePools);
 
@@ -117,6 +117,7 @@ final class PoolThreadCache {
 
     private static <T> MemoryRegionCache<T>[] createSubPageCaches(
             int cacheSize, int numCaches) {
+        // 如果缓存大小大于0，并且缓存数量大于0
         if (cacheSize > 0 && numCaches > 0) {
             @SuppressWarnings("unchecked")
             MemoryRegionCache<T>[] cache = new MemoryRegionCache[numCaches];

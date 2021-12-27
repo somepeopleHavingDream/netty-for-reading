@@ -95,18 +95,7 @@ abstract class SizeClasses implements SizeClassesMetric {
 
     private static final byte no = 0, yes = 1;
 
-    /**
-     * 尺码等级
-     *
-     * @param pageSize 页大小
-     * @param pageShifts 页偏移
-     * @param chunkSize 块大小
-     * @param directMemoryCacheAlignment 直接内存缓存对齐
-     */
     protected SizeClasses(int pageSize, int pageShifts, int chunkSize, int directMemoryCacheAlignment) {
-        /*
-            以下不细究
-         */
         // 设置页面大小、页面偏移、块大小、直接内存缓存对齐
         this.pageSize = pageSize;
         this.pageShifts = pageShifts;
