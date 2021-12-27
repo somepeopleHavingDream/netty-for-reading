@@ -56,6 +56,7 @@ public abstract class ReferenceCountUpdater<T extends ReferenceCounted> {
     protected abstract long unsafeOffset();
 
     public final int initialValue() {
+        // 默认为2
         return 2;
     }
 
@@ -105,6 +106,7 @@ public abstract class ReferenceCountUpdater<T extends ReferenceCounted> {
      * Resets the reference count to 1
      */
     public final void resetRefCnt(T instance) {
+        // 获得更新器，使用更新器将入参实例设置为初始值
         updater().set(instance, initialValue());
     }
 

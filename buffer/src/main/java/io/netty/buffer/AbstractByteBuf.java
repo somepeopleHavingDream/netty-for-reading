@@ -1530,11 +1530,13 @@ public abstract class AbstractByteBuf extends ByteBuf {
     }
 
     final void setIndex0(int readerIndex, int writerIndex) {
+        // 设置读下标、写下标
         this.readerIndex = readerIndex;
         this.writerIndex = writerIndex;
     }
 
     final void discardMarks() {
+        // 将标记的读下标、标记的写下标置为0
         markedReaderIndex = markedWriterIndex = 0;
     }
 }

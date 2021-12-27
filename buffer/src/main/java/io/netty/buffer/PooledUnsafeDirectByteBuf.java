@@ -43,6 +43,7 @@ final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
         PooledUnsafeDirectByteBuf buf = RECYCLER.get();
         // 重用字节缓冲
         buf.reuse(maxCapacity);
+        // 返回字节缓冲
         return buf;
     }
 
