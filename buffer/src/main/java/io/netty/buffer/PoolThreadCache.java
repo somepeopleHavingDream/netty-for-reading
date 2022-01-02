@@ -186,6 +186,7 @@ final class PoolThreadCache {
      * Try to allocate a small buffer out of the cache. Returns {@code true} if successful {@code false} otherwise
      */
     boolean allocateSmall(PoolArena<?> area, PooledByteBuf<?> buf, int reqCapacity, int sizeIdx) {
+        // 获得小缓存的大小，
         return allocate(cacheForSmall(area, sizeIdx), buf, reqCapacity);
     }
 
@@ -316,9 +317,12 @@ final class PoolThreadCache {
     }
 
     private MemoryRegionCache<?> cacheForSmall(PoolArena<?> area, int sizeIdx) {
+        // 如果池竞技场是直接的
         if (area.isDirect()) {
+            // 获得小子页直接缓存数组中对应下标的缓存大小
             return cache(smallSubPageDirectCaches, sizeIdx);
         }
+        // 不细究
         return cache(smallSubPageHeapCaches, sizeIdx);
     }
 
@@ -332,9 +336,13 @@ final class PoolThreadCache {
     }
 
     private static <T> MemoryRegionCache<T> cache(MemoryRegionCache<T>[] cache, int sizeIdx) {
+        // 如果入参缓存为null，或大小表下标超过缓存区域的下标，则返回null
         if (cache == null || sizeIdx > cache.length - 1) {
+            // 不细究
             return null;
         }
+
+        // 返回缓存数组中对应下标的内存区域缓存
         return cache[sizeIdx];
     }
 

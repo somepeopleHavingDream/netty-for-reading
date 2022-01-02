@@ -141,18 +141,24 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
     PooledByteBuf<T> allocate(PoolThreadCache cache, int reqCapacity, int maxCapacity) {
         // 实例化一个池化字节缓冲
         PooledByteBuf<T> buf = newByteBuf(maxCapacity);
+        // 分配池竞技场
         allocate(cache, buf, reqCapacity);
         return buf;
     }
 
     private void allocate(PoolThreadCache cache, PooledByteBuf<T> buf, final int reqCapacity) {
+        // 获得请求容量在大小表中的大小下标
         final int sizeIdx = size2SizeIdx(reqCapacity);
 
+        // 如果大小下标小于等于小的最大大小下标
         if (sizeIdx <= smallMaxSizeIdx) {
+            // 分配小内存
             tcacheAllocateSmall(cache, buf, reqCapacity, sizeIdx);
         } else if (sizeIdx < nSizes) {
+            // 不细究
             tcacheAllocateNormal(cache, buf, reqCapacity, sizeIdx);
         } else {
+            // 不细究
             int normCapacity = directMemoryCacheAlignment > 0
                     ? normalizeSize(reqCapacity) : reqCapacity;
             // Huge allocations are never served via the cache so just call allocateHuge
@@ -162,7 +168,7 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
 
     private void tcacheAllocateSmall(PoolThreadCache cache, PooledByteBuf<T> buf, final int reqCapacity,
                                      final int sizeIdx) {
-
+        // 如果池线程缓存分配小内存成功
         if (cache.allocateSmall(this, buf, reqCapacity, sizeIdx)) {
             // was able to allocate out of the cache so move on
             return;
@@ -608,20 +614,8 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         }
     }
 
-    /**
-     * 直接竞技场
-     */
     static final class DirectArena extends PoolArena<ByteBuffer> {
 
-        /**
-         * 该直接竞技场的构造方法
-         *
-         * @param parent 父池化字节缓冲分配器
-         * @param pageSize 页数量
-         * @param pageShifts 页偏移
-         * @param chunkSize 块大小
-         * @param directMemoryCacheAlignment 直接内存缓存对齐
-         */
         DirectArena(PooledByteBufAllocator parent, int pageSize, int pageShifts,
                     int chunkSize, int directMemoryCacheAlignment) {
             super(parent, pageSize, pageShifts, chunkSize,
