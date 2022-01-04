@@ -153,8 +153,9 @@ public class FastThreadLocal<V> {
 
         // 从内部线程本地映射的索引表中，获得对应值
         Object v = threadLocalMap.indexedVariable(index);
-        // 如果该值已经被设置，则直接返回
+        // 如果该值已经被设置
         if (v != InternalThreadLocalMap.UNSET) {
+            // 直接返回
             return (V) v;
         }
 

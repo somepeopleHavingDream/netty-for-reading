@@ -176,14 +176,12 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         indexedVariables = newIndexedVariableTable();
     }
 
-    /**
-     * 实例化一个索引变量表
-     *
-     * @return 索引变量表
-     */
     private static Object[] newIndexedVariableTable() {
+        // 以初始容量32实例化对象数组
         Object[] array = new Object[INDEXED_VARIABLE_TABLE_INITIAL_SIZE];
+        // 填充未设置对象
         Arrays.fill(array, UNSET);
+        // 返回对象数组，作为索引变量表
         return array;
     }
 
