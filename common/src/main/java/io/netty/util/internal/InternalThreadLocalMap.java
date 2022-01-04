@@ -103,10 +103,7 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
 
         // 根据线程的类型，采用不同的获取内部线程本地映射的方式
         if (thread instanceof FastThreadLocalThread) {
-            /*
-                以下不细究
-             */
-            // 快速获取
+            // 强转线程类型后，快速获取内部线程本地映射
             return fastGet((FastThreadLocalThread) thread);
         } else {
             // 慢获取
@@ -117,10 +114,13 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
     private static InternalThreadLocalMap fastGet(FastThreadLocalThread thread) {
         // 获得内部线程本地映射
         InternalThreadLocalMap threadLocalMap = thread.threadLocalMap();
-        // 如果内部线程本地映射为null，则为该快速线程本地线程设置内部线程本地映射（此过程不涉及到jdk底层的线程本地实例）
+        // 如果内部线程本地映射为null
         if (threadLocalMap == null) {
+            // 为该快速线程本地线程设置内部线程本地映射（此过程不涉及到jdk底层的线程本地实例）
             thread.setThreadLocalMap(threadLocalMap = new InternalThreadLocalMap());
         }
+
+        // 返回当前线程的线程本地映射
         return threadLocalMap;
     }
 

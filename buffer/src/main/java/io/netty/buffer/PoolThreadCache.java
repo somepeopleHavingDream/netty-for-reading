@@ -199,15 +199,23 @@ final class PoolThreadCache {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private boolean allocate(MemoryRegionCache<?> cache, PooledByteBuf buf, int reqCapacity) {
+        // 如果入参内存区域缓存为null
         if (cache == null) {
+            // 不细究
             // no cache found so just return false here
             return false;
         }
+
+        // 从缓存中进行分配
         boolean allocated = cache.allocate(buf, reqCapacity, this);
+        // 更新分配次数，如果该分配次数大于等于自由交换分配阈值
         if (++ allocations >= freeSweepAllocationThreshold) {
+            // 不细究
             allocations = 0;
             trim();
         }
+
+        // 返回是否从缓存中分配成功
         return allocated;
     }
 
@@ -406,8 +414,11 @@ final class PoolThreadCache {
          */
         @SuppressWarnings("unchecked")
         public final boolean add(PoolChunk<T> chunk, ByteBuffer nioBuffer, long handle, int normCapacity) {
+            // 实例化一个条目
             Entry<T> entry = newEntry(chunk, nioBuffer, handle, normCapacity);
+            // 将条目入队
             boolean queued = queue.offer(entry);
+            // 如果入队失败
             if (!queued) {
                 // If it was not possible to cache the chunk, immediately recycle the entry
                 entry.recycle();
@@ -420,10 +431,18 @@ final class PoolThreadCache {
          * Allocate something out of the cache if possible and remove the entry from the cache.
          */
         public final boolean allocate(PooledByteBuf<T> buf, int reqCapacity, PoolThreadCache threadCache) {
+            // 从队列中取出一项
             Entry<T> entry = queue.poll();
+            // 如果元素为null
             if (entry == null) {
+                // 返回假，表示从缓存中分配失败
                 return false;
             }
+
+            /*
+                以下不细究
+             */
+
             initBuf(entry.chunk, entry.nioBuffer, entry.handle, buf, reqCapacity, threadCache);
             entry.recycle();
 
@@ -502,11 +521,16 @@ final class PoolThreadCache {
 
         @SuppressWarnings("rawtypes")
         private static Entry newEntry(PoolChunk<?> chunk, ByteBuffer nioBuffer, long handle, int normCapacity) {
+            // 从回收器中获得一个条目
             Entry entry = RECYCLER.get();
+
+            // 设置条目的各个属性
             entry.chunk = chunk;
             entry.nioBuffer = nioBuffer;
             entry.handle = handle;
             entry.normCapacity = normCapacity;
+
+            // 返回条目
             return entry;
         }
 
@@ -515,6 +539,7 @@ final class PoolThreadCache {
             @SuppressWarnings("unchecked")
             @Override
             public Entry newObject(Handle<Entry> handle) {
+                // 实例化并返回条目
                 return new Entry(handle);
             }
         });

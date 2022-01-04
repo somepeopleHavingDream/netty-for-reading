@@ -72,6 +72,7 @@ public class FastThreadLocalThread extends Thread {
      * Note that this method is for internal use only, and thus is subject to change at any time.
      */
     public final InternalThreadLocalMap threadLocalMap() {
+        // 返回当前快速线程本地线程的线程本地映射
         return threadLocalMap;
     }
 
@@ -80,6 +81,7 @@ public class FastThreadLocalThread extends Thread {
      * Note that this method is for internal use only, and thus is subject to change at any time.
      */
     public final void setThreadLocalMap(InternalThreadLocalMap threadLocalMap) {
+        // 设置当前快速线程本地线程的线程本地映射
         this.threadLocalMap = threadLocalMap;
     }
 

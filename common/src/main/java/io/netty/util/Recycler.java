@@ -186,7 +186,7 @@ public abstract class Recycler<T> {
 
     @SuppressWarnings("unchecked")
     public final T get() {
-        // 如果单线程的最大容量为0
+        // 如果每个线程的最大容量为0
         if (maxCapacityPerThread == 0) {
             // 不细究
             return newObject((Handle<T>) NOOP_HANDLE);
