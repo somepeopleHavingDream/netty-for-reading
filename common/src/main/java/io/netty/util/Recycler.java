@@ -622,8 +622,9 @@ public abstract class Recycler<T> {
 
             // 栈元素个数减1
             size --;
-            // 取出栈尾元素，将栈尾元素引用至null
+            // 取出栈顶元素
             DefaultHandle ret = elements[size];
+            // 将栈顶元素引用至null
             elements[size] = null;
 
             // As we already set the element[size] to null we also need to store the updated size before we do
@@ -638,9 +639,11 @@ public abstract class Recycler<T> {
                 throw new IllegalStateException("recycled multiple times");
             }
 
-            // 重置回收Id和最后一次回收Id，并返回栈尾的默认处理器
+            // 重置回收Id和最后一次回收Id
             ret.recycleId = 0;
             ret.lastRecycledId = 0;
+
+            // 返回栈顶的默认处理器
             return ret;
         }
 
@@ -662,14 +665,19 @@ public abstract class Recycler<T> {
         }
 
         private boolean scavengeSome() {
+            // 指向上一个元素的游标
             WeakOrderQueue prev;
+            // 指向当前元素的游标
             WeakOrderQueue cursor = this.cursor;
 
             // 如果当前游标为null
             if (cursor == null) {
-                // 设置当前游标和上一个游标的引用
+                // 设置上一个位置的游标为null
                 prev = null;
+                // 将当前游标指向头部
                 cursor = head;
+
+                // 如果当前游标为null
                 if (cursor == null) {
                     // 说明当前栈没有任何元素，因此也就不能清空任何元素，故返回假
                     return false;
