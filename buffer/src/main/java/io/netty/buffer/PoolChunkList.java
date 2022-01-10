@@ -139,13 +139,21 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
         for (PoolChunk<T> cur = head; cur != null; cur = cur.next) {
             // 如果当前池块分配成功
             if (cur.allocate(buf, reqCapacity, sizeIdx, threadCache)) {
+                // 如果当前池块的释放字节数小于等于最小可释放阈值
                 if (cur.freeBytes <= freeMinThreshold) {
+                    /*
+                        以下不细究
+                     */
                     remove(cur);
                     nextList.add(cur);
                 }
+
+                // 返回真，代表当前池块列表分配成功
                 return true;
             }
         }
+
+        // 返回假，代表当前池块列表分配失败
         return false;
     }
 

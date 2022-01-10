@@ -54,6 +54,9 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
     }
 
     PoolSubpage(PoolSubpage<T> head, PoolChunk<T> chunk, int pageShifts, int runOffset, int runSize, int elemSize) {
+        /*
+            设置该池子页的一些属性
+         */
         this.chunk = chunk;
         this.pageShifts = pageShifts;
         this.runOffset = runOffset;
@@ -74,6 +77,8 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
                 bitmap[i] = 0;
             }
         }
+
+        // 将入参池子页添加进池内
         addToPool(head);
     }
 
@@ -144,7 +149,12 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
     }
 
     private void addToPool(PoolSubpage<T> head) {
+        // 断言：当前池子页的前驱和后继必不为null
         assert prev == null && next == null;
+
+        /*
+            构造如下结构：head <=> this <=> head.next（头插法）
+         */
         prev = head;
         next = head.next;
         next.prev = this;

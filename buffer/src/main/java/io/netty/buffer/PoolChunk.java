@@ -300,11 +300,18 @@ final class PoolChunk<T> implements PoolChunkMetric {
             // small
             // 分配子页，获得句柄
             handle = allocateSubpage(sizeIdx);
+            // 如果句柄值小于0
             if (handle < 0) {
+                // 不细究
                 return false;
             }
+
+            // 断言：该句柄值代表一个子页
             assert isSubpage(handle);
         } else {
+            /*
+                以下不细究
+             */
             // normal
             // runSize must be multiple of pageSize
             int runSize = arena.sizeIdx2size(sizeIdx);
@@ -314,8 +321,12 @@ final class PoolChunk<T> implements PoolChunkMetric {
             }
         }
 
+        // 如果当前池块的缓存集存在，则从缓存集中取出最后一个，否则返回null（一般为null）
         ByteBuffer nioBuffer = cachedNioBuffers != null? cachedNioBuffers.pollLast() : null;
+        // 初始化缓冲
         initBuf(buf, nioBuffer, handle, reqCapacity, cache);
+
+        // 返回真，代表池块分配成功
         return true;
     }
 
@@ -458,6 +469,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
 
             // 将该实例化
             subpages[runOffset] = subpage;
+            // 池子页做分配操作，返回句柄
             return subpage.allocate();
         }
     }
@@ -574,10 +586,13 @@ final class PoolChunk<T> implements PoolChunkMetric {
 
     void initBuf(PooledByteBuf<T> buf, ByteBuffer nioBuffer, long handle, int reqCapacity,
                  PoolThreadCache threadCache) {
+        // 如果入参句柄代表一个运行
         if (isRun(handle)) {
+            // 不细究
             buf.init(this, nioBuffer, handle, runOffset(handle) << pageShifts,
                      reqCapacity, runSize(pageShifts, handle), arena.parent.threadCache());
         } else {
+            // 用子页初始化缓冲
             initBufWithSubpage(buf, nioBuffer, handle, reqCapacity, threadCache);
         }
     }
@@ -657,10 +672,12 @@ final class PoolChunk<T> implements PoolChunkMetric {
     }
 
     static boolean isRun(long handle) {
+        // 如果入参句柄不是一个子页，则该句柄就代表一个运行
         return !isSubpage(handle);
     }
 
     static boolean isSubpage(long handle) {
+        // 不细究
         return (handle >> IS_SUBPAGE_SHIFT & 1) == 1L;
     }
 

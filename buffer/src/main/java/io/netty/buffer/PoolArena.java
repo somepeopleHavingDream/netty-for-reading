@@ -242,10 +242,12 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
             q000.allocate(buf, reqCapacity, sizeIdx, threadCache) ||
             qInit.allocate(buf, reqCapacity, sizeIdx, threadCache) ||
             q075.allocate(buf, reqCapacity, sizeIdx, threadCache)) {
+            // 直接返回
             return;
         }
 
         // Add a new chunk.
+        // 添加一个新的池块
         PoolChunk<T> c = newChunk(pageSize, nPSizes, pageShifts, chunkSize);
         boolean success = c.allocate(buf, reqCapacity, sizeIdx, threadCache);
         assert success;
@@ -654,7 +656,9 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         @Override
         protected PoolChunk<ByteBuffer> newChunk(int pageSize, int maxPageIdx,
             int pageShifts, int chunkSize) {
+            // 如果直接内存缓冲对齐量等于0
             if (directMemoryCacheAlignment == 0) {
+                // 分配指定块大小的直接内存
                 ByteBuffer memory = allocateDirect(chunkSize);
                 return new PoolChunk<ByteBuffer>(this, memory, memory, pageSize, pageShifts,
                         chunkSize, maxPageIdx);
