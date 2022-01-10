@@ -16,10 +16,7 @@
 
 package io.netty.buffer;
 
-import static io.netty.buffer.PoolChunk.RUN_OFFSET_SHIFT;
-import static io.netty.buffer.PoolChunk.SIZE_SHIFT;
-import static io.netty.buffer.PoolChunk.IS_USED_SHIFT;
-import static io.netty.buffer.PoolChunk.IS_SUBPAGE_SHIFT;
+import static io.netty.buffer.PoolChunk.*;
 import static io.netty.buffer.SizeClasses.LOG2_QUANTUM;
 
 final class PoolSubpage<T> implements PoolSubpageMetric {
@@ -45,6 +42,9 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
 
     /** Special constructor that creates a linked list head */
     PoolSubpage() {
+        /*
+            设置一系列参数
+         */
         chunk = null;
         pageShifts = -1;
         runOffset = -1;
@@ -81,6 +81,9 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
      * Returns the bitmap index of the subpage allocation.
      */
     long allocate() {
+        /*
+            以下不细究
+         */
         if (numAvail == 0 || !doNotDestroy) {
             return -1;
         }

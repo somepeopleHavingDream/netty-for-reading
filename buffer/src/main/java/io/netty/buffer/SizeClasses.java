@@ -99,6 +99,9 @@ abstract class SizeClasses implements SizeClassesMetric {
     private static final byte no = 0, yes = 1;
 
     protected SizeClasses(int pageSize, int pageShifts, int chunkSize, int directMemoryCacheAlignment) {
+        /*
+            此类不细究
+         */
         this.pageSize = pageSize;
         this.pageShifts = pageShifts;
         this.chunkSize = chunkSize;
@@ -267,6 +270,7 @@ abstract class SizeClasses implements SizeClassesMetric {
 
     @Override
     public int sizeIdx2size(int sizeIdx) {
+        // 获得并返回大小表中对应位置的大小
         return sizeIdx2sizeTab[sizeIdx];
     }
 

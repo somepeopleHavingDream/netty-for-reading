@@ -294,8 +294,11 @@ final class PoolChunk<T> implements PoolChunkMetric {
 
     boolean allocate(PooledByteBuf<T> buf, int reqCapacity, int sizeIdx, PoolThreadCache cache) {
         final long handle;
+
+        // 如果入参大小下标小于等于当前池块所用的池竞技场的小号最大下标
         if (sizeIdx <= arena.smallMaxSizeIdx) {
             // small
+            // 分配子页，获得句柄
             handle = allocateSubpage(sizeIdx);
             if (handle < 0) {
                 return false;
@@ -317,6 +320,9 @@ final class PoolChunk<T> implements PoolChunkMetric {
     }
 
     private long allocateRun(int runSize) {
+        /*
+            以下不细究
+         */
         int pages = runSize >> pageShifts;
         int pageIdx = arena.pages2pageIdx(pages);
 
@@ -345,6 +351,9 @@ final class PoolChunk<T> implements PoolChunkMetric {
     }
 
     private int calculateRunSize(int sizeIdx) {
+        /*
+            以下不细究
+         */
         int maxElements = 1 << pageShifts - SizeClasses.LOG2_QUANTUM;
         int runSize = 0;
         int nElements;
@@ -418,23 +427,36 @@ final class PoolChunk<T> implements PoolChunkMetric {
     private long allocateSubpage(int sizeIdx) {
         // Obtain the head of the PoolSubPage pool that is owned by the PoolArena and synchronize on it.
         // This is need as we may add it back and so alter the linked-list structure.
+        // 通过该池块的池竞技场，找到头子页池
         PoolSubpage<T> head = arena.findSubpagePoolHead(sizeIdx);
+        // 锁住头池子页
         synchronized (head) {
             //allocate a new run
+            // 计算出运行大小
             int runSize = calculateRunSize(sizeIdx);
+
             //runSize must be multiples of pageSize
+            // 运行大小必须是页面大小的倍数
+            // 分配运行，获得运行句柄
             long runHandle = allocateRun(runSize);
+            // 如果运行句柄小于0
             if (runHandle < 0) {
+                // 不细究
                 return -1;
             }
 
+            // 计算出运行偏移
             int runOffset = runOffset(runHandle);
+            // 断言：该池块的对应子页不为null
             assert subpages[runOffset] == null;
+            // 获得该池块所在池竞技场中对应元素大小
             int elemSize = arena.sizeIdx2size(sizeIdx);
 
+            // 实例化出一个池子页
             PoolSubpage<T> subpage = new PoolSubpage<T>(head, this, pageShifts, runOffset,
                                runSize(pageShifts, runHandle), elemSize);
 
+            // 将该实例化
             subpages[runOffset] = subpage;
             return subpage.allocate();
         }
@@ -562,14 +584,22 @@ final class PoolChunk<T> implements PoolChunkMetric {
 
     void initBufWithSubpage(PooledByteBuf<T> buf, ByteBuffer nioBuffer, long handle, int reqCapacity,
                             PoolThreadCache threadCache) {
+        // 计算出运行偏移量
         int runOffset = runOffset(handle);
+        // 计算出位图偏移量
         int bitmapIdx = bitmapIdx(handle);
 
+        // 从小子页数组中获得池子页
         PoolSubpage<T> s = subpages[runOffset];
+
+        // 断言：该池子页不被破坏
         assert s.doNotDestroy;
+        // 断言：请求的容量小于等于该池子页的容量
         assert reqCapacity <= s.elemSize;
 
+        // 计算出偏移量
         int offset = (runOffset << pageShifts) + bitmapIdx * s.elemSize;
+        // 初始化入参缓冲
         buf.init(this, nioBuffer, handle, offset, reqCapacity, s.elemSize, threadCache);
     }
 
@@ -610,6 +640,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
     }
 
     static int runOffset(long handle) {
+        // 计算出并返回运行偏移量
         return (int) (handle >> RUN_OFFSET_SHIFT);
     }
 
@@ -634,6 +665,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
     }
 
     static int bitmapIdx(long handle) {
+        // 直接返回入参
         return (int) handle;
     }
 }

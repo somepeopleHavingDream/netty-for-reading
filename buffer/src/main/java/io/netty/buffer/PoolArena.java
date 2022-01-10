@@ -79,7 +79,7 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         // 调用父类的构造方法
         super(pageSize, pageShifts, chunkSize, cacheAlignment);
 
-        // 设置池化字节缓冲分配器、直接内存缓存对齐、小子页池数
+        // 设置当前池化竞技场的池化字节缓冲分配器、直接内存缓存对齐量、小子页池数
         this.parent = parent;
         directMemoryCacheAlignment = cacheAlignment;
         numSmallSubpagePools = nSubpages;
@@ -87,8 +87,13 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         // 实例化小子页池
         smallSubpagePools = newSubpagePoolArray(numSmallSubpagePools);
         for (int i = 0; i < smallSubpagePools.length; i ++) {
+            // 初始化小子页池数组中的每个小子页池
             smallSubpagePools[i] = newSubpagePoolHead();
         }
+
+        /*
+            最后的结构为：qInit <=> q000 <=> q025 <=> q050 <=> q075 <=> q100
+         */
 
         // 使不同的池化列表引用指向不同的池化块列表实例
         q100 = new PoolChunkList<T>(this, null, 100, Integer.MAX_VALUE, chunkSize);
@@ -98,9 +103,6 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         q000 = new PoolChunkList<T>(this, q025, 1, 50, chunkSize);
         qInit = new PoolChunkList<T>(this, q000, Integer.MIN_VALUE, 25, chunkSize);
 
-        /*
-            将下列池化块列表组装成链表结构
-         */
         q100.prevList(q075);
         q075.prevList(q050);
         q050.prevList(q025);
@@ -119,20 +121,21 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         chunkListMetrics = Collections.unmodifiableList(metrics);
     }
 
-    /**
-     * 实例化子页池头
-     *
-     * @return 池子页
-     */
     private PoolSubpage<T> newSubpagePoolHead() {
+        // 实例化池子页对象，将该对象作为头部
         PoolSubpage<T> head = new PoolSubpage<T>();
+
+        // 初始化该池子页对象的前驱和后继
         head.prev = head;
         head.next = head;
+
+        // 返回该作为头结点的池子页对象
         return head;
     }
 
     @SuppressWarnings("unchecked")
     private PoolSubpage<T>[] newSubpagePoolArray(int size) {
+        // 实例化并返回池子页数组
         return new PoolSubpage[size];
     }
 
@@ -141,7 +144,7 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
     PooledByteBuf<T> allocate(PoolThreadCache cache, int reqCapacity, int maxCapacity) {
         // 实例化一个池化字节缓冲
         PooledByteBuf<T> buf = newByteBuf(maxCapacity);
-        // 分配池竞技场
+        // 做分配操作
         allocate(cache, buf, reqCapacity);
         return buf;
     }
@@ -170,6 +173,9 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
                                      final int sizeIdx) {
         // 如果池线程缓存分配小内存成功
         if (cache.allocateSmall(this, buf, reqCapacity, sizeIdx)) {
+            /*
+                以下不细究
+             */
             // was able to allocate out of the cache so move on
             return;
         }
@@ -178,21 +184,37 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
          * Synchronize on the head. This is needed as {@link PoolChunk#allocateSubpage(int)} and
          * {@link PoolChunk#free(long)} may modify the doubly linked list as well.
          */
+        // 从当前池竞技场的小子页池数组中获得对应位置的池子页
         final PoolSubpage<T> head = smallSubpagePools[sizeIdx];
+
+        // 记录是否需要正常分配
         final boolean needsNormalAllocation;
+        // 锁住拿到的头池子页
         synchronized (head) {
+            // 获得下一个池子页
             final PoolSubpage<T> s = head.next;
+
+            // 如果头池子页与下一个池子页的引用相同，则需要做正常分配操作
             needsNormalAllocation = s == head;
+            // 如果不需要正常分配
             if (!needsNormalAllocation) {
+                // 断言：该池子页不被破坏，并且它的元素大小对应大小表中的元素大小
                 assert s.doNotDestroy && s.elemSize == sizeIdx2size(sizeIdx);
+
+                // 获得池子页分配的句柄
                 long handle = s.allocate();
+                // 断言：句柄值大于等于0
                 assert handle >= 0;
+                // 调用用子页初始化缓冲方法
                 s.chunk.initBufWithSubpage(buf, null, handle, reqCapacity, cache);
             }
         }
 
+        // 如果需要正常分配
         if (needsNormalAllocation) {
+            // 锁住当前池竞技场
             synchronized (this) {
+                // 做正常分配操作
                 allocateNormal(buf, reqCapacity, sizeIdx, cache);
             }
         }
@@ -214,6 +236,7 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
 
     // Method must be called inside synchronized(this) { ... } block
     private void allocateNormal(PooledByteBuf<T> buf, int reqCapacity, int sizeIdx, PoolThreadCache threadCache) {
+        // 如果有任何一个池块列表分配成功
         if (q050.allocate(buf, reqCapacity, sizeIdx, threadCache) ||
             q025.allocate(buf, reqCapacity, sizeIdx, threadCache) ||
             q000.allocate(buf, reqCapacity, sizeIdx, threadCache) ||
@@ -288,6 +311,7 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
     }
 
     PoolSubpage<T> findSubpagePoolHead(int sizeIdx) {
+        // 获得并返回对应位置的小子页池
         return smallSubpagePools[sizeIdx];
     }
 

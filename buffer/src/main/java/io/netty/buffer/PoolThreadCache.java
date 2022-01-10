@@ -186,7 +186,7 @@ final class PoolThreadCache {
      * Try to allocate a small buffer out of the cache. Returns {@code true} if successful {@code false} otherwise
      */
     boolean allocateSmall(PoolArena<?> area, PooledByteBuf<?> buf, int reqCapacity, int sizeIdx) {
-        // 获得小缓存的大小，
+        // 获得小缓存的大小，再进行内存分配
         return allocate(cacheForSmall(area, sizeIdx), buf, reqCapacity);
     }
 
@@ -420,10 +420,14 @@ final class PoolThreadCache {
             boolean queued = queue.offer(entry);
             // 如果入队失败
             if (!queued) {
+                /*
+                    不细究
+                 */
                 // If it was not possible to cache the chunk, immediately recycle the entry
                 entry.recycle();
             }
 
+            // 返回入队是否成功
             return queued;
         }
 

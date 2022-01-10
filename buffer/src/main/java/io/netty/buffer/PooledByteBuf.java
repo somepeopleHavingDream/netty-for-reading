@@ -62,7 +62,7 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
 
     void init(PoolChunk<T> chunk, ByteBuffer nioBuffer,
               long handle, int offset, int length, int maxLength, PoolThreadCache cache) {
-        // 初始化
+        // 初始化当前池化字节缓冲
         init0(chunk, nioBuffer, handle, offset, length, maxLength, cache);
     }
 
@@ -72,6 +72,9 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
 
     private void init0(PoolChunk<T> chunk, ByteBuffer nioBuffer,
                        long handle, int offset, int length, int maxLength, PoolThreadCache cache) {
+        /*
+            设置一系列参数
+         */
         assert handle >= 0;
         assert chunk != null;
 

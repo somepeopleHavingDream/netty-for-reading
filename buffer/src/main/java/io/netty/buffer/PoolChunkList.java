@@ -27,37 +27,17 @@ import java.util.List;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-/**
- * 池块列表
- *
- * @param <T>
- */
 final class PoolChunkList<T> implements PoolChunkListMetric {
     private static final Iterator<PoolChunkMetric> EMPTY_METRICS = Collections.<PoolChunkMetric>emptyList().iterator();
 
-    /**
-     * 当前池块列表的池竞技场
-     */
     private final PoolArena<T> arena;
 
-    /**
-     * 当前池块列表的池块列表
-     */
     private final PoolChunkList<T> nextList;
 
-    /**
-     * 当前池块列表的最小使用量
-     */
     private final int minUsage;
 
-    /**
-     * 当前池块列表的最大使用量
-     */
     private final int maxUsage;
 
-    /**
-     * 当前池块列表的最大容量
-     */
     private final int maxCapacity;
 
     private PoolChunk<T> head;
@@ -70,15 +50,6 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
     // TODO: Test if adding padding helps under contention
     //private long pad0, pad1, pad2, pad3, pad4, pad5, pad6, pad7;
 
-    /**
-     * 池块列表的构造方法
-     *
-     * @param arena 池竞技场
-     * @param nextList 下一个池块列表
-     * @param minUsage 最小使用量
-     * @param maxUsage 最大使用量
-     * @param chunkSize 块大小
-     */
     PoolChunkList(PoolArena<T> arena, PoolChunkList<T> nextList, int minUsage, int maxUsage, int chunkSize) {
         // 断言：最小使用量必定小于等于最大使用量
         assert minUsage <= maxUsage;
@@ -89,7 +60,7 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
         this.minUsage = minUsage;
         this.maxUsage = maxUsage;
 
-        // 计算出并设置最大容量
+        // 计算出并设置当前池块列表的最大容量
         maxCapacity = calculateMaxCapacity(minUsage, chunkSize);
 
         // the thresholds are aligned with PoolChunk.usage() logic:
@@ -108,7 +79,7 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
         //     At the same time we want to have zero thresholds in case of (maxUsage == 100) and (minUsage == 100).
         //
 
-        // 设置自由的最小和最大阈值
+        // 设置当前池化块列表的释放最小和最大阈值
         freeMinThreshold = (maxUsage == 100) ? 0 : (int) (chunkSize * (100.0 - maxUsage + 0.99999999) / 100L);
         freeMaxThreshold = (minUsage == 100) ? 0 : (int) (chunkSize * (100.0 - minUsage + 0.99999999) / 100L);
     }
@@ -116,8 +87,6 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
     /**
      * Calculates the maximum capacity of a buffer that will ever be possible to allocate out of the {@link PoolChunk}s
      * that belong to the {@link PoolChunkList} with the given {@code minUsage} and {@code maxUsage} settings.
-     *
-     * 使用给定的最小用量和最大用量设置计算可以从属于池块列表的池块中分配的缓冲区的最大容量。
      */
     private static int calculateMaxCapacity(int minUsage, int chunkSize) {
         // 计算出最小用量
@@ -154,14 +123,21 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
     }
 
     boolean allocate(PooledByteBuf<T> buf, int reqCapacity, int sizeIdx, PoolThreadCache threadCache) {
+        // 从当前池块列表所在的池竞技场中，获得对应标准容量
         int normCapacity = arena.sizeIdx2size(sizeIdx);
+        // 如果标准容量大于最大容量
         if (normCapacity > maxCapacity) {
+            /*
+                以下不细究
+             */
             // Either this PoolChunkList is empty or the requested capacity is larger then the capacity which can
             // be handled by the PoolChunks that are contained in this PoolChunkList.
             return false;
         }
 
+        // 遍历当前池块列表
         for (PoolChunk<T> cur = head; cur != null; cur = cur.next) {
+            // 如果当前池块分配成功
             if (cur.allocate(buf, reqCapacity, sizeIdx, threadCache)) {
                 if (cur.freeBytes <= freeMinThreshold) {
                     remove(cur);
@@ -260,12 +236,6 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
         return min(maxUsage, 100);
     }
 
-    /**
-     * 最小用量
-     *
-     * @param value 需要比较的值
-     * @return 比较之后的最小用量
-     */
     private static int minUsage0(int value) {
         return max(1, value);
     }
