@@ -195,10 +195,16 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
     }
 
     void add(PoolChunk<T> chunk) {
+        // 如果入参池块的释放字节数小于等于当前池块列表最小释放阈值
         if (chunk.freeBytes <= freeMinThreshold) {
+            /*
+                以下不细究
+             */
             nextList.add(chunk);
             return;
         }
+
+        // 将入参池块添加到当前池块列表中
         add0(chunk);
     }
 
@@ -206,12 +212,18 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
      * Adds the {@link PoolChunk} to this {@link PoolChunkList}.
      */
     void add0(PoolChunk<T> chunk) {
+        // 将入参池块的池块列表设值为当前池块列表
         chunk.parent = this;
+
+        // 如果当前池块列表的头结点不存在
         if (head == null) {
+            // 将当前池块列表的头结点设值为入参池块
             head = chunk;
+            // 前驱和后继置为null
             chunk.prev = null;
             chunk.next = null;
         } else {
+            // 如果当前池块列表的头结点存在，使用头插法将入参池块插入到当前池块列表头结点的前面，重置头结点为入参池块
             chunk.prev = null;
             chunk.next = head;
             head.prev = chunk;

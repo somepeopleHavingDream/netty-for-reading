@@ -182,6 +182,9 @@ final class PoolChunk<T> implements PoolChunkMetric {
 
     @SuppressWarnings("unchecked")
     PoolChunk(PoolArena<T> arena, Object base, T memory, int pageSize, int pageShifts, int chunkSize, int maxPageIdx) {
+        /*
+            设置当前池块的一系列参数
+         */
         unpooled = false;
         this.arena = arena;
         this.base = base;

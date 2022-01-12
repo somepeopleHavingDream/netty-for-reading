@@ -136,6 +136,7 @@ public final class PlatformDependent {
                 @Override
                 @SuppressJava6Requirement(reason = "Usage guarded by java version check")
                 public Random current() {
+                    // 实例化并返回线程本地随机器
                     return java.util.concurrent.ThreadLocalRandom.current();
                 }
             };
@@ -495,8 +496,6 @@ public final class PlatformDependent {
 
     /**
      * Creates a new fastest {@link ConcurrentMap} implementation for the current platform.
-     *
-     * 创建一个比当前平台更快的并发映射实现。
      */
     public static <K, V> ConcurrentMap<K, V> newConcurrentHashMap() {
         return new ConcurrentHashMap<K, V>();
@@ -506,9 +505,12 @@ public final class PlatformDependent {
      * Creates a new fastest {@link LongCounter} implementation for the current platform.
      */
     public static LongCounter newLongCounter() {
+        // 如果当前机器的jdk版本大于等于8
         if (javaVersion() >= 8) {
+            // 实例化并返回长地址计数器
             return new LongAdderCounter();
         } else {
+            // 不细究
             return new AtomicLongCounter();
         }
     }
@@ -792,12 +794,18 @@ public final class PlatformDependent {
      * this method <strong>MUST</strong> be deallocated via {@link #freeDirectNoCleaner(ByteBuffer)}.
      */
     public static ByteBuffer allocateDirectNoCleaner(int capacity) {
+        // 断言：当前平台使用无清理器的直接缓冲
         assert USE_DIRECT_BUFFER_NO_CLEANER;
 
+        // 增加内存计数器
         incrementMemoryCounter(capacity);
         try {
+            // 调用平台的无清理器分配直接内存的方法，获得并返回字节缓冲
             return PlatformDependent0.allocateDirectNoCleaner(capacity);
         } catch (Throwable e) {
+            /*
+                以下不细究
+             */
             decrementMemoryCounter(capacity);
             throwException(e);
             return null;
@@ -861,9 +869,15 @@ public final class PlatformDependent {
     }
 
     private static void incrementMemoryCounter(int capacity) {
+        // 如果当前平台的直接内存计数器不存在
         if (DIRECT_MEMORY_COUNTER != null) {
+            // 更新直接内存计数器，获得最新的已使用内存
             long newUsedMemory = DIRECT_MEMORY_COUNTER.addAndGet(capacity);
+            // 如果最新的已使用内存超过直接内存限制
             if (newUsedMemory > DIRECT_MEMORY_LIMIT) {
+                /*
+                    以下不细究
+                 */
                 DIRECT_MEMORY_COUNTER.addAndGet(-capacity);
                 throw new OutOfDirectMemoryError("failed to allocate " + capacity
                         + " byte(s) of direct memory (used: " + (newUsedMemory - capacity)
@@ -880,7 +894,7 @@ public final class PlatformDependent {
     }
 
     public static boolean useDirectBufferNoCleaner() {
-        // 返回是否使用直接缓冲无清理器
+        // 返回当前平台是否使用无清理器的直接缓冲
         return USE_DIRECT_BUFFER_NO_CLEANER;
     }
 
@@ -1716,16 +1730,8 @@ public final class PlatformDependent {
         }
     }
 
-    /**
-     * 线程本地随机提供者
-     */
     private interface ThreadLocalRandomProvider {
 
-        /**
-         * 返回当前的随机器
-         *
-         * @return 随机器
-         */
         Random current();
     }
 

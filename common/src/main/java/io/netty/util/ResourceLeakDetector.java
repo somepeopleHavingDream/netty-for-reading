@@ -42,53 +42,28 @@ public class ResourceLeakDetector<T> {
     private static final String PROP_LEVEL_OLD = "io.netty.leakDetectionLevel";
     private static final String PROP_LEVEL = "io.netty.leakDetection.level";
 
-    /**
-     * 资源泄露检测的默认级别
-     */
     private static final Level DEFAULT_LEVEL = Level.SIMPLE;
 
-    /**
-     * 属性-目标记录
-     */
     private static final String PROP_TARGET_RECORDS = "io.netty.leakDetection.targetRecords";
 
-    /**
-     * 默认目标记录数
-     */
     private static final int DEFAULT_TARGET_RECORDS = 4;
 
-    /**
-     * 属性-采样间隔
-     */
     private static final String PROP_SAMPLING_INTERVAL = "io.netty.leakDetection.samplingInterval";
 
     // There is a minor performance benefit in TLR if this is a power of 2.
-    /**
-     * 如果是2的幂，则tlr有较小的性能收益。
-     */
     private static final int DEFAULT_SAMPLING_INTERVAL = 128;
 
-    /**
-     * 目标记录数
-     */
     private static final int TARGET_RECORDS;
 
-    /**
-     * 采样间隔
-     */
     static final int SAMPLING_INTERVAL;
 
     /**
      * Represents the level of resource leak detection.
-     *
-     * 代表资源泄露检查的级别。
      */
     public enum Level {
 
         /**
          * Disables resource leak detection.
-         *
-         * 关闭资源泄露检测。
          */
         DISABLED,
 
@@ -125,9 +100,6 @@ public class ResourceLeakDetector<T> {
         }
     }
 
-    /**
-     * 当前资源泄露检测器级别
-     */
     private static Level level;
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(ResourceLeakDetector.class);
@@ -203,10 +175,9 @@ public class ResourceLeakDetector<T> {
 
     /**
      * Returns the current resource leak detection level.
-     *
-     * 返回当前资源泄露检测级别。
      */
     public static Level getLevel() {
+        // 返回当前资源泄露侦测器的级别（一般为SIMPLE）
         return level;
     }
 
@@ -292,16 +263,21 @@ public class ResourceLeakDetector<T> {
      */
     @SuppressWarnings("unchecked")
     public final ResourceLeakTracker<T> track(T obj) {
+        // 追踪入参对象
         return track0(obj);
     }
 
     @SuppressWarnings("unchecked")
     private DefaultResourceLeak track0(T obj) {
+        // 获得资源泄露侦测器的级别
         Level level = ResourceLeakDetector.level;
+        // 如果泄露级别为关闭状态
         if (level == Level.DISABLED) {
+            // 不细究
             return null;
         }
 
+        // 如果泄露侦测级别的序号小于最高的侦测级别
         if (level.ordinal() < Level.PARANOID.ordinal()) {
             if ((PlatformDependent.threadLocalRandom().nextInt(samplingInterval)) == 0) {
                 reportLeak();

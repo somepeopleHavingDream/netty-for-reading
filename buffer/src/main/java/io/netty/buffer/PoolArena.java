@@ -144,8 +144,9 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
     PooledByteBuf<T> allocate(PoolThreadCache cache, int reqCapacity, int maxCapacity) {
         // 实例化一个池化字节缓冲
         PooledByteBuf<T> buf = newByteBuf(maxCapacity);
-        // 做分配操作
+        // 做内存分配操作
         allocate(cache, buf, reqCapacity);
+        // 返回池化字节缓冲
         return buf;
     }
 
@@ -161,7 +162,9 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
             // 不细究
             tcacheAllocateNormal(cache, buf, reqCapacity, sizeIdx);
         } else {
-            // 不细究
+            /*
+                以下不细究
+             */
             int normCapacity = directMemoryCacheAlignment > 0
                     ? normalizeSize(reqCapacity) : reqCapacity;
             // Huge allocations are never served via the cache so just call allocateHuge
@@ -219,6 +222,7 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
             }
         }
 
+        // 更新小分配次数
         incSmallAllocation();
     }
 
@@ -249,12 +253,17 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         // Add a new chunk.
         // 添加一个新的池块
         PoolChunk<T> c = newChunk(pageSize, nPSizes, pageShifts, chunkSize);
+        // 由新池块做分配内存操作
         boolean success = c.allocate(buf, reqCapacity, sizeIdx, threadCache);
+        // 断言：池块分配内存成功
         assert success;
+
+        // 将新池块添加到qInit的池块列表里
         qInit.add(c);
     }
 
     private void incSmallAllocation() {
+        // 增加小分配次数
         allocationsSmall.increment();
     }
 
@@ -660,10 +669,14 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
             if (directMemoryCacheAlignment == 0) {
                 // 分配指定块大小的直接内存
                 ByteBuffer memory = allocateDirect(chunkSize);
+                // 实例化并返回池块
                 return new PoolChunk<ByteBuffer>(this, memory, memory, pageSize, pageShifts,
                         chunkSize, maxPageIdx);
             }
 
+            /*
+                以下不细究
+             */
             final ByteBuffer base = allocateDirect(chunkSize + directMemoryCacheAlignment);
             final ByteBuffer memory = PlatformDependent.alignDirectBuffer(base, directMemoryCacheAlignment);
             return new PoolChunk<ByteBuffer>(this, base, memory, pageSize,
@@ -683,6 +696,7 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         }
 
         private static ByteBuffer allocateDirect(int capacity) {
+            // 如果平台依赖使用不带清理器的直接缓冲，则调用无清理器分配直接缓冲方法，否则调用分配直接内存方法
             return PlatformDependent.useDirectBufferNoCleaner() ?
                     PlatformDependent.allocateDirectNoCleaner(capacity) : ByteBuffer.allocateDirect(capacity);
         }

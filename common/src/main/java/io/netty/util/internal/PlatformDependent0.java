@@ -44,28 +44,16 @@ final class PlatformDependent0 {
     private static final long LONG_ARRAY_BASE_OFFSET;
     private static final long LONG_ARRAY_INDEX_SCALE;
 
-    /**
-     * 直接缓冲构造器
-     */
     private static final Constructor<?> DIRECT_BUFFER_CONSTRUCTOR;
 
     private static final Throwable EXPLICIT_NO_UNSAFE_CAUSE = explicitNoUnsafeCause0();
 
-    /**
-     * 分配数组的方法
-     */
     private static final Method ALLOCATE_ARRAY_METHOD;
 
     private static final Method ALIGN_SLICE;
 
-    /**
-     * Java版本
-     */
     private static final int JAVA_VERSION = javaVersion0();
 
-    /**
-     * 当前平台是否为安卓平台
-     */
     private static final boolean IS_ANDROID = isAndroid0();
 
     private static final Throwable UNSAFE_UNAVAILABILITY_CAUSE;
@@ -523,11 +511,6 @@ final class PlatformDependent0 {
         UNSAFE.throwException(checkNotNull(cause, "cause"));
     }
 
-    /**
-     * 是否具有直接缓冲没有清理器构造器
-     *
-     * @return 是否具有直接缓冲没有清理器构造器
-     */
     static boolean hasDirectBufferNoCleanerConstructor() {
         return DIRECT_BUFFER_CONSTRUCTOR != null;
     }
@@ -540,6 +523,7 @@ final class PlatformDependent0 {
         // Calling malloc with capacity of 0 may return a null ptr or a memory address that can be used.
         // Just use 1 to make it safe to use in all cases:
         // See: https://pubs.opengroup.org/onlinepubs/009695399/functions/malloc.html
+        // 通过不安全实例分配内存，再调用实例化直接缓冲方法
         return newDirectBuffer(UNSAFE.allocateMemory(Math.max(1, capacity)), capacity);
     }
 
@@ -577,11 +561,16 @@ final class PlatformDependent0 {
     }
 
     static ByteBuffer newDirectBuffer(long address, int capacity) {
+        // 检查入参容量值是否是个非负数
         ObjectUtil.checkPositiveOrZero(capacity, "capacity");
 
         try {
+            // 通过直接内存构造器实例化出一个字节缓冲实例
             return (ByteBuffer) DIRECT_BUFFER_CONSTRUCTOR.newInstance(address, capacity);
         } catch (Throwable cause) {
+            /*
+                以下不细究
+             */
             // Not expected to ever throw!
             if (cause instanceof Error) {
                 throw (Error) cause;
