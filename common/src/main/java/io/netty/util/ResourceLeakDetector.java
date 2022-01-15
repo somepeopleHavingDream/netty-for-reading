@@ -219,6 +219,7 @@ public class ResourceLeakDetector<T> {
      */
     @Deprecated
     public ResourceLeakDetector(Class<?> resourceType, int samplingInterval, long maxActive) {
+        // 调用构造方法
         this(resourceType, samplingInterval);
     }
 
@@ -229,6 +230,7 @@ public class ResourceLeakDetector<T> {
      */
     @SuppressWarnings("deprecation")
     public ResourceLeakDetector(Class<?> resourceType, int samplingInterval) {
+        // 获取入参资源类型的简单类名后，再调用另一个构造方法
         this(simpleClassName(resourceType), samplingInterval, Long.MAX_VALUE);
     }
 
@@ -239,6 +241,7 @@ public class ResourceLeakDetector<T> {
      */
     @Deprecated
     public ResourceLeakDetector(String resourceType, int samplingInterval, long maxActive) {
+        // 设值当前资源泄露侦测器的资源类型和采样间隔
         this.resourceType = ObjectUtil.checkNotNull(resourceType, "resourceType");
         this.samplingInterval = samplingInterval;
     }
@@ -279,12 +282,22 @@ public class ResourceLeakDetector<T> {
 
         // 如果泄露侦测级别的序号小于最高的侦测级别
         if (level.ordinal() < Level.PARANOID.ordinal()) {
+            // 如果此次的随机数为0
             if ((PlatformDependent.threadLocalRandom().nextInt(samplingInterval)) == 0) {
+                /*
+                    以下不细究
+                 */
                 reportLeak();
                 return new DefaultResourceLeak(obj, refQueue, allLeaks);
             }
+
+            // 返回null
             return null;
         }
+
+        /*
+            以下不细究
+         */
         reportLeak();
         return new DefaultResourceLeak(obj, refQueue, allLeaks);
     }

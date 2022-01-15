@@ -1151,6 +1151,7 @@ public final class PlatformDependent {
      * Return a {@link Random} which is not-threadsafe and so can only be used from the same thread.
      */
     public static Random threadLocalRandom() {
+        // 从当前平台依赖的随机器提供者中，获得随机器
         return RANDOM_PROVIDER.current();
     }
 

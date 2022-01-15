@@ -84,6 +84,16 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
         directMemoryCacheAlignment = cacheAlignment;
         numSmallSubpagePools = nSubpages;
 
+        /*
+            - PoolArena
+                - PoolChunkList
+                    - PoolChunk
+                        - normal
+                - smallSubpagePools
+                    - PoolSubpage
+                        - small
+         */
+
         // 实例化小子页池
         smallSubpagePools = newSubpagePoolArray(numSmallSubpagePools);
         for (int i = 0; i < smallSubpagePools.length; i ++) {

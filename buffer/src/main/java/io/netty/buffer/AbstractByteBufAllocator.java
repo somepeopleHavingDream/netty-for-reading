@@ -48,12 +48,17 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
             case SIMPLE:
                 // 通过泄露侦测器，追踪入参缓冲，获得资源泄露跟踪器
                 leak = AbstractByteBuf.leakDetector.track(buf);
+                // 如果资源泄露跟踪器不为null
                 if (leak != null) {
+                    // 不细究
                     buf = new SimpleLeakAwareByteBuf(buf, leak);
                 }
                 break;
             case ADVANCED:
             case PARANOID:
+                /*
+                    以下不细究
+                 */
                 leak = AbstractByteBuf.leakDetector.track(buf);
                 if (leak != null) {
                     buf = new AdvancedLeakAwareByteBuf(buf, leak);
@@ -62,6 +67,8 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
             default:
                 break;
         }
+
+        // 返回字节缓冲（有可能已被包装）
         return buf;
     }
 

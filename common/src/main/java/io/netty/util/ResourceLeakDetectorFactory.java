@@ -38,6 +38,7 @@ public abstract class ResourceLeakDetectorFactory {
      * @return the current {@link ResourceLeakDetectorFactory}
      */
     public static ResourceLeakDetectorFactory instance() {
+        // 返回当前资源泄露侦测器工厂的工厂实例
         return factoryInstance;
     }
 
@@ -60,6 +61,7 @@ public abstract class ResourceLeakDetectorFactory {
      * @return a new instance of {@link ResourceLeakDetector}
      */
     public final <T> ResourceLeakDetector<T> newResourceLeakDetector(Class<T> resource) {
+        // 调用并返回实例化资源侦测器
         return newResourceLeakDetector(resource, ResourceLeakDetector.SAMPLING_INTERVAL);
     }
 
@@ -88,7 +90,9 @@ public abstract class ResourceLeakDetectorFactory {
      */
     @SuppressWarnings("deprecation")
     public <T> ResourceLeakDetector<T> newResourceLeakDetector(Class<T> resource, int samplingInterval) {
+        // 检查入参采样间隔是否为正数
         ObjectUtil.checkPositive(samplingInterval, "samplingInterval");
+        // 实例化并返回资源泄露侦测器
         return newResourceLeakDetector(resource, samplingInterval, Long.MAX_VALUE);
     }
 
@@ -102,14 +106,24 @@ public abstract class ResourceLeakDetectorFactory {
         DefaultResourceLeakDetectorFactory() {
             String customLeakDetector;
             try {
+                // 获得自定义泄露侦测器
                 customLeakDetector = SystemPropertyUtil.get("io.netty.customResourceLeakDetector");
             } catch (Throwable cause) {
+                /*
+                    以下不细究
+                 */
                 logger.error("Could not access System property: io.netty.customResourceLeakDetector", cause);
                 customLeakDetector = null;
             }
+
+            // 如果自定义泄露侦测器为null
             if (customLeakDetector == null) {
+                // 将当前资源泄露侦测器工厂的过时自定义类构造器和自定义类构造器置为null
                 obsoleteCustomClassConstructor = customClassConstructor = null;
             } else {
+                /*
+                    不细究
+                 */
                 obsoleteCustomClassConstructor = obsoleteCustomClassConstructor(customLeakDetector);
                 customClassConstructor = customClassConstructor(customLeakDetector);
             }
@@ -153,7 +167,11 @@ public abstract class ResourceLeakDetectorFactory {
         @Override
         public <T> ResourceLeakDetector<T> newResourceLeakDetector(Class<T> resource, int samplingInterval,
                                                                    long maxActive) {
+            // 如果当前资源泄露侦测器工厂的过时自定义类构造器不存在
             if (obsoleteCustomClassConstructor != null) {
+                /*
+                    以下不细究
+                 */
                 try {
                     @SuppressWarnings("unchecked")
                     ResourceLeakDetector<T> leakDetector =
@@ -169,6 +187,7 @@ public abstract class ResourceLeakDetectorFactory {
                 }
             }
 
+            // 实例化出资源泄露侦测器
             ResourceLeakDetector<T> resourceLeakDetector = new ResourceLeakDetector<T>(resource, samplingInterval,
                                                                                        maxActive);
             logger.debug("Loaded default ResourceLeakDetector: {}", resourceLeakDetector);
