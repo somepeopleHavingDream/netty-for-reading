@@ -158,11 +158,12 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
             // 获得通道流水线
             final ChannelPipeline pipeline = pipeline();
-            // 从配置中拿到字节缓冲分配器
+            // 从配置中拿到字节缓冲分配器（一般为默认的池化字节缓冲分配器）
             final ByteBufAllocator allocator = config.getAllocator();
+
             // 获得接收字节缓冲分配器的处理器
             final RecvByteBufAllocator.Handle allocHandle = recvBufAllocHandle();
-            // 分配处理器按照配置重置
+            // 分配处理器做重置操作
             allocHandle.reset(config);
 
             ByteBuf byteBuf = null;

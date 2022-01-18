@@ -35,28 +35,15 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 /**
  * The default {@link ChannelPipeline} implementation.  It is usually created
  * by a {@link Channel} implementation when the {@link Channel} is created.
- *
- * 默认通道流水线实现。
- * 它通常在创建通道时，
- * 由通道实现来创建。
  */
 public class DefaultChannelPipeline implements ChannelPipeline {
 
     static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultChannelPipeline.class);
 
-    /**
-     * 头名
-     */
     private static final String HEAD_NAME = generateName0(HeadContext.class);
 
-    /**
-     * 尾名
-     */
     private static final String TAIL_NAME = generateName0(TailContext.class);
 
-    /**
-     * 名称缓存
-     */
     private static final FastThreadLocal<Map<Class<?>, String>> nameCaches =
             new FastThreadLocal<Map<Class<?>, String>>() {
         @Override
@@ -69,60 +56,35 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             AtomicReferenceFieldUpdater.newUpdater(
                     DefaultChannelPipeline.class, MessageSizeEstimator.Handle.class, "estimatorHandle");
 
-    /**
-     * 通道处理者上下文，队头
-     */
     final AbstractChannelHandlerContext head;
 
-    /**
-     * 通道处理者上下文，队尾
-     */
     final AbstractChannelHandlerContext tail;
 
-    /**
-     * 用于当前通道流水线的通道
-     */
     private final Channel channel;
 
     private final ChannelFuture succeededFuture;
     private final VoidChannelPromise voidPromise;
 
-    /**
-     * 当前通道流水线是否触摸（取决于资源泄露侦测器是否打开）
-     */
     private final boolean touch = ResourceLeakDetector.isEnabled();
 
     private Map<EventExecutorGroup, EventExecutor> childExecutors;
     private volatile MessageSizeEstimator.Handle estimatorHandle;
 
-    /**
-     * 是否是首次注册
-     */
     private boolean firstRegistration = true;
 
     /**
      * This is the head of a linked list that is processed by {@link #callHandlerAddedForAllHandlers()} and so process
      * all the pending {@link #callHandlerAdded0(AbstractChannelHandlerContext)}.
      *
-     * 这是一个链表的头部。
-     * 该链表由对于所有处理者调用添加处理者方法所处理。
-     * 并且以处理所有待办。
-     *
      * We only keep the head because it is expected that the list is used infrequently and its size is small.
      * Thus full iterations to do insertions is assumed to be a good compromised to saving memory and tail management
      * complexity.
-     *
-     * 我们仅保持头部，因为预期链表会被很少地使用，并且它的大小也是小的。
-     * 因为对插入的全迭代被认为是对保存内存和尾部管理复杂性的好的妥协。
      */
     private PendingHandlerCallback pendingHandlerCallbackHead;
 
     /**
      * Set to {@code true} once the {@link AbstractChannel} is registered.Once set to {@code true} the value will never
      * change.
-     *
-     * 一旦抽象通道被注册，就设置成真。
-     * 一旦设置成真，此值将不再会改变。
      */
     private boolean registered;
 
@@ -153,36 +115,16 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         return handle;
     }
 
-    /**
-     * 触碰
-     *
-     * @param msg 消息
-     * @param next 通道处理者上下文
-     * @return 消息
-     */
     final Object touch(Object msg, AbstractChannelHandlerContext next) {
+        // 如果需要做触碰操作，则做触碰操作，否则直接返回消息
         return touch ? ReferenceCountUtil.touch(msg, next) : msg;
     }
 
-    /**
-     * 实例化一个通道处理者上下文
-     *
-     * @param group 事件执行器组
-     * @param name 通道处理者名称
-     * @param handler 通道处理者
-     * @return 通道处理者上下文
-     */
     private AbstractChannelHandlerContext newContext(EventExecutorGroup group, String name, ChannelHandler handler) {
         // 实例化并返回默认通道处理者上下文
         return new DefaultChannelHandlerContext(this, childExecutor(group), name, handler);
     }
 
-    /**
-     * 子执行器
-     *
-     * @param group 事件执行器组
-     * @return 事件执行器
-     */
     private EventExecutor childExecutor(EventExecutorGroup group) {
         if (group == null) {
             return null;
@@ -1094,7 +1036,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelPipeline fireChannelRead(Object msg) {
-        // 通道处理者上下文调用读通道法
+        // 通道处理器上下文调用读通道法
         AbstractChannelHandlerContext.invokeChannelRead(head, msg);
         return this;
     }

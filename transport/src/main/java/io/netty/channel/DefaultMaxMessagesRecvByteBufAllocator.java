@@ -126,11 +126,11 @@ public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessa
          */
         @Override
         public void reset(ChannelConfig config) {
-            // 设置通道配置
+            // 设置当前最大消息接收字节缓冲分配器的通道配置
             this.config = config;
-            // 获取并设置每次读的最大消息数
+            // 获取并设置当前最大消息接收字节缓冲分配器的每次读的最大消息数
             maxMessagePerRead = maxMessagesPerRead();
-            // 将总消息数和总读取字节数重置为0
+            // 将当前最大消息接收字节缓冲分配器的总消息数和总读取字节数重置为0
             totalMessages = totalBytesRead = 0;
         }
 

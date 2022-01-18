@@ -94,7 +94,7 @@ public final class ByteBufUtil {
             logger.debug("-Dio.netty.allocator.type: pooled (unknown: {})", allocType);
         }
 
-        // 设置默认分配器
+        // 设置默认字节缓冲分配器
         DEFAULT_ALLOCATOR = alloc;
 
         // 设置线程本地缓冲大小

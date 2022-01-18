@@ -34,20 +34,11 @@ import static java.lang.Math.min;
  */
 public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufAllocator {
 
-    /**
-     * 该自适应接收字节缓冲分配器的默认最小值
-     */
     static final int DEFAULT_MINIMUM = 64;
 
     // Use an initial value that is bigger than the common MTU of 1500
-    /**
-     * 使用大于1500的常见最大传输单元的初始值
-     */
     static final int DEFAULT_INITIAL = 2048;
 
-    /**
-     * 该自适应接收字节缓冲分配器的默认最大值
-     */
     static final int DEFAULT_MAXIMUM = 65536;
 
     private static final int INDEX_INCREMENT = 4;
@@ -81,12 +72,6 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
     @Deprecated
     public static final AdaptiveRecvByteBufAllocator DEFAULT = new AdaptiveRecvByteBufAllocator();
 
-    /**
-     * 获得入参大小在大小表中的索引
-     *
-     * @param size 大小值
-     * @return 入参大小值在大小表中的索引
-     */
     private static int getSizeTableIndex(final int size) {
         for (int low = 0, high = SIZE_TABLE.length - 1;;) {
             if (high < low) {
@@ -122,11 +107,11 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
         private boolean decreaseNow;
 
         HandleImpl(int minIndex, int maxIndex, int initial) {
-            // 设置最小索引和最大索引
+            // 设置当前处理器实现的最小下标和最大下标
             this.minIndex = minIndex;
             this.maxIndex = maxIndex;
 
-            // 计算出初始位置的索引，也即初始容量大小所在大小表中的索引
+            // 计算出初始位置的下标，也即初始容量大小所在大小表中的下标
             index = getSizeTableIndex(initial);
             // 设置下一个接收缓冲大小
             nextReceiveBufferSize = SIZE_TABLE[index];
@@ -252,7 +237,7 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
     @SuppressWarnings("deprecation")
     @Override
     public Handle newHandle() {
-        // 实例化一个处理实现并返回
+        // 实例化一个处理器实现并返回
         return new HandleImpl(minIndex, maxIndex, initial);
     }
 

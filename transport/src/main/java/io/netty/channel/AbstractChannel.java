@@ -125,8 +125,6 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     /**
      * Returns a new {@link DefaultChannelPipeline} instance.
-     *
-     * 返回一个新的默认通道流水线实例。
      */
     protected DefaultChannelPipeline newChannelPipeline() {
         // 实例化并返回一个默认通道流水线实例
@@ -162,6 +160,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     @Override
     public ChannelPipeline pipeline() {
+        // 返回处理当前通道的通道流水线
         return pipeline;
     }
 
@@ -444,27 +443,17 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     /**
      * {@link Unsafe} implementation which sub-classes must extend and use.
-     *
-     * 不安全实现，该实现子类必须扩展并且使用。
      */
     protected abstract class AbstractUnsafe implements Unsafe {
 
-        /**
-         * 通道出境缓冲
-         */
         private volatile ChannelOutboundBuffer outboundBuffer = new ChannelOutboundBuffer(AbstractChannel.this);
 
-        /**
-         * 接收字节缓冲分配器的处理器
-         */
         private RecvByteBufAllocator.Handle recvHandle;
 
         private boolean inFlush0;
 
         /**
          * true if the channel has never been registered, false otherwise
-         *
-         * 如果通道还未被注册，则为真，否则为假
          */
         private boolean neverRegistered = true;
 
@@ -476,7 +465,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         public RecvByteBufAllocator.Handle recvBufAllocHandle() {
             // 如果当前通道的接收处理器为null
             if (recvHandle == null) {
-                // 从配置中获取接收字节缓冲分配器，用该分配器实例化处理者，并赋值
+                // 从配置中获取接收字节缓冲分配器，用该分配器实例化处理者，并赋值为接收处理器
                 recvHandle = config().getRecvByteBufAllocator().newHandle();
             }
 

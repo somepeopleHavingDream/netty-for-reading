@@ -161,6 +161,7 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
             // 分配指定容量的直接缓冲
             return directBuffer(initialCapacity);
         }
+
         // 以下不细究
         return heapBuffer(initialCapacity);
     }

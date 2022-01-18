@@ -158,8 +158,6 @@ public class ResourceLeakDetector<T> {
 
     /**
      * Returns {@code true} if resource leak detection is enabled.
-     *
-     * 如果资源泄露侦测是有效的，返回真。
      */
     public static boolean isEnabled() {
         // 如果当前资源泄露侦测器的级别高于关闭级别，则当前资源泄露侦测器是打开的

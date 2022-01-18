@@ -408,12 +408,6 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         return this;
     }
 
-    /**
-     * 调用通道读
-     *
-     * @param next 当前通道处理者上下文
-     * @param msg 消息
-     */
     static void invokeChannelRead(final AbstractChannelHandlerContext next, Object msg) {
         // 入参通道处理者上下文所在的流水线做触摸操作，获得触摸后的消息对象
         final Object m = next.pipeline.touch(ObjectUtil.checkNotNull(msg, "msg"), next);

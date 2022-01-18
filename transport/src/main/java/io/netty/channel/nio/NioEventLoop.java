@@ -49,33 +49,17 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
     private static final int CLEANUP_INTERVAL = 256; // XXX Hard-coded value, but won't need customization.
 
-    /**
-     * 禁用键集优化，默认为false
-     */
     private static final boolean DISABLE_KEY_SET_OPTIMIZATION =
             SystemPropertyUtil.getBoolean("io.netty.noKeySetOptimization", false);
 
-    /**
-     * 最小过早选择器返回次数
-     */
     private static final int MIN_PREMATURE_SELECTOR_RETURNS = 3;
 
-    /**
-     * 选择器自动重建的阈值
-     */
     private static final int SELECTOR_AUTO_REBUILD_THRESHOLD;
 
-    /**
-     * 立刻选择提供者
-     */
     private final IntSupplier selectNowSupplier = new IntSupplier() {
         @Override
         public int get() throws Exception {
-            /*
-                selectNow()不会阻塞，不管什么通道就绪就立即返回。
-                此方法执行非阻塞的选择操作。
-                如果自从前一次选择操作后，没有通道变成可选择的，则此方法直接返回零。
-            */
+
             return selectNow();
         }
     };
@@ -85,9 +69,6 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     // See:
     // - https://bugs.java.com/view_bug.do?bug_id=6427854
     // - https://github.com/netty/netty/issues/203
-    /*
-        用于java开发包nio故障的解决办法。
-     */
     static {
         // 获取故障级别
         final String key = "sun.nio.ch.bugLevel";

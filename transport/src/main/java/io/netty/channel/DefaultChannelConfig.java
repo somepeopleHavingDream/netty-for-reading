@@ -292,6 +292,7 @@ public class DefaultChannelConfig implements ChannelConfig {
 
     @Override
     public ByteBufAllocator getAllocator() {
+        // 返回当前通道配置的字节缓冲分配器
         return allocator;
     }
 
@@ -304,19 +305,20 @@ public class DefaultChannelConfig implements ChannelConfig {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends RecvByteBufAllocator> T getRecvByteBufAllocator() {
+        // 返回当前通道配置的接收字节缓冲分配器
         return (T) rcvBufAllocator;
     }
 
     @Override
     public ChannelConfig setRecvByteBufAllocator(RecvByteBufAllocator allocator) {
+        // 检查并设置当前通道配置的接收字节缓冲分配器
         rcvBufAllocator = checkNotNull(allocator, "allocator");
+        // 返回当前通道配置
         return this;
     }
 
     /**
      * Set the {@link RecvByteBufAllocator} which is used for the channel to allocate receive buffers.
-     *
-     * 设置被用于通道以分配接收缓冲的接收字节缓冲分配器。
      *
      * @param allocator the allocator to set.
      * @param metadata Used to set the {@link ChannelMetadata#defaultMaxMessagesPerRead()} if {@code allocator}
