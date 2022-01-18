@@ -359,8 +359,6 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     /**
      * Create a new {@link AbstractUnsafe} instance which will be used for the life-time of the {@link Channel}
-     *
-     * 创建一个新的抽象不安全实例，该实例将被用于通道的生命周期。
      */
     protected abstract AbstractUnsafe newUnsafe();
 

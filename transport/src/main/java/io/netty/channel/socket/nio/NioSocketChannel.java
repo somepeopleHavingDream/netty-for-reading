@@ -439,6 +439,7 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
 
     @Override
     protected AbstractNioUnsafe newUnsafe() {
+        // 实例化并返回nio套接字通道不安全实例
         return new NioSocketChannelUnsafe();
     }
 

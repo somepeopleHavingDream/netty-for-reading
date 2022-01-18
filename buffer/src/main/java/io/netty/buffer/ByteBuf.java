@@ -414,8 +414,6 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     /**
      * Returns the number of writable bytes which is equal to
      * {@code (this.capacity - this.writerIndex)}.
-     *
-     * 返回可写入的字节数，该字节数等于容量减去它的写索引。
      */
     public abstract int writableBytes();
 

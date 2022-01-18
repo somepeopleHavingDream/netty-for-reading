@@ -75,6 +75,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
     @Override
     protected AbstractNioUnsafe newUnsafe() {
+        // 实例化并返回nio字节不安全实例
         return new NioByteUnsafe();
     }
 
@@ -170,7 +171,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             boolean close = false;
             try {
                 do {
-                    // 分配处理器分配出一个字节缓冲
+                    // 分配处理器分配出一个字节缓冲（用于接收字节）
                     byteBuf = allocHandle.allocate(allocator);
                     // 做读字节操作，并更新分配处理器的最后读取字节数
                     allocHandle.lastBytesRead(doReadBytes(byteBuf));
